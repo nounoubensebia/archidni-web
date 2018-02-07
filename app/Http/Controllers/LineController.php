@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\GeoUtils;
 use App\Http\Resources\LineResource;
 use App\Line;
 use Illuminate\Http\Request;
@@ -9,24 +10,19 @@ use Illuminate\Http\Request;
 
 class LineController extends Controller
 {
-    public function getLinesInsideBoundingBox (Request $request)
+    public function getLinesCloseToPosition (Request $request)
     {
         $lines = Line::all();
-        $northeast = $request->input('northeast');
-        $southwest = $request->input('southwest');
-        $arr1 = explode(',',$northeast);
-        $arr2 = explode(',',$southwest);
-        $maxLat = $arr1[0];
-        $maxLng = $arr1[1];
-        $minLat = $arr2[0];
-        $minLng = $arr2[1];
-        $filtered = $lines->reject(function($value,$key) use ($maxLat,$maxLng,$minLat,$minLng){
+        $position = $request->input('position');
+        $arr1 = explode(',',$position);
+        $lat = $arr1[0];
+        $lng = $arr1[1];
+        $filtered = $lines->reject(function($value,$key) use ($lat,$lng){
             $sections = $value->sections;
             foreach ($sections as $section)
             {
                 $origin = $section->origin;
-                if ($origin->latitude>$minLat&&$origin->latitude<$maxLat&&$origin->longitude<$maxLng&&
-                    $origin->longitude>$minLng)
+                if (GeoUtils::haversineGreatCircleDistance($lat,$lng,$origin->latitude,$origin->longitude)<15)
                 {
                     return false;
                 }

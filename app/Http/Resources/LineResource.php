@@ -37,6 +37,7 @@ class LineResource extends Resource
                 'id' => $this->id,
                 'name' => $this->name,
                 'sections' => $sortedSections->values()->all(),
+                'transport_mode_id' =>$this->transport_mode_id
             ];
         else
         {
@@ -65,7 +66,8 @@ class LineResource extends Resource
                 'id' => $this->id,
                 'name' => $this->name,
                 'sections' => $sortedSections->values()->all(),
-                'trips' =>$tripsCollection->all()
+                'trips' =>$tripsCollection->all(),
+                'transport_mode_id' =>$this->transport_mode_id
             ];
         }
     }

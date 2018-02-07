@@ -26,8 +26,8 @@ Route::get('/test',function () {
 Route::group(['prefix' => 'v1'],function (){
     Route::group(['prefix' => 'lines'],function ()
     {
-        Route::get('boundingbox',[
-            'uses' => 'LineController@getLinesInsideBoundingBox'
+        Route::get('',[
+            'uses' => 'LineController@getLinesCloseToPosition'
         ]);
 
     });
