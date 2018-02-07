@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Resources\LineCollection;
+use App\Http\Resources\LineResource;
+use App\Line;
 use Illuminate\Http\Request;
 
 /*
@@ -17,7 +20,21 @@ use Illuminate\Http\Request;
     return $request->user();
 });*/
 Route::get('/test',function () {
-    $lines = \App\Line::with(['operator','transportMode','trainTrips','metroTrips'])->with('sections')->get();
-    return response()->json($lines,200);
+    //$lines = \App\Line::with(['operator','transportMode','trainTrips','metroTrips'])->with('sections')->get();
+
+});
+Route::group(['prefix' => 'v1'],function (){
+    Route::group(['prefix' => 'lines'],function ()
+    {
+        Route::get('boundingbox',[
+            'uses' => 'LineController@getLinesInsideBoundingBox'
+        ]);
+
+    });
+    Route::group(['prefix' => '/station'],function (){
+        Route::get('{id}/lines',[
+            'uses' => 'LineController@getLinesPassingByStation'
+        ]);
+    });
 });
 
