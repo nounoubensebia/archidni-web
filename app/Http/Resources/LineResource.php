@@ -46,13 +46,27 @@ class LineResource extends Resource
             foreach ($trips as $trip)
             {
                 $tripArray = array();
+                $tripArray['id'] = $trip->id;
                 $tripArray['days'] = $trip->days;
-                $departures = array();
-                foreach ($trip->departures as $departure)
+                if ($this->transport_mode_id==2)
                 {
-                    array_push($departures,['time'=>$departure->time]);
+                    $departures = array();
+                    foreach ($trip->departures as $departure)
+                    {
+                        array_push($departures,['time'=>$departure->time]);
+                    }
+                    $tripArray['departures'] = $departures;
                 }
-                $tripArray['departures'] = $departures;
+                else
+                {
+                    $timePeriods = array();
+                    foreach ($trip->timePeriods as $timePeriod)
+                    {
+                        array_push($timePeriods,['start'=>$timePeriod->start,'end'=>$timePeriod->end,
+                            'waitingTime'=>$timePeriod->waiting_time]);
+                    }
+                    $tripArray['time_periods'] = $timePeriods;
+                }
                 $stations = array();
                 foreach ($trip->stations as $station)
                 {
@@ -65,9 +79,9 @@ class LineResource extends Resource
             return  [
                 'id' => $this->id,
                 'name' => $this->name,
+                'transport_mode_id' =>$this->transport_mode_id,
                 'sections' => $sortedSections->values()->all(),
-                'trips' =>$tripsCollection->all(),
-                'transport_mode_id' =>$this->transport_mode_id
+                'trips' =>$tripsCollection->all()
             ];
         }
     }
