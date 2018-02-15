@@ -39,4 +39,19 @@ class LineController extends Controller
         })->get();
         return LineResource::collection($lines);
     }
+
+    public function getLineAutocompleteSuggestions (Request $request)
+    {
+        $text = $request->input("text");
+        $lines = Line::query()->where('name','like',"%$text%")->orderByRaw("CASE
+        WHEN name like '$text%' THEN 1 WHEN name like '%$text' THEN 3 ELSE 2 END")
+            ->get();
+        return LineResource::collection($lines);
+    }
+
+    public function getLine (Request $request,$id)
+    {
+        $line = Line::find($id);
+        return new LineResource($line);
+    }
 }
