@@ -156,4 +156,10 @@ class GraphStation
         if($time == null) $time = self::getDefaultTime();
         return $this->getTrip()->getWaitingTimeOfStation($this,$time);
     }
+
+    public function getWaitingTimeAtTrip($time = null)
+    {
+        if($time == null) $time = self::getDefaultTime();
+        return 0;
+    }
 }

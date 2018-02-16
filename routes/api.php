@@ -24,7 +24,7 @@ use Illuminate\Http\Request;
 //    return response()->json($lines,200);
 //});
 
-Route::get('/test','PathFinderController@findPath');
+Route::get('/findPath','PathFinderController@findPath');
 //Route::get('/test',function () {
 //    //$lines = \App\Line::with(['operator','transportMode','trainTrips','metroTrips'])->with('sections')->get();
 //

@@ -15,6 +15,7 @@ class GraphTrip
     private $departures;
     private $timePeriods;
     private $line;
+    private $transportMean;
 
     // methods
     private $getEdgeVal;
@@ -39,6 +40,7 @@ class GraphTrip
             $graphStations[] = GraphStation::loadFromStation($station,$station->pivot->minutes,$graphTrip);
         }
         $graphTrip->setStations($graphStations);
+        $graphTrip->setTransportMean($trip->line->transportMode->name);
         return $graphTrip;
     }
 
@@ -101,6 +103,24 @@ class GraphTrip
     {
         $this->line = $line;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getTransportMean()
+    {
+        return $this->transportMean;
+    }
+
+    /**
+     * @param mixed $transportMean
+     */
+    public function setTransportMean($transportMean)
+    {
+        $this->transportMean = $transportMean;
+    }
+
+
 
     /**
      * @return mixed

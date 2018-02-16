@@ -35,10 +35,10 @@ class GraphLinker
             $node2 = new Node($station->getTag());
             if($mask & GraphLinker::$sToN)
             $graph->attachNodes($node2,$node
-                ,$edgeVal);
+                ,$edgeVal)->addData("type","byFoot");
             if($mask & GraphLinker::$nToS)
             $graph->attachNodes($node,$node2
-                ,$edgeVal + $station->getWaitingTime($time));
+                ,$edgeVal + $station->getWaitingTime($time))->addData("type","byFoot");
 
 
         }
@@ -52,6 +52,7 @@ class GraphLinker
      */
     static public function linkTripStations($graph,$trip)
     {
+        $transportMean = $trip->getTransportMean();
         foreach ($trip->getStations() as $station)
         {
             /** @var $station GraphStation */
@@ -60,7 +61,7 @@ class GraphLinker
             $nextS = $station;
             if(isset($prev) && isset($prevS))
             {
-                $graph->attachNodes($prev,$next,$trip->getEdgeValue($prevS,$nextS));
+                $graph->attachNodes($prev,$next,$trip->getEdgeValue($prevS,$nextS))->addData("type",$transportMean);
             }
             $prev = $next;
             $prevS = $nextS;

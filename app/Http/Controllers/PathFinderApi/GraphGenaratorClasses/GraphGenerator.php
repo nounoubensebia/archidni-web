@@ -16,6 +16,7 @@ include "TripGenerator.php";
 include "GraphLinker.php";
 include "GraphClasses/AStar.php";
 include "GraphClasses/HeuristicEstimator.php";
+include "PathNode.php";
 
 class GraphGenerator
 {
@@ -25,6 +26,7 @@ class GraphGenerator
      * $position1 array 0 : latitude, 1 : longitude. starting position
      * $position2 array 0 : latitude, 1 : longitude. destination position
      * @param $params
+     * @return array
      */
     public static function generateGraph($params = [])
     {
@@ -44,7 +46,7 @@ class GraphGenerator
         $graph->addNode($destination);
         $graph->attachNodes($origin,$destination,UtilFunctions::getTime(
             $origin->getData("position"),$destination->getData("position")
-        ));
+        ))->addData("type","byFoot");
 
         $stations = StationGenerator::getStationsByFoot($position1);
         $trips = TripGenerator::getTripsFromStations($stations);
@@ -70,11 +72,19 @@ class GraphGenerator
 
         $astar = new AStar(new HeuristicEstimatorDijkstra());
         $path = $astar->findPath($origin,$destination);
-        echo "path is: <BR>";
-        foreach ($path as $node)
-        {
-            echo $node->getTag()."<BR>";
+        $pNodes = PathNode::loadFromPath($path,$time);
+        $result = [];
+        foreach ($pNodes as $pNode) {
+            /** @var $pNode PathNode */
+            $result[] = $pNode->toArray();
         }
+//        echo "path is: <BR>";
+//        foreach ($pNodes as $pNode)
+//        {
+//            /** @var $pNode PathNode */
+//            echo $pNode->getName()." ".$pNode->getWaitingTimeAtNode()." ".$pNode->getTransportModeToNextNode()."<BR>";
+//        }
+        return $result;
     }
 
 

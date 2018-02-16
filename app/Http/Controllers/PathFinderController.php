@@ -32,10 +32,10 @@ class PathFinderController extends Controller
         {
             $attributes = $this->retrieveAttributes($_GET);
         }
-        var_dump($attributes);
-        \GraphGenerator::generateGraph($attributes);
+//        var_dump($attributes);
+        $path = \GraphGenerator::generateGraph($attributes);
 
-        return "lalala ";
+        return response()->json($path);
     }
 
     private function retrieveAttributes($getAttr)

@@ -133,7 +133,7 @@ class Node
 
     /**
      * @param string $key
-     * @return null
+     * @return mixed
      */
     public function getData($key = "")
     {
