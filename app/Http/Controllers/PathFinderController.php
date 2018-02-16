@@ -5,25 +5,19 @@ namespace App\Http\Controllers;
 use App\Line;
 use App\MetroTrip;
 use App\Station;
+use AStar;
+use HeuristicEstimatorDijkstra;
 use Illuminate\Http\Request;
+use PathNode;
+
 include "PathFinderApi/DataRetrieving/DataRetriever.php";
-include "PathFinderApi/GraphGenaratorClasses/GraphGenerator.php";
+include "PathFinderApi/GraphGeneratorClasses/GraphGenerator.php";
+include "PathFinderApi/GraphGeneratorClasses/GraphClasses/AStar.php";
+include "PathFinderApi/GraphGeneratorClasses/GraphClasses/HeuristicEstimator.php";
+include "PathFinderApi/GraphGeneratorClasses/PathNode.php";
 
 class PathFinderController extends Controller
 {
-
-    public function insertInDatabase()
-    {
-//        $line = Line::find(1);
-//        $metroTrips = $line->metroTrips;
-//        foreach ($metroTrips as $metroTrip)
-//        {
-//            echo $metroTrip."<br>".$metroTrip->timePeriods."<br>";
-//            foreach ($metroTrip->stations as $station)
-//                echo $station->name."<br>";
-//        }
-
-    }
 
     public function findPath()
     {
@@ -32,11 +26,26 @@ class PathFinderController extends Controller
         {
             $attributes = $this->retrieveAttributes($_GET);
         }
-//        var_dump($attributes);
-        $path = \GraphGenerator::generateGraph($attributes);
+        $graphInfos = \GraphGenerator::generateGraph($attributes);
+        $origin = $graphInfos["origin"];
+        $destination = $graphInfos["destination"];
 
-        return response()->json($path);
+        // applying A*
+
+        $astar = new AStar(new HeuristicEstimatorDijkstra());
+        $path = $astar->findPath($origin,$destination);
+
+        // loading output
+        $pNodes = PathNode::loadFromPath($path,$attributes["time"]);
+        $result = [];
+        foreach ($pNodes as $pNode) {
+            /** @var $pNode PathNode */
+            $result[] = $pNode->toArray();
+        }
+
+        return response()->json($result);
     }
+
 
     private function retrieveAttributes($getAttr)
     {
