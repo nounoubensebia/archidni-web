@@ -34,6 +34,7 @@ class PathFinderController extends Controller
         }
         var_dump($attributes);
         \GraphGenerator::generateGraph($attributes);
+
         return "lalala ";
     }
 
