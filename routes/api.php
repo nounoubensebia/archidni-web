@@ -48,6 +48,15 @@ Route::group(['prefix' => 'v1'],function (){
         ])->name('lines_passing_by_station');
 
     });
+    Route::group(['prefix'=>'user'],function ()
+    {
+      Route::post('signup',[
+          'uses'=>'UserController@signup'
+      ]);
+      Route::post('login',[
+          'uses'=>'UserController@login'
+      ]);
+    });
 
 });
 
