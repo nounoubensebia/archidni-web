@@ -16,8 +16,10 @@ use Illuminate\Http\Request;
 /*Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });*/
-Route::get('/test',function () {
-    $lines = \App\Line::with(['operator','transportMode','trainTrips','metroTrips'])->with('sections')->get();
-    return response()->json($lines,200);
-});
+//Route::get('/test',function () {
+//    $lines = \App\Line::with(['operator','transportMode','trainTrips','metroTrips'])->with('sections')->get();
+//    return response()->json($lines,200);
+//});
+
+Route::get('/test','PathFinderController@findPath');
 

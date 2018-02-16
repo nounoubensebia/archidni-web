@@ -29,7 +29,7 @@ class Line extends Model
 
     public function metroTrips()
     {
-        return $this->hasMany('App\MetroTrip')->with('departures');;
+        return $this->hasMany('App\MetroTrip');
     }
 
     public function transportMode()

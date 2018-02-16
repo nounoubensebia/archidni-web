@@ -14,6 +14,11 @@ class Station extends Model
 
     public function trainTrips()
     {
-        return $this->belongsToMany('App\TrainTrip');
+        return $this->belongsToMany('App\TrainTrip' , 'train_trip_station');
+    }
+
+    public function metroTrips()
+    {
+        return $this->belongsToMany('App\MetroTrip');
     }
 }
