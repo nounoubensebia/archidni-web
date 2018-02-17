@@ -26,7 +26,8 @@ class DataRetriever
         "transportMeanUnused", // restriction over transport mean by stating unused transport means
         // separated by ",". default all
         "priority", // order found paths by priority : time, distance, price... default time
-        "numberOfPaths", // number of paths to return ordered by priority. default 1
+        "numberOfPaths", // number of paths to return ordered by priority, -1 for maximum number
+        //of paths possible. default 1 path
     ];
 
     static private $necessaryAttributes = [

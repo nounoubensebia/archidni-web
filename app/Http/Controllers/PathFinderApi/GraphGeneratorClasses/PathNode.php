@@ -15,6 +15,7 @@ class PathNode
     private $next;
     private $waitingTimeAtNode;
     private $transportModeToNextNode;
+    private $idLine;
 
     public function toArray()
     {
@@ -24,6 +25,7 @@ class PathNode
         $array["longitude"] = $this->getLongitude();
         $array["waitingTime"] = $this->getWaitingTimeAtNode();
         $array["transportModeToNextNode"] = $this->getTransportModeToNextNode();
+        $array["idLine"] = $this->getIdLine();
         return $array;
     }
 
@@ -50,12 +52,13 @@ class PathNode
             /** @var $station GraphStation */
             $station = $node->getData("station");
             $pathNode = new PathNode($station->getName(),$station->getLatitude(),$station->getLongitude());
+            $pathNode->setIdLine($station->getTrip()->getLine()->id);
             return $pathNode;
         }
         else
         {
             $position = $node->getData("position");
-            $pathNode = new PathNode($node->getTag(),$position[0],$position[1]);
+            $pathNode = new PathNode($node->getTag(),$position[0]+0,$position[1]+0);
             return $pathNode;
         }
     }
@@ -88,6 +91,24 @@ class PathNode
         }
         return $pathNodes;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getIdLine()
+    {
+        return $this->idLine;
+    }
+
+    /**
+     * @param mixed $idLine
+     */
+    public function setIdLine($idLine)
+    {
+        $this->idLine = $idLine;
+    }
+
+
 
     /**
      * @return mixed

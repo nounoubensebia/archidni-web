@@ -11,10 +11,7 @@ use Illuminate\Http\Request;
 use PathNode;
 
 include "PathFinderApi/DataRetrieving/DataRetriever.php";
-include "PathFinderApi/GraphGeneratorClasses/GraphGenerator.php";
-include "PathFinderApi/GraphGeneratorClasses/GraphClasses/AStar.php";
-include "PathFinderApi/GraphGeneratorClasses/GraphClasses/HeuristicEstimator.php";
-include "PathFinderApi/GraphGeneratorClasses/PathNode.php";
+include "PathFinderApi/GraphGeneratorClasses/PathFinder.php";
 
 class PathFinderController extends Controller
 {
@@ -26,22 +23,8 @@ class PathFinderController extends Controller
         {
             $attributes = $this->retrieveAttributes($_GET);
         }
-        $graphInfos = \GraphGenerator::generateGraph($attributes);
-        $origin = $graphInfos["origin"];
-        $destination = $graphInfos["destination"];
+        $result = \PathFinder::findPath($attributes);
 
-        // applying A*
-
-        $astar = new AStar(new HeuristicEstimatorDijkstra());
-        $path = $astar->findPath($origin,$destination);
-
-        // loading output
-        $pNodes = PathNode::loadFromPath($path,$attributes["time"]);
-        $result = [];
-        foreach ($pNodes as $pNode) {
-            /** @var $pNode PathNode */
-            $result[] = $pNode->toArray();
-        }
 
         return response()->json($result);
     }
