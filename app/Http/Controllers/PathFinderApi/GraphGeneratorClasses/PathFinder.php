@@ -19,6 +19,8 @@ class PathFinder
         $graphInfos = \GraphGenerator::generateGraph($attributes);
         $origin = $graphInfos["origin"];
         $destination = $graphInfos["destination"];
+        if(isset($attributes["time"])) $time = $attributes["time"];
+        else $time = UtilFunctions::getCurrentTime();
 
         // applying A*
 
@@ -26,8 +28,9 @@ class PathFinder
         $path = $astar->findPath($origin,$destination);
 
         // loading output
-        $pNodes = PathNode::loadFromPath($path,$attributes["time"]);
+        $pNodes = PathNode::loadFromPath($path,$time);
         $result = [];
+
         foreach ($pNodes as $pNode) {
             /** @var $pNode PathNode */
             $result[] = $pNode->toArray();

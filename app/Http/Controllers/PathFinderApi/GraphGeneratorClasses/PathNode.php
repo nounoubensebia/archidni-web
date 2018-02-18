@@ -76,14 +76,17 @@ class PathNode
              */
             $pNode = self::loadFromNode($node);
             if(isset($prev) && isset($prevPNode)) {
-                $edgeType = $prev->getEdgeTo($node)->getData("type");
+                $edge = $prev->getEdgeTo($node);
+                $edgeType = $edge->getData("type");
                 $prevPNode->setTransportModeToNextNode($edgeType);
                 if($i < count($nodes)-1)
                 if ($edgeType == "byFoot") {
-                    $pNode->setWaitingTimeAtNode($node->getData("station")->getWaitingTime($time));
+                    $walkTime = UtilFunctions::getTime($node->getData("position"),$prev->getData("position"));
+                    $pNode->setWaitingTimeAtNode($node->getData("station")->getWaitingTime($time+$walkTime));
                 } else {
                     $pNode->setWaitingTimeAtNode($node->getData("station")->getWaitingTimeAtTrip($time));
                 }
+                $time += $edge->getData("time"); // advance in time with time it takes to travel the edge
             }
             $pathNodes[] = $pNode;
             $prev = $node;

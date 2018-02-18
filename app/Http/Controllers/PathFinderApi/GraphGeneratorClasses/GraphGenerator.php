@@ -30,27 +30,24 @@ class GraphGenerator
     {
         $position1 = $params["origin"];
         $position2 = $params["destination"];
-        $time = $params["time"];
+
+
+        if(!isset($params["day"])) $day = UtilFunctions::getCurrentDay(); // default today
+        else $day = $params["day"];
+        if(!isset($params["time"])) $time = UtilFunctions::strToMin(UtilFunctions::getCurrentTime()); // default now
+        else $time = $params["time"];
 
         // creating graph
         $graph = new Graph();
-        $origin = new Node("origin");
-        $destination = new Node("destination");
-        // setting positions
-        $origin->addData("position",[$position1["latitude"],$position1["longitude"]]);
-        $destination->addData("position",[$position2["latitude"],$position2["longitude"]]);
-        // adding nodes to graph
-        $graph->addNode($origin);
-        $graph->addNode($destination);
-        $graph->attachNodes($origin,$destination,UtilFunctions::getTime(
-            $origin->getData("position"),$destination->getData("position")
-        ))->addData("type","byFoot");
 
+        $nodes = GraphLinker::linkOriginDestination($graph,$position1,$position2);
+        $origin = $nodes[0];
+        $destination = $nodes[1];
 
         // generating stations available by foot
         $stations = StationGenerator::getStationsByFoot($position1);
         // generating trips from stations available by foot
-        $trips = TripGenerator::getTripsFromStations($stations);
+        $trips = TripGenerator::getTripsFromStations($stations,$time,$day);
 
         // linking trip's stations as nodes in graph
         foreach ($trips as $trip) {

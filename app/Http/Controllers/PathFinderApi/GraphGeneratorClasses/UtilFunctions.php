@@ -69,4 +69,9 @@ class UtilFunctions
     {
         return date("G:i:s");
     }
+
+    public static function getCurrentDay()
+    {
+        return 1<<(date("N")-1);
+    }
 }

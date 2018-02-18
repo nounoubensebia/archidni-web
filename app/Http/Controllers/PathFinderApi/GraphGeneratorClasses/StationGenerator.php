@@ -29,7 +29,7 @@ class StationGenerator
     static private function stationAvailableByFoot($station,$position)
     {
         $p1 = [$station->latitude,$station->longitude];
-        $p2 = [$position["latitude"],$position["longitude"]];
+        $p2 = $position;
         return UtilFunctions::getDistance($p1,$p2) < self::getMaxDistanceToStationByFoot();
     }
 

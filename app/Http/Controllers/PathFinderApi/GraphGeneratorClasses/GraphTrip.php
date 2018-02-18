@@ -255,7 +255,8 @@ class GraphTrip
      */
     private function getWaitingTimeOfStationMetro($station,$time)
     {
-        $t = UtilFunctions::strToMin($time);
+//        echo $time."<BR>";
+        $t = $time;
         $minStartT = 24*60;
         $minWaitingTime = 24*60;
         foreach ($this->getTimePeriods() as $timePeriod) {
@@ -271,11 +272,6 @@ class GraphTrip
                 {
                     $minWaitingTime = ($minStartT<$strtT-$t)?$minWaitingTime:$timePeriod->waiting_time;
                     $minStartT = self::minA($minStartT,$strtT-$t);
-                }
-                else
-                {
-                    $minWaitingTime = ($minStartT<$strtT+24*60-$t)?$minWaitingTime:$timePeriod->waiting_time;
-                    $minStartT = self::minA($minStartT,$strtT+24*60-$t);
                 }
             }
         }
