@@ -12,7 +12,7 @@
 
 class StationGenerator
 {
-    static private $distance = 3;
+    static private $distance = 1000000;
 
     static public function getStationsByFoot($position)
     {

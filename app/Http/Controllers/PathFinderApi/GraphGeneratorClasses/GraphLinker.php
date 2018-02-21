@@ -9,12 +9,14 @@
 
 include "GraphClasses/Graph.php";
 include "GraphClasses/Node.php";
+include "DynamicTransferEdgeGenerator.php";
 class GraphLinker
 {
 
     public static $nToS = 1;
     public static $sToN = 2;
     public static $bothWays = 3;
+    public static $byFootPenalty = 2.5;
 
     /**
      * @param $graph Graph
@@ -36,7 +38,7 @@ class GraphLinker
         $edgeTime = UtilFunctions::getTime(
             $origin->getData("position"),$destination->getData("position")
         );
-        $edge = $graph->attachNodes($origin,$destination,$edgeTime);
+        $edge = $graph->attachNodes($origin,$destination,$edgeTime*self::$byFootPenalty);
         $edge->addData("type","byFoot");
         $edge->addData("time",$edgeTime);
         return [$origin,$destination];
@@ -46,12 +48,12 @@ class GraphLinker
      * @param $node Node
      * @param $stations
      * @param int $mask
-     * @param null $time
+     * @param $filter GeneratorFilter
      * @return Graph
      */
-    static public function linkStationsByFoot($graph,$node,$stations,$mask = 3,$time = null)
+    static public function linkStationsByFoot($graph,$node,$stations,$mask = 3,$filter)
     {
-        if($time == null) $time = UtilFunctions::getCurrentTime();
+        $time = $filter->getTime();
         foreach ($stations as $station) {
             /** @var $station GraphStation */
             $p1 = $node->getData("position");
@@ -60,13 +62,13 @@ class GraphLinker
             $node2 = new Node($station->getTag());
             if($mask & GraphLinker::$sToN) {
                 $edge = $graph->attachNodes($node2, $node
-                    , $edgeVal);
+                    , $edgeVal*self::$byFootPenalty);
                 $edge->addData("type", "byFoot");
                 $edge->addData("time",$edgeVal);
             }
             if($mask & GraphLinker::$nToS) {
                 $edge = $graph->attachNodes($node, $node2
-                    , $edgeVal + $station->getWaitingTime($time + $edgeVal));
+                    , $edgeVal*self::$byFootPenalty + $station->getWaitingTime($time + $edgeVal));
                 $edge->addData("type", "byFoot");
                 $edge->addData("time",$edgeVal + $station->getWaitingTime($time + $edgeVal));
             }
@@ -78,9 +80,10 @@ class GraphLinker
     /**
      * @param $graph Graph
      * @param $trip GraphTrip
+     * @param $filter GeneratorFilter
      * @return Graph
      */
-    static public function linkTripStations($graph,$trip)
+    static public function linkTripStations($graph,$trip,$filter)
     {
         $transportMean = $trip->getTransportMean();
         foreach ($trip->getStations() as $station)
@@ -103,4 +106,21 @@ class GraphLinker
         return $graph;
     }
 
+
+    /**
+     * @param $graph Graph
+     * @param $filter GeneratorFilter
+     */
+    public static function linkExistingNodesAsTransfer($graph,$filter)
+    {
+        foreach ($graph->getNodes() as $node1) {
+            /** @var $node1 Node */
+            $station1 = $node1->getData("station");
+            if(isset($station1))
+            {
+                $node1->addDynamicEdgeLoader(new DynamicTransferEdgeLoader());
+            }
+        }
+        $graph->addDynamicContextUpdater(new DynamicTransferContextUpdater($filter,$graph));
+    }
 }

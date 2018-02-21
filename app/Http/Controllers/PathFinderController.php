@@ -21,7 +21,7 @@ class PathFinderController extends Controller
         $attributes = [];
         if(isset($_GET))
         {
-            $attributes = $this->retrieveAttributes($_GET);
+            $attributes = \DataRetriever::retrieveAttributes($_GET);
         }
         $result = \PathFinder::findPath($attributes);
 
@@ -30,13 +30,5 @@ class PathFinderController extends Controller
     }
 
 
-    private function retrieveAttributes($getAttr)
-    {
-        $hash = [];
-        foreach ($getAttr as $key => $value) {
-            if(\DataRetriever::isAnAttribute($key))
-                $hash[$key] = \DataRetriever::retrieve($key, $value);
-        }
-        return $hash;
-    }
+
 }

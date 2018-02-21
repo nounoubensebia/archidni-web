@@ -23,19 +23,15 @@ class GraphGenerator
     /**
      * $position1 array 0 : latitude, 1 : longitude. starting position
      * $position2 array 0 : latitude, 1 : longitude. destination position
-     * @param $params
+     * @param $filter GeneratorFilter
      * @return array
      */
-    public static function generateGraph($params = [])
+    public static function generateGraph($filter)
     {
-        $position1 = $params["origin"];
-        $position2 = $params["destination"];
-
-
-        if(!isset($params["day"])) $day = UtilFunctions::getCurrentDay(); // default today
-        else $day = $params["day"];
-        if(!isset($params["time"])) $time = UtilFunctions::strToMin(UtilFunctions::getCurrentTime()); // default now
-        else $time = $params["time"];
+        $position1 = $filter->getOrigin();
+        $position2 = $filter->getDestination();
+        $time = $filter->getTime();
+        $day = $filter->getDay();
 
         // creating graph
         $graph = new Graph();
@@ -52,12 +48,13 @@ class GraphGenerator
         // linking trip's stations as nodes in graph
         foreach ($trips as $trip) {
             /**@var $trip GraphTrip */
-            GraphLinker::linkTripStations($graph,$trip);
+            GraphLinker::linkTripStations($graph,$trip,$filter);
             GraphLinker::linkStationsByFoot($graph,$origin,$trip->getStations()
-                                            ,GraphLinker::$nToS,$time);
+                                            ,GraphLinker::$nToS,$filter);
             GraphLinker::linkStationsByFoot($graph,$destination,$trip->getStations()
-                                            ,GraphLinker::$sToN,$time);
+                                            ,GraphLinker::$sToN,$filter);
         }
+        GraphLinker::linkExistingNodesAsTransfer($graph,$filter);
 
 
         return [

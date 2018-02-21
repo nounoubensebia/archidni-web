@@ -11,21 +11,31 @@ include "GraphGenerator.php";
 include "GraphClasses/AStar.php";
 include "GraphClasses/HeuristicEstimator.php";
 include "PathNode.php";
+include "GeneratorFilter.php";
 
 class PathFinder
 {
     public static function findPath($attributes)
     {
-        $graphInfos = \GraphGenerator::generateGraph($attributes);
+        if(!isset($attributes["time"])) $time = UtilFunctions::strToMin(UtilFunctions::getCurrentTime()); // default now
+        else $time = $attributes["time"];
+
+        if(!isset($params["day"])) $day = UtilFunctions::getCurrentDay(); // default today
+        else $day = $params["day"];
+
+        $filter = new GeneratorFilter($attributes["origin"],$attributes["destination"],
+            $day,$time);
+
+
+        $graphInfos = \GraphGenerator::generateGraph($filter);
         $origin = $graphInfos["origin"];
         $destination = $graphInfos["destination"];
-        if(isset($attributes["time"])) $time = $attributes["time"];
-        else $time = UtilFunctions::getCurrentTime();
+        $graph = $graphInfos["graph"];
 
         // applying A*
 
         $astar = new AStar(new HeuristicEstimatorDijkstra());
-        $path = $astar->findPath($origin,$destination);
+        $path = $astar->findPath($origin,$destination,$graph);
 
         // loading output
         $pNodes = PathNode::loadFromPath($path,$time);

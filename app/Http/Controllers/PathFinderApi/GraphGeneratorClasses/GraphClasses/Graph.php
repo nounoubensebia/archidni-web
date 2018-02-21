@@ -11,6 +11,8 @@ class Graph
 {
     private $nodes = [];
     private $tags = [];
+    /** @var  $dynamicContextUpdater DynamicContextUpdater */
+    private $dynamicContextUpdater;
 
     /**
      * @param $node Node
@@ -91,6 +93,34 @@ class Graph
             }
         }
         return $this;
+    }
+
+
+    /**
+     * @return DynamicContextUpdater
+     */
+    public function getDynamicContextUpdater()
+    {
+        return $this->dynamicContextUpdater;
+    }
+
+    /**
+     * @param DynamicContextUpdater $dynamicContextUpdater
+     */
+    private function setDynamicContextUpdater(DynamicContextUpdater $dynamicContextUpdater)
+    {
+        $this->dynamicContextUpdater = $dynamicContextUpdater;
+    }
+
+    /**
+     * @param DynamicContextUpdater $dynamicContextUpdater
+     */
+    public function addDynamicContextUpdater(DynamicContextUpdater $dynamicContextUpdater)
+    {
+        if($this->getDynamicContextUpdater() != null)
+            $this->getDynamicContextUpdater()->addUpdater($dynamicContextUpdater);
+        else
+            $this->setDynamicContextUpdater($dynamicContextUpdater);
     }
 
 

@@ -8,11 +8,16 @@
  */
 class AStar
 {
+
+    /**
+     * @var $heuristic HeuristicEstimator
+     */
     private $heuristic;
+
 
     /**
      * AStar constructor.
-     * @param $heuristicFunction
+     * @param $heuristicFunction HeuristicEstimator
      * @throws Exception
      */
     public function __construct($heuristicFunction)
@@ -24,8 +29,13 @@ class AStar
     }
 
 
-
-    public function findPath($start,$goal)
+    /**
+     * @param $start Node
+     * @param $goal Node
+     * @param $graph Graph
+     * @return array|null
+     */
+    public function findPath($start,$goal,$graph)
     {
         $evaluated = array(); // closed
         $toEvaluate = array($start); // open
@@ -34,10 +44,19 @@ class AStar
         $hScores = new SplObjectStorage();
         $scores[$start] = 0;
         $hScores[$start] = $this->heuristic->run($start,$goal);
+        $context = $graph->getDynamicContextUpdater()->createContext();
 
         while(count($toEvaluate) > 0) // open is not empty
         {
+            /** @var $current Node*/
             $current = $this->getLowestHScoreNode($toEvaluate,$hScores);
+            /** @var $prev Node*/
+
+            if($previous->contains($current))
+            {
+                $prev = $previous[$current];
+                $graph->getDynamicContextUpdater()->updateContext($context,$prev->getEdgeTo($current));
+            }
             if($current->getTag() == $goal->getTag())
             {
                 return $this->getPathFromPrev($current,$previous);
@@ -53,12 +72,16 @@ class AStar
             }
             array_push($evaluated,$current); // add to closed
 
-            $edges = $current->getOEdges();
+            $edges = $current->getNextNodesEdges($context);
+//            echo "from current: ".$current->getTag()."<BR>";
             foreach ($edges as $edge)
             {
+                /** @var $node Node
+                 * @var $edge Edge
+                 */
                 $node = ($edge->getNode1()->getTag() == $current->getTag() ? $edge->getNode2() : $edge->getNode1());
                 $weight = $edge->getWeight();
-
+//                echo "access: ".$node->getTag()." with weight: $weight <BR>";
                 if(!in_array($node,$evaluated,true))
                 {
                     if(!in_array($node,$toEvaluate,true))
@@ -79,22 +102,17 @@ class AStar
 
     }
 
-    private function remove($assoTab,$node)
-    {
-        foreach ($assoTab as $key=>$n)
-        {
-            if($n->getTag() == $node->getTag()) {
-                unset($assoTab[$key]);
-                break;
-            }
-        }
-    }
-
+    /**
+     * @param $toEvaluate
+     * @param $hScore
+     * @return Node
+     */
     private function getLowestHScoreNode($toEvaluate,$hScore)
     {
         $selectedNode = null;
         foreach ($toEvaluate as $node)
         {
+            /** @var $node Node */
 //            echo "node tag ".$node->getTag()." score: ".(isset($hScore[$node])? $hScore[$node]:"null")."\n";
             if(!isset($min) || (isset($hScore[$node]) && $hScore[$node] < $min))
             {
@@ -104,6 +122,12 @@ class AStar
         }
         return $selectedNode;
     }
+
+    /**
+     * @param $current Node
+     * @param $previous SplObjectStorage
+     * @return array
+     */
 
     private function getPathFromPrev($current,$previous)
     {

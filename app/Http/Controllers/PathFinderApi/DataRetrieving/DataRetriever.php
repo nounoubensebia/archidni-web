@@ -24,7 +24,8 @@ class DataRetriever
         "transportMeanUsed", // restriction over transport mean by stating used transport means
         // separated by ",". default all
         "transportMeanUnused", // restriction over transport mean by stating unused transport means
-        // separated by ",". default all
+        // separated by ",". default none
+        // 1=>metro,2=>train,3=>bus,4=>tramway
         "priority", // order found paths by priority : time, distance, price... default time
         "numberOfPaths", // number of paths to return ordered by priority, -1 for maximum number
         //of paths possible. default 1 path
@@ -38,6 +39,16 @@ class DataRetriever
     public static function retrieve($attribute,$value)
     {
         return self::$attribute($value);
+    }
+
+    public static function retrieveAttributes($getAttr)
+    {
+        $hash = [];
+        foreach ($getAttr as $key => $value) {
+            if(\DataRetriever::isAnAttribute($key))
+                $hash[$key] = \DataRetriever::retrieve($key, $value);
+        }
+        return $hash;
     }
 
 
@@ -91,7 +102,38 @@ class DataRetriever
              found ".$value);
     }
 
+    private static function transportMeanUsed($value)
+    {
+        return self::retreaveTransportMeans($value);
+    }
 
+
+    private static function transportMeanUnused($value)
+    {
+        return self::retreaveTransportMeans($value);
+    }
+
+    private static function retreaveTransportMeans($value)
+    {
+        if(preg_match("/^(\d(,\d)*)$/",$value,$tab))
+        {
+            $value = explode(",",$value);
+            return $value;
+        }
+        else
+            throw new InvalidDataFormatException("invalid transportMeanUsed format, expected digits between 1 and 4
+             separated by ',' found ".$value);
+    }
+
+    private static function priority($value)
+    {
+
+    }
+
+    private static function numberOfPaths($value)
+    {
+
+    }
 
     private static function getLatLong($value)
     {

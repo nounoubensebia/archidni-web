@@ -14,6 +14,8 @@ class Node
     private $tag;
     private $heuristicData;
     private $data;
+    /** @var  $dynamicEdgeLoader DynamicEdgeLoader */
+    private $dynamicEdgeLoader;
 
     /**
      * @return int
@@ -44,7 +46,13 @@ class Node
             }
     }
 
-
+    public function getNextNodesEdges($context)
+    {
+        // loads dynamic edges
+        if($this->getDynamicEdgeLoader() != null)
+            $this->getDynamicEdgeLoader()->loadEdges($context,$this);
+        return $this->getOEdges();
+    }
     public function getOEdges()
     {
         return $this->Oedges;
@@ -130,6 +138,35 @@ class Node
     {
         $this->tag = $tag;
     }
+
+    /**
+     * @return DynamicEdgeLoader
+     */
+    public function getDynamicEdgeLoader()
+    {
+        return $this->dynamicEdgeLoader;
+    }
+
+    /**
+     * @param DynamicEdgeLoader $dynamicEdgeLoader
+     */
+    private function setDynamicEdgeLoader(DynamicEdgeLoader $dynamicEdgeLoader)
+    {
+        $this->dynamicEdgeLoader = $dynamicEdgeLoader;
+    }
+
+    /**
+     * @param DynamicEdgeLoader $dynamicEdgeLoader
+     */
+    public function addDynamicEdgeLoader(DynamicEdgeLoader $dynamicEdgeLoader)
+    {
+        if($this->getDynamicEdgeLoader() != null)
+            $this->getDynamicEdgeLoader()->addLoader($dynamicEdgeLoader);
+        else
+            $this->setDynamicEdgeLoader($dynamicEdgeLoader);
+    }
+
+
 
     /**
      * @param string $key
