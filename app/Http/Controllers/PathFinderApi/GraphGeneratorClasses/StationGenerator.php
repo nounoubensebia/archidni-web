@@ -14,13 +14,19 @@ class StationGenerator
 {
     static private $distance = 1000000;
 
-    static public function getStationsByFoot($position)
+    /**
+     * @param $position
+     * @param $filter GeneratorFilter
+     * @return array
+     */
+    static public function getStationsByFoot($position,$filter)
     {
+
         $stations = \App\Station::all();
         $result = [];
         foreach ($stations as $station)
         {
-            if(self::stationAvailableByFoot($station,$position))
+            if(self::stationAvailableByFoot($station,$position) && self::satisfyFilter($station,$filter))
                 $result[] = $station;
         }
         return $result;
@@ -36,5 +42,10 @@ class StationGenerator
     static private function getMaxDistanceToStationByFoot()
     {
         return self::$distance;
+    }
+
+    static private function satisfyFilter($station,$filter)
+    {
+        return true;
     }
 }

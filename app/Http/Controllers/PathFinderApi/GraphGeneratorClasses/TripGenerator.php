@@ -12,20 +12,20 @@ class TripGenerator
 {
     /**
      * @param $stations
-     * @param $time string format hh:mm
-     * @param $day integer bitmask
+     * @param $filter GeneratorFilter
      * @return array
      */
-    public static function getTripsFromStations($stations,$time = null,$day = 127)
+    public static function getTripsFromStations($stations,$filter)
     {
-        if($time == null) $time = UtilFunctions::getCurrentTime();
+        $time = $filter->getTime();
+        $day = $filter->getDay();
         $result = [];
         $ids = [];
         foreach ($stations as $station) {
 
             $trips = $station->metroTrips;
             foreach ($trips as $trip) {
-                if(!in_array($trip->id,$ids) && ($trip->days & $day)) {
+                if(!in_array($trip->id,$ids) && self::satisfyFilter($trip,$filter)) {
                     $result[] = GraphTrip::loadFromMetroTrip($trip);
                     $ids[] = $trip->id;
                 }
@@ -33,12 +33,23 @@ class TripGenerator
 
             $trips = $station->trainTrips;
             foreach ($trips as $trip) {
-                if(!in_array($trip->id,$ids) && ($trip->days & $day)) {
+                if(!in_array($trip->id,$ids) && self::satisfyFilter($trip,$filter)) {
                     $result[] = GraphTrip::loadFromTrainTrip($trip);
                     $ids[] = $trip->id;
                 }
             }
         }
         return $result;
+    }
+
+    /**
+     * @param $trip
+     * @param $filter GeneratorFilter
+     * @return bool
+     */
+
+    private static function satisfyFilter($trip,$filter)
+    {
+        return !in_array($trip->line->id,$filter->getUnusedTransportMeans()) && ($trip->days & $filter->getDay());
     }
 }

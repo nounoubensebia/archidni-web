@@ -12,6 +12,7 @@ class GeneratorFilter
     private $destination;
     private $day;
     private $time;
+    private $unusedTransportMeans;
 
     /**
      * GeneratorFilter constructor.
@@ -90,6 +91,22 @@ class GeneratorFilter
     public function setTime($time)
     {
         $this->time = $time;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getUnusedTransportMeans()
+    {
+        return $this->unusedTransportMeans;
+    }
+
+    /**
+     * @param mixed $unusedTransportMeans
+     */
+    public function setUnusedTransportMeans($unusedTransportMeans)
+    {
+        $this->unusedTransportMeans = $unusedTransportMeans;
     }
 
 

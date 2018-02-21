@@ -17,15 +17,7 @@ class PathFinder
 {
     public static function findPath($attributes)
     {
-        if(!isset($attributes["time"])) $time = UtilFunctions::strToMin(UtilFunctions::getCurrentTime()); // default now
-        else $time = $attributes["time"];
-
-        if(!isset($params["day"])) $day = UtilFunctions::getCurrentDay(); // default today
-        else $day = $params["day"];
-
-        $filter = new GeneratorFilter($attributes["origin"],$attributes["destination"],
-            $day,$time);
-
+        $filter = self::initFilter($attributes);
 
         $graphInfos = \GraphGenerator::generateGraph($filter);
         $origin = $graphInfos["origin"];
@@ -38,7 +30,7 @@ class PathFinder
         $path = $astar->findPath($origin,$destination,$graph);
 
         // loading output
-        $pNodes = PathNode::loadFromPath($path,$time);
+        $pNodes = PathNode::loadFromPath($path,$filter->getTime());
         $result = [];
 
         foreach ($pNodes as $pNode) {
@@ -47,5 +39,24 @@ class PathFinder
         }
 
         return $result;
+    }
+
+    private static function initFilter($attributes)
+    {
+        if(!isset($attributes["time"])) $time = UtilFunctions::strToMin(UtilFunctions::getCurrentTime()); // default now
+        else $time = $attributes["time"];
+
+        if(!isset($params["day"])) $day = UtilFunctions::getCurrentDay(); // default today
+        else $day = $params["day"];
+
+        $filter = new GeneratorFilter($attributes["origin"],$attributes["destination"],
+            $day,$time);
+
+        if(isset($attributes["transportMeanUnused"]))
+            $filter->setUnusedTransportMeans($attributes["transportMeanUnused"]);
+        else
+            $filter->setUnusedTransportMeans([0]);
+
+        return $filter;
     }
 }
