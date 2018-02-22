@@ -31,13 +31,13 @@ class PathFinder
 
         // loading output
         $pNodes = PathNode::loadFromPath($path,$filter->getTime());
-        $result = [];
+        $outPath = [];
 
         foreach ($pNodes as $pNode) {
             /** @var $pNode PathNode */
-            $result[] = $pNode->toArray();
+            $outPath[] = $pNode->toArray();
         }
-
+        $result[] = $outPath;
         return $result;
     }
 

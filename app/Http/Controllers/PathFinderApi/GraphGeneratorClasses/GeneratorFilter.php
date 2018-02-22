@@ -126,6 +126,18 @@ class GeneratorFilter
         $this->unusedTransportMeans = $unusedTransportMeans;
     }
 
+    /**
+     * @param $station \App\Station
+     * @return bool
+     */
+    public function filterStation($station)
+    {
+        return true;
+    }
 
+    public function filterTrip($trip)
+    {
+
+    }
 
 }
