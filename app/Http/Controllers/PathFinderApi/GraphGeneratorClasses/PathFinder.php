@@ -57,6 +57,11 @@ class PathFinder
         else
             $filter->setUnusedTransportMeans([0]);
 
+        if(isset($attributes["transportLineUnused"]))
+            $filter->setUnusedTransportLines($attributes["transportLineUnused"]);
+        else
+            $filter->setUnusedTransportLines([0]);
+
         return $filter;
     }
 }

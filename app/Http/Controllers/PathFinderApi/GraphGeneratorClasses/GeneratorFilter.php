@@ -12,6 +12,7 @@ class GeneratorFilter
     private $destination;
     private $day;
     private $time;
+    private $unusedTransportLines;
     private $unusedTransportMeans;
 
     /**
@@ -91,6 +92,22 @@ class GeneratorFilter
     public function setTime($time)
     {
         $this->time = $time;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getUnusedTransportLines()
+    {
+        return $this->unusedTransportLines;
+    }
+
+    /**
+     * @param mixed $unusedTransportLines
+     */
+    public function setUnusedTransportLines($unusedTransportLines)
+    {
+        $this->unusedTransportLines = $unusedTransportLines;
     }
 
     /**
