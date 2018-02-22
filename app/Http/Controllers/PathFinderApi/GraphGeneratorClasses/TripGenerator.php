@@ -50,6 +50,6 @@ class TripGenerator
 
     private static function satisfyFilter($trip,$filter)
     {
-        return !in_array($trip->line->id,$filter->getUnusedTransportMeans()) && ($trip->days & $filter->getDay());
+        return !in_array($trip->line->id,$filter->getUnusedTransportLines()) && ($trip->days & $filter->getDay());
     }
 }

@@ -31,13 +31,13 @@ class PathFinder
 
         // loading output
         $pNodes = PathNode::loadFromPath($path,$filter->getTime());
-        $result = [];
+        $outPath = [];
 
         foreach ($pNodes as $pNode) {
             /** @var $pNode PathNode */
-            $result[] = $pNode->toArray();
+            $outPath[] = $pNode->toArray();
         }
-
+        $result[] = $outPath;
         return $result;
     }
 
@@ -56,6 +56,11 @@ class PathFinder
             $filter->setUnusedTransportMeans($attributes["transportMeanUnused"]);
         else
             $filter->setUnusedTransportMeans([0]);
+
+        if(isset($attributes["transportLineUnused"]))
+            $filter->setUnusedTransportLines($attributes["transportLineUnused"]);
+        else
+            $filter->setUnusedTransportLines([0]);
 
         return $filter;
     }

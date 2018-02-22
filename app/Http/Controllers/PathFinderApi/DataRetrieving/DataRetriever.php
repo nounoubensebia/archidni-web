@@ -26,6 +26,10 @@ class DataRetriever
         "transportMeanUnused", // restriction over transport mean by stating unused transport means
         // separated by ",". default none
         // 1=>metro,2=>train,3=>bus,4=>tramway
+        "transportLineUsed", // restriction over transport line by stating used transport lines
+        // separated by ",". default all
+        "transportLineUnused", // restriction over transport line by stating unused transport lines
+        // separated by ",". default none
         "priority", // order found paths by priority : time, distance, price... default time
         "numberOfPaths", // number of paths to return ordered by priority, -1 for maximum number
         //of paths possible. default 1 path
@@ -104,16 +108,27 @@ class DataRetriever
 
     private static function transportMeanUsed($value)
     {
-        return self::retreaveTransportMeans($value);
+        return self::retrieveTransportRestriction($value);
     }
 
 
     private static function transportMeanUnused($value)
     {
-        return self::retreaveTransportMeans($value);
+        return self::retrieveTransportRestriction($value);
     }
 
-    private static function retreaveTransportMeans($value)
+    private static function transportLineUsed($value)
+    {
+        return self::retrieveTransportRestriction($value);
+    }
+
+
+    private static function transportLineUnused($value)
+    {
+        return self::retrieveTransportRestriction($value);
+    }
+
+    private static function retrieveTransportRestriction($value)
     {
         if(preg_match("/^(\d(,\d)*)$/",$value,$tab))
         {

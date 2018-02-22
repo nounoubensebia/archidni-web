@@ -12,6 +12,7 @@ class GeneratorFilter
     private $destination;
     private $day;
     private $time;
+    private $unusedTransportLines;
     private $unusedTransportMeans;
 
     /**
@@ -96,6 +97,22 @@ class GeneratorFilter
     /**
      * @return mixed
      */
+    public function getUnusedTransportLines()
+    {
+        return $this->unusedTransportLines;
+    }
+
+    /**
+     * @param mixed $unusedTransportLines
+     */
+    public function setUnusedTransportLines($unusedTransportLines)
+    {
+        $this->unusedTransportLines = $unusedTransportLines;
+    }
+
+    /**
+     * @return mixed
+     */
     public function getUnusedTransportMeans()
     {
         return $this->unusedTransportMeans;
@@ -109,6 +126,18 @@ class GeneratorFilter
         $this->unusedTransportMeans = $unusedTransportMeans;
     }
 
+    /**
+     * @param $station \App\Station
+     * @return bool
+     */
+    public function filterStation($station)
+    {
+        return true;
+    }
 
+    public function filterTrip($trip)
+    {
+
+    }
 
 }

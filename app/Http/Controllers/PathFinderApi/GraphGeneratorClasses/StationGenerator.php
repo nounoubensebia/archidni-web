@@ -26,7 +26,7 @@ class StationGenerator
         $result = [];
         foreach ($stations as $station)
         {
-            if(self::stationAvailableByFoot($station,$position) && self::satisfyFilter($station,$filter))
+            if(self::stationAvailableByFoot($station,$position) && $filter->filterStation($station))
                 $result[] = $station;
         }
         return $result;
@@ -44,8 +44,4 @@ class StationGenerator
         return self::$distance;
     }
 
-    static private function satisfyFilter($station,$filter)
-    {
-        return true;
-    }
 }
