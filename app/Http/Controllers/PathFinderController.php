@@ -9,9 +9,12 @@ use AStar;
 use HeuristicEstimatorDijkstra;
 use Illuminate\Http\Request;
 use PathNode;
+use PathTransformer;
+
 
 include "PathFinderApi/DataRetrieving/DataRetriever.php";
 include "PathFinderApi/GraphGeneratorClasses/PathFinder.php";
+include "PathFinderApi/PathTransformer.php";
 
 class PathFinderController extends Controller
 {
@@ -23,10 +26,18 @@ class PathFinderController extends Controller
         {
             $attributes = \DataRetriever::retrieveAttributes($_GET);
         }
+        //TODO Remove this if train trips added
+        $attributes['transportLineUnused'] = [3,4,5];
+
         $result = \PathFinder::findPath($attributes);
-
-
-        return response()->json($result);
+        $pathsTransformed = array();
+        foreach ($result as $path)
+        {
+            $transformedPath = new PathTransformer($path);
+            array_push($pathsTransformed,$transformedPath->getTransformedPath());
+        }
+        //return $result->idLine;
+        return response()->json($pathsTransformed);
     }
 
 

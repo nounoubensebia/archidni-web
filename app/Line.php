@@ -36,4 +36,9 @@ class Line extends Model
     {
         return $this->belongsTo('App\TransportMode');
     }
+
+    public function getOrigin()
+    {
+        return $this->sections()->first();
+    }
 }
