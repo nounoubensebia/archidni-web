@@ -19,6 +19,6 @@ class MetroTrip extends Model
 
     public function stations ()
     {
-        return $this->belongsToMany('App\Station','metro_trip_station')->withPivot('minutes');
+        return $this->belongsToMany('App\Station')->withPivot(['minutes']);
     }
 }
