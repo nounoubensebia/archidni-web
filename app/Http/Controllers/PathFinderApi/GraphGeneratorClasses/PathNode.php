@@ -18,6 +18,7 @@ class PathNode
     private $idLine;
     private $idStation;
     private $idTrip;
+    private $timeToNextNode;
 
     public function toArray()
     {
@@ -30,6 +31,7 @@ class PathNode
         $array["idLine"] = $this->getIdLine();
         $array["idStation"] = $this->getIdStation();
         $array["idTrip"] = $this->getIdTrip();
+        $array["timeToNextNode"] = $this->getTimeToNextNode();
         return $array;
     }
 
@@ -85,10 +87,12 @@ class PathNode
                 $edge = $prev->getEdgeTo($node);
                 $edgeType = $edge->getData("type");
                 $prevPNode->setTransportModeToNextNode($edgeType);
+                $prevPNode->setTimeToNextNode($edge->getData("time"));
                 if($i < count($nodes)-1)
                 if ($edgeType == "byFoot") {
                     $walkTime = UtilFunctions::getTime($node->getData("position"),$prev->getData("position"));
                     $pNode->setWaitingTimeAtNode($node->getData("station")->getWaitingTime($time+$walkTime));
+
                 } else {
                     $pNode->setWaitingTimeAtNode($node->getData("station")->getWaitingTimeAtTrip($time));
                 }
@@ -132,6 +136,24 @@ class PathNode
     {
         $this->idStation = $idStation;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getTimeToNextNode()
+    {
+        return $this->timeToNextNode;
+    }
+
+    /**
+     * @param mixed $timeToNextNode
+     */
+    public function setTimeToNextNode($timeToNextNode)
+    {
+        $this->timeToNextNode = $timeToNextNode;
+    }
+
+
 
     /**
      * @return mixed
