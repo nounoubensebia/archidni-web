@@ -40,6 +40,11 @@ class DataRetriever
         "destination" // latitude and longitude of destination
     ];
 
+    static private $priorityOptions = [
+        "distance",
+        "time"
+        ];
+
     public static function retrieve($attribute,$value)
     {
         return self::$attribute($value);
@@ -142,12 +147,24 @@ class DataRetriever
 
     private static function priority($value)
     {
-
+        if(in_array($value,self::$priorityOptions))
+            return $value;
+        else
+        {
+            $options = "";
+            foreach (self::$priorityOptions as $priorityOption) {
+                $options .= $priorityOption." ";
+            }
+            throw new InvalidDataFormatException("invalid priority format, expected [ ".$options."] found ".$value);
+        }
     }
 
     private static function numberOfPaths($value)
     {
-
+        if(preg_match("/^\d+$/",$value))
+            return $value;
+        else
+            throw new InvalidDataFormatException("invalid numberOfPaths format, expected integer found ".$value);
     }
 
     private static function getLatLong($value)
@@ -156,7 +173,7 @@ class DataRetriever
             $hash = [$tab[1],$tab[2]];
         else
             throw new InvalidDataFormatException("invalid latitude/longitude format, expected 
-            latitude longitude found".$value);
+            latitude longitude found ".$value);
         return $hash;
     }
 }

@@ -16,6 +16,8 @@ class PathNode
     private $waitingTimeAtNode;
     private $transportModeToNextNode;
     private $idLine;
+    private $idStation;
+    private $idTrip;
 
     public function toArray()
     {
@@ -26,6 +28,8 @@ class PathNode
         $array["waitingTime"] = $this->getWaitingTimeAtNode();
         $array["transportModeToNextNode"] = $this->getTransportModeToNextNode();
         $array["idLine"] = $this->getIdLine();
+        $array["idStation"] = $this->getIdStation();
+        $array["idTrip"] = $this->getIdTrip();
         return $array;
     }
 
@@ -53,6 +57,8 @@ class PathNode
             $station = $node->getData("station");
             $pathNode = new PathNode($station->getName(),$station->getLatitude(),$station->getLongitude());
             $pathNode->setIdLine($station->getTrip()->getLine()->id);
+            $pathNode->setIdStation($station->getId());
+            $pathNode->setIdTrip($station->getTrip()->getId());
             return $pathNode;
         }
         else
@@ -109,6 +115,38 @@ class PathNode
     public function setIdLine($idLine)
     {
         $this->idLine = $idLine;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getIdStation()
+    {
+        return $this->idStation;
+    }
+
+    /**
+     * @param mixed $idStation
+     */
+    public function setIdStation($idStation)
+    {
+        $this->idStation = $idStation;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getIdTrip()
+    {
+        return $this->idTrip;
+    }
+
+    /**
+     * @param mixed $idTrip
+     */
+    public function setIdTrip($idTrip)
+    {
+        $this->idTrip = $idTrip;
     }
 
 
