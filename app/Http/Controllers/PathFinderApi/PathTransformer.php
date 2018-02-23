@@ -67,6 +67,8 @@ class PathTransformer
             ]
         ];
         $instruction['polyline'] = $polyline;
+        $instruction['destination_type'] = (isset($dNode['idLine']))? "station":"user_destination";
+        $instruction['destination'] = $dNode['name'];
         return $instruction;
     }
 
@@ -89,14 +91,15 @@ class PathTransformer
         $line = \App\Line::find($nodes[0]['idLine']);
         $instruction['line_name'] = $line->name;
         $instruction['transport_mode_id'] = $line->transport_mode_id;
+        //TODO FIX ME
+        $instruction['duration'] = 25;
+        $instruction['destination'] = "Test";
         $stations= array();
-        $i=0;
-
         foreach ($nodes as $node)
         {
             $station=[
                 'name' => $node['name'],
-                'coordinates' => ['latitude' => $node['longitude'],'longitude' => $node['longitude']]
+                'coordinate' => ['latitude' => $node['latitude'],'longitude' => $node['longitude']]
             ];
             array_push($stations,$station);
         }
