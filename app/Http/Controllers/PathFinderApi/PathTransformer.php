@@ -36,6 +36,7 @@ class PathTransformer
                     array_push($rideNodes,$this->path[$i]);
                     $i++;
                 }
+                array_push($rideNodes,$this->path[$i]);
                 array_push($instructions,$this->getRideInstruction($rideNodes));
                 array_push($instructions,$this->getWalkInstruction($this->path[$i],$this->path[$i+1]));
                 if (isset($this->path[$i+1]['waitingTime']))
@@ -76,7 +77,7 @@ class PathTransformer
     {
         $instruction = array();
         $instruction['type']='wait_instruction';
-        $instruction['duration']=$node['waitingTime'];
+        $instruction['duration']=intval($node['waitingTime']);
         $instruction['coordinate'] = [
             'latitude' => $node['latitude'],
             'longitude' => $node['longitude']
@@ -91,28 +92,42 @@ class PathTransformer
         $line = \App\Line::find($nodes[0]['idLine']);
         $instruction['line_name'] = $line->name;
         $instruction['transport_mode_id'] = $line->transport_mode_id;
-        //TODO FIX ME
-        $instruction['duration'] = 25;
-        $instruction['destination'] = "Test";
         $stations= array();
         foreach ($nodes as $node)
         {
             $station=[
                 'name' => $node['name'],
-                'coordinate' => ['latitude' => $node['latitude'],'longitude' => $node['longitude']]
+                'coordinate' => ['latitude' => $node['latitude'],'longitude' => $node['longitude']],
+                'id' => $node['idStation']
             ];
             array_push($stations,$station);
         }
+        $instruction['duration'] = $this->getRideDuration($nodes);
+        $instruction['destination'] = $this->getTripDestination($line,['origin_id'=>$stations[0]['id'],
+            'destination_id'=>$stations[1]['id']]);
         $instruction['stations'] = $stations;
         return $instruction;
     }
 
-    /*private function isTripGoingFromOriginToDestination ($line,$section)
+    private function getRideDuration ($nodes)
+    {
+        $duration = 0;
+        $lastNode = null;
+        foreach ($nodes as $node)
+        {
+            $duration+=$node['timeToNextNode'];
+            $lastNode = $node;
+        }
+        $duration -= intval($lastNode['timeToNextNode']);
+        return intVal($duration);
+    }
+
+    private function isTripGoingFromOriginToDestination ($line,$section)
     {
         $lineSections = $line->sections;
         foreach ($lineSections as $lineSection)
         {
-            if ($lineSection->origin_id==$section->origin_id&&$lineSection->destination_id==$section->destination_id)
+            if ($lineSection->origin_id==$section['origin_id']&&$lineSection->destination_id==$section['destination_id'])
             {
                 if ($lineSection->mode == 0||$lineSection->mode == 1)
                 {
@@ -125,12 +140,46 @@ class PathTransformer
             }
             else
             {
-                if ($lineSection->origin_id == $section['destination_id']&&$lineSection->destination_id&&$lineSection->)
+                if ($lineSection->origin_id == $section['destination_id']
+                    &&$lineSection->destination_id==$section['origin_id'])
                 {
-
+                    return false;
                 }
             }
         }
-    }*/
+        return true;
+    }
+
+    private function getLineFirstStop ($line)
+    {
+        $sections = \App\Section::query()->whereHas('lines',function ($q) use ($line)
+        {
+            $q->where('line_id','=',$line->id)->orderBy('order')->orderBy('mode');
+        })
+            ->get()->all();
+        return $sections[0]->origin->name;
+    }
+
+    private function getLineLastStop ($line)
+    {
+        $sections = \App\Section::query()->whereHas('lines',function ($q) use ($line)
+        {
+            $q->where('line_id','=',$line->id)->orderByDesc('order')->orderBy('mode');
+        })
+            ->get()->all();
+        return $sections[count($sections)-1]->destination->name;
+    }
+
+    private function getTripDestination ($line,$section)
+    {
+        if ($this->isTripGoingFromOriginToDestination($line,$section))
+        {
+            return $this->getLineLastStop($line);
+        }
+        else
+        {
+            return $this->getLineFirstStop($line);
+        }
+    }
 
 }
