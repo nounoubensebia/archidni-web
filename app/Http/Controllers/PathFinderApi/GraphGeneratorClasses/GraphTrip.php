@@ -39,9 +39,28 @@ class GraphTrip
         foreach ($trip->stations as $station) {
             $graphStations[] = GraphStation::loadFromStation($station,$station->pivot->minutes,$graphTrip);
         }
-        $graphTrip->setStations($graphStations);
+        $graphTrip->setStations(self::orderStationByMinute($graphStations));
         $graphTrip->setTransportMean($trip->line->transportMode->name);
         return $graphTrip;
+    }
+
+    private static function orderStationByMinute($stations)
+    {
+        for($i=0;$i < count($stations);$i++)
+        {
+            /** @var $min GraphStation*/
+            $min = $stations[$i];
+            $k = $i;
+            for($j=$i+1;$j<count($stations);$j++)
+                if($min->getMinute() > $stations[$j]->getMinute())
+                {
+                    $min = $stations[$j];
+                    $k = $j;
+                }
+            $stations[$k] = $stations[$i];
+            $stations[$i] = $min;
+        }
+        return $stations;
     }
 
     public static function loadFromTrainTrip($trip)
@@ -242,11 +261,19 @@ class GraphTrip
     /**
      * @param $station GraphStation
      * @param $time
+     * @return mixed
      */
     private function getWaitingTimeOfStationTrain($station,$time)
     {
-
+        $minWaitingTime = 24*60;
+        foreach ($this->getDepartures() as $departure) {
+            $depTime = UtilFunctions::strToMin($departure->time) + $station->getMinute();
+            if($time < $depTime && $minWaitingTime > $depTime-$time)
+                $minWaitingTime = $depTime-$time;
+        }
+        return $minWaitingTime;
     }
+
 
     /**
      * @param $station GraphStation
@@ -276,6 +303,16 @@ class GraphTrip
             }
         }
         return $minStartT+$minWaitingTime;
+    }
+
+    public function toString()
+    {
+        $str = $this->getId().": ".$this->getLine()->name."<BR>";
+        foreach ($this->getStations() as $station) {
+            /** @var $station GraphStation */
+            $str .= $station->getName()." ";
+        }
+        return $str;
     }
 
     private static function minA($a,$b){return ($a<$b)?$a:$b;}

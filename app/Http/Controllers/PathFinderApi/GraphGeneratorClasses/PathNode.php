@@ -8,6 +8,7 @@
  */
 class PathNode
 {
+    static private $debugging = 1;
     private $name;
     private $latitude;
     private $longitude;
@@ -19,6 +20,12 @@ class PathNode
     private $idStation;
     private $idTrip;
     private $timeToNextNode;
+
+
+    // debugging
+    private $edgeValue;
+    private $timeSinceStart;
+    private $timeAtNode;
 
     public function toArray()
     {
@@ -32,6 +39,11 @@ class PathNode
         $array["idStation"] = $this->getIdStation();
         $array["idTrip"] = $this->getIdTrip();
         $array["timeToNextNode"] = $this->getTimeToNextNode();
+        if(self::$debugging) {
+            $array["edgeValue"] = $this->edgeValue;
+            $array["timeSinceStart"] = $this->getTimeSinceStart();
+            $array["timeAtNode"] = $this->getTimeSinceStart();
+        }
         return $array;
     }
 
@@ -54,6 +66,7 @@ class PathNode
      */
     public static function loadFromNode($node)
     {
+
         if($node->getData("station") != null) {
             /** @var $station GraphStation */
             $station = $node->getData("station");
@@ -61,6 +74,7 @@ class PathNode
             $pathNode->setIdLine($station->getTrip()->getLine()->id);
             $pathNode->setIdStation($station->getId());
             $pathNode->setIdTrip($station->getTrip()->getId());
+            $pathNode->timeAtNode = $node->getData("timeAtNode");
             return $pathNode;
         }
         else
@@ -83,11 +97,15 @@ class PathNode
              * @var $prevPNode PathNode
              */
             $pNode = self::loadFromNode($node);
+
             if(isset($prev) && isset($prevPNode)) {
                 $edge = $prev->getEdgeTo($node);
                 $edgeType = $edge->getData("type");
                 $prevPNode->setTransportModeToNextNode($edgeType);
                 $prevPNode->setTimeToNextNode($edge->getData("time"));
+                $prevPNode->setTimeSinceStart($time);
+//                echo "setting ".$prevPNode->getName()." time is ".$edge->getData("time")."<BR>";
+                $prevPNode->edgeValue = $edge->getWeight();
                 if($i < count($nodes)-1)
                 if ($edgeType == "byFoot") {
                     $walkTime = UtilFunctions::getTime($node->getData("position"),$prev->getData("position"));
@@ -104,6 +122,24 @@ class PathNode
         }
         return $pathNodes;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getTimeSinceStart()
+    {
+        return $this->timeSinceStart;
+    }
+
+    /**
+     * @param mixed $timeSinceStart
+     */
+    public function setTimeSinceStart($timeSinceStart)
+    {
+        $this->timeSinceStart = $timeSinceStart;
+    }
+
+
 
     /**
      * @return mixed

@@ -49,8 +49,17 @@ class DynamicTransferContextUpdater extends DynamicContextUpdater
     public function updateContext($context, $edge)
     {
         $time = $context->getData("time");
-        $context->setData("time",$time+$edge->getData("time"));
-
+        $node1 = $edge->getNode1();
+        $node2 = $edge->getNode2();
+        $tNode1 = $node1->getData("ctxTime");
+        if(!isset($tNode1)) $node1->addData("ctxTime",$time);
+        $newTime = $node1->getData("ctxTime")+$edge->getData("time");
+        $node2->addData("ctxTime",$newTime);
+        $context->setData("time",$newTime);
+        $time = $context->getData("time");
+        $n1 = $node1->getTag();
+        $n2 = $node2->getTag();
+//        echo "updating context time is: $time edge from $n1 to $n2 has: ".$edge->getData("time")." <BR>";
         if($this->getNextUpdater() != null)
             $this->getNextUpdater()->updateContext($context,$edge);
     }
@@ -64,6 +73,7 @@ class DynamicTransferEdgeLoader extends DynamicEdgeLoader
         $time = $context->getData("time");
         $graph = $context->getData("graph");
         $station1 = $node->getData("station");
+        $node->addData("timeAtNode",$time);
         /** @var $graph Graph
          * @var $node2 Node
          * @var $station1 GraphStation
@@ -78,7 +88,14 @@ class DynamicTransferEdgeLoader extends DynamicEdgeLoader
                 $edge = $graph->attachNodes($node, $node2
                     , $edgeVal*GraphLinker::$byFootPenalty+$station2->getWaitingTime($time + $edgeVal));
                 $edge->addData("type", "byFoot");
-                $edge->addData("time",$edgeVal);
+                $edge->addData("time",$edgeVal+$station2->getWaitingTime($time + $edgeVal));
+                if(preg_match("/Caroubier/",$station1->getName()) && preg_match("/Caroubier/",$station2->getName()))
+                {
+//                    echo "time is: $time <BR>";
+//                    echo "id1 ".$station1->getId()." id2 ".$station2->getId().
+//                        " id trip1 ".$station1->getTrip()->getId()." id trip2 ".$station2->getTrip()->getId()."<BR>";
+//                    echo "walking time: ".$edgeVal." waiting time: ".$station2->getWaitingTime($time + $edgeVal)."<BR>";
+                }
             }
         }
         if($this->getNextLoader() != null)

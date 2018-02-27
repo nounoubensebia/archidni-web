@@ -27,7 +27,7 @@ class PathFinderController extends Controller
             $attributes = \DataRetriever::retrieveAttributes($_GET);
         }
         //TODO Remove this if train trips added
-        $attributes['transportLineUnused'] = [3,4,5];
+//        $attributes['transportLineUnused'] = [3,4,5];
 
         $result = \PathFinder::findPath($attributes);
         $pathsTransformed = array();
@@ -36,7 +36,7 @@ class PathFinderController extends Controller
             $transformedPath = new PathTransformer($path);
             array_push($pathsTransformed,$transformedPath->getTransformedPath());
         }
-        //return $result->idLine;
+//        return $result->idLine;
         return response()->json($pathsTransformed);
     }
 

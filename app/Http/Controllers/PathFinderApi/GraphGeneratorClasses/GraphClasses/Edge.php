@@ -30,7 +30,7 @@ class Edge
 
 
     /**
-     * @return mixed
+     * @return Node
      */
     public function getNode1()
     {
@@ -38,7 +38,7 @@ class Edge
     }
 
     /**
-     * @return mixed
+     * @return Node
      */
     public function getNode2()
     {

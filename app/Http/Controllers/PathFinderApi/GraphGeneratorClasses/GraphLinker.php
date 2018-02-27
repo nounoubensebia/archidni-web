@@ -16,7 +16,7 @@ class GraphLinker
     public static $nToS = 1;
     public static $sToN = 2;
     public static $bothWays = 3;
-    public static $byFootPenalty = 2.5;
+    public static $byFootPenalty = 2;
 
     /**
      * @param $graph Graph
@@ -71,6 +71,9 @@ class GraphLinker
                     , $edgeVal*self::$byFootPenalty + $station->getWaitingTime($time + $edgeVal));
                 $edge->addData("type", "byFoot");
                 $edge->addData("time",$edgeVal + $station->getWaitingTime($time + $edgeVal));
+//                if(preg_match("/aroubier/",$station->getName()))
+//                echo "to ".$station->getName()." is ".$edgeVal ." and waiting time ". $station->getWaitingTime($time + $edgeVal).
+//                    " id trip ".$station->getTrip()->getId()."<BR>";
             }
 
         }
