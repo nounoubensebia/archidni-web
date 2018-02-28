@@ -47,6 +47,7 @@ class PathNode
         return $array;
     }
 
+
     /**
      * PathNode constructor.
      * @param $name
