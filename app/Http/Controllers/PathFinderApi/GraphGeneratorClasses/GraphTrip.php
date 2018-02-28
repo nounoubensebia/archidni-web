@@ -20,6 +20,7 @@ class GraphTrip
     // methods
     private $getEdgeVal;
     private $getWaitingTime;
+    private $hasExactWaitingTime;
 
     /**
      * GraphTrip constructor.
@@ -72,6 +73,7 @@ class GraphTrip
 
         $graphTrip->setGetEdgeVal("getEdgeValueTrain");
         $graphTrip->setGetWaitingTime("getWaitingTimeOfStationTrain");
+        $graphTrip->setHasExactWaitingTime("hasExactWaitingTimeTrain");
         return $graphTrip;
     }
 
@@ -85,6 +87,7 @@ class GraphTrip
 
         $graphTrip->setGetEdgeVal("getEdgeValueMetro");
         $graphTrip->setGetWaitingTime("getWaitingTimeOfStationMetro");
+        $graphTrip->setHasExactWaitingTime("hasExactWaitingTimeMetro");
         return $graphTrip;
     }
 
@@ -205,6 +208,24 @@ class GraphTrip
         $this->timePeriods = $timePeriods;
     }
 
+    /**
+     * @return mixed
+     */
+    private function getHasExactWaitingTime()
+    {
+        return $this->hasExactWaitingTime;
+    }
+
+    /**
+     * @param mixed $hasExactWaitingTime
+     */
+    private function setHasExactWaitingTime($hasExactWaitingTime)
+    {
+        $this->hasExactWaitingTime = $hasExactWaitingTime;
+    }
+
+
+
 
     // trip methods
 
@@ -303,6 +324,22 @@ class GraphTrip
             }
         }
         return $minStartT+$minWaitingTime;
+    }
+
+    public function hasExactWaitingTime()
+    {
+        $func = $this->getHasExactWaitingTime();
+        return $this->$func();
+    }
+
+    private function hasExactWaitingTimeMetro()
+    {
+        return false;
+    }
+
+    private function hasExactWaitingTimeTrain()
+    {
+        return true;
     }
 
     public function toString()

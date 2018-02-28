@@ -20,6 +20,7 @@ class PathNode
     private $idStation;
     private $idTrip;
     private $timeToNextNode;
+    private $exactWaitingTime;
 
 
     // debugging
@@ -39,6 +40,7 @@ class PathNode
         $array["idStation"] = $this->getIdStation();
         $array["idTrip"] = $this->getIdTrip();
         $array["timeToNextNode"] = $this->getTimeToNextNode();
+        $array["exactWaitingTime"] = $this->getExactWaitingTime();
         if(self::$debugging) {
             $array["edgeValue"] = $this->edgeValue;
             $array["timeSinceStart"] = $this->getTimeSinceStart();
@@ -105,13 +107,14 @@ class PathNode
                 $prevPNode->setTransportModeToNextNode($edgeType);
                 $prevPNode->setTimeToNextNode($edge->getData("time"));
                 $prevPNode->setTimeSinceStart($time);
+
 //                echo "setting ".$prevPNode->getName()." time is ".$edge->getData("time")."<BR>";
                 $prevPNode->edgeValue = $edge->getWeight();
                 if($i < count($nodes)-1)
                 if ($edgeType == "byFoot") {
                     $walkTime = UtilFunctions::getTime($node->getData("position"),$prev->getData("position"));
                     $pNode->setWaitingTimeAtNode($node->getData("station")->getWaitingTime($time+$walkTime));
-
+                    $pNode->setExactWaitingTime($node->getData("station")->hasExactWaitingTime());
                 } else {
                     $pNode->setWaitingTimeAtNode($node->getData("station")->getWaitingTimeAtTrip($time));
                 }
@@ -138,6 +141,22 @@ class PathNode
     public function setTimeSinceStart($timeSinceStart)
     {
         $this->timeSinceStart = $timeSinceStart;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getExactWaitingTime()
+    {
+        return $this->exactWaitingTime;
+    }
+
+    /**
+     * @param mixed $exactWaitingTime
+     */
+    public function setExactWaitingTime($exactWaitingTime)
+    {
+        $this->exactWaitingTime = $exactWaitingTime;
     }
 
 

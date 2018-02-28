@@ -162,4 +162,9 @@ class GraphStation
         if($time == null) $time = self::getDefaultTime();
         return 0;
     }
+
+    public function hasExactWaitingTime()
+    {
+        return $this->getTrip()->hasExactWaitingTime();
+    }
 }
