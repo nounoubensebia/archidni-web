@@ -62,7 +62,8 @@ class PathRetreiver
             array_push($paths,$path);
             if (!PathUtils::isPathOnlyWalking($path))
             {
-                $this->addLinesToStack(PathUtils::getLinesInPath($path),$level);
+                if ($level<$maxLevel)
+                    $this->addLinesToStack(PathUtils::getLinesInPath($path),$level);
                 if (count($this->toBlacklist)!=0)
                 {
                     $next = array_pop($this->toBlacklist);
