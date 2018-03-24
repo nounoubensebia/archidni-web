@@ -30,6 +30,10 @@ class DataRetriever
         // separated by ",". default all
         "transportLineUnused", // restriction over transport line by stating unused transport lines
         // separated by ",". default none
+        "MaxWalkingTimePerCorrespondence", // restriction over maximum time passed to walk
+        // between two stations, time given in minutes, default infinity
+        "MaxWaitingTimePerCorrespondence", // restriction over maximum time passed to waiting
+        // in a stations, time given in minutes, default infinity
         "priority", // order found paths by priority : time, distance, price... default time
         "numberOfPaths", // number of paths to return ordered by priority, -1 for maximum number
         //of paths possible. default 1 path
@@ -109,6 +113,24 @@ class DataRetriever
         else
             throw new InvalidDataFormatException("invalid day format, expected digit between 0 and 6
              found ".$value);
+    }
+
+    private static function MaxWalkingTimePerCorrespondence($value)
+    {
+        if(preg_match("/^\d+$/",$value))
+            return $value;
+        else
+            throw new InvalidDataFormatException("invalid maximum walking time per correspondence format,
+             expected integer found ".$value);
+    }
+
+    private static function MaxWaitingTimePerCorrespondence($value)
+    {
+        if(preg_match("/^\d+$/",$value))
+            return $value;
+        else
+            throw new InvalidDataFormatException("invalid maximum waiting time per correspondence format,
+             expected integer found ".$value);
     }
 
     private static function transportMeanUsed($value)

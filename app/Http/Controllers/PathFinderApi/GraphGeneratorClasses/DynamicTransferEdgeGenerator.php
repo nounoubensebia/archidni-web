@@ -10,6 +10,7 @@
 include "GraphClasses/DynamicContextUpdater.php";
 include "GraphClasses/DynamicContext.php";
 include "GraphClasses/DynamicEdgeLoader.php";
+
 class DynamicTransferContextUpdater extends DynamicContextUpdater
 {
     /** @var  $filter GeneratorFilter
@@ -39,6 +40,7 @@ class DynamicTransferContextUpdater extends DynamicContextUpdater
         $time = $this->filter->getTime();
         $context->setData("time",$time);
         $context->setData("graph",$this->graph);
+        $context->setData("filter",$this->filter);
         return $context;
     }
 
@@ -63,6 +65,7 @@ class DynamicTransferContextUpdater extends DynamicContextUpdater
         if($this->getNextUpdater() != null)
             $this->getNextUpdater()->updateContext($context,$edge);
     }
+
 }
 
 
@@ -74,9 +77,11 @@ class DynamicTransferEdgeLoader extends DynamicEdgeLoader
         $graph = $context->getData("graph");
         $station1 = $node->getData("station");
         $node->addData("timeAtNode",$time);
+        $filter = $context->getData("filter");
         /** @var $graph Graph
          * @var $node2 Node
          * @var $station1 GraphStation
+         * @var $filter GeneratorFilter
          */
         foreach ($graph->getNodes() as $node2) {
             $station2 = $node2->getData("station");
@@ -84,18 +89,17 @@ class DynamicTransferEdgeLoader extends DynamicEdgeLoader
             if(isset($station2) && $node2->getTag() != $node->getTag()
                 && $station1->getTrip()->getLine()->id != $station2->getTrip()->getLine()->id)
             {
-                $edgeVal = UtilFunctions::getTime($node->getData("position"),$node2->getData("position"));
-                $edge = $graph->attachNodes($node, $node2
-                    , $edgeVal*GraphLinker::$byFootPenalty+$station2->getWaitingTime($time + $edgeVal));
-                $edge->addData("type", "byFoot");
-                $edge->addData("time",$edgeVal+$station2->getWaitingTime($time + $edgeVal));
-                if(preg_match("/Caroubier/",$station1->getName()) && preg_match("/Caroubier/",$station2->getName()))
-                {
-//                    echo "time is: $time <BR>";
-//                    echo "id1 ".$station1->getId()." id2 ".$station2->getId().
-//                        " id trip1 ".$station1->getTrip()->getId()." id trip2 ".$station2->getTrip()->getId()."<BR>";
-//                    echo "walking time: ".$edgeVal." waiting time: ".$station2->getWaitingTime($time + $edgeVal)."<BR>";
+                $walkingTime = UtilFunctions::getTime($node->getData("position"),$node2->getData("position"));
+                $waitingTime = $station2->getWaitingTime($time + $walkingTime);
+
+                if($filter->filterWaitingTimePerCorrespondence($waitingTime)
+                && $filter->filterWalkingTimePerCorrespondence($walkingTime)) {
+                    $edge = $graph->attachNodes($node, $node2
+                        , $walkingTime * GraphLinker::$byFootPenalty + $waitingTime);
+                    $edge->addData("type", "byFoot");
+                    $edge->addData("time", $walkingTime + $waitingTime);
                 }
+
             }
         }
         if($this->getNextLoader() != null)

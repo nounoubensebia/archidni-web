@@ -14,6 +14,8 @@ class GeneratorFilter
     private $time;
     private $unusedTransportLines;
     private $unusedTransportMeans;
+    private $MaxWalkingTimePerCorrespondence;
+    private $MaxWaitingTimePerCorrespondence;
 
     /**
      * GeneratorFilter constructor.
@@ -125,6 +127,46 @@ class GeneratorFilter
     {
         $this->unusedTransportMeans = $unusedTransportMeans;
     }
+
+    /**
+     * @param mixed $MaxWalkingTimePerCorrespondence
+     */
+    public function setMaxWalkingTimePerCorrespondence($MaxWalkingTimePerCorrespondence)
+    {
+        $this->MaxWalkingTimePerCorrespondence = $MaxWalkingTimePerCorrespondence;
+    }
+
+    /**
+     * @param $walkingTime
+     * @return bool
+     */
+
+    public function filterWalkingTimePerCorrespondence($walkingTime)
+    {
+        return $walkingTime < $this->MaxWalkingTimePerCorrespondence
+            || $this->MaxWalkingTimePerCorrespondence == -1;
+    }
+
+    /**
+     * @param $waitingTime
+     * @return bool
+     */
+    public function filterWaitingTimePerCorrespondence($waitingTime)
+    {
+        return $waitingTime < $this->MaxWaitingTimePerCorrespondence
+            || $this->MaxWaitingTimePerCorrespondence == -1;
+    }
+
+    /**
+     * @param mixed $MaxWaitingTimePerCorrespondence
+     */
+    public function setMaxWaitingTimePerCorrespondence($MaxWaitingTimePerCorrespondence)
+    {
+        $this->MaxWaitingTimePerCorrespondence = $MaxWaitingTimePerCorrespondence;
+    }
+
+
+
 
     /**
      * @param $station \App\Station

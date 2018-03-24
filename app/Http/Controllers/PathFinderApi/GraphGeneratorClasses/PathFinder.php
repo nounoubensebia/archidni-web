@@ -62,6 +62,16 @@ class PathFinder
         else
             $filter->setUnusedTransportLines([0]);
 
+        if(isset($attributes["MaxWalkingTimePerCorrespondence"]))
+            $filter->setMaxWalkingTimePerCorrespondence($attributes["MaxWalkingTimePerCorrespondence"]);
+        else
+            $filter->setMaxWalkingTimePerCorrespondence(-1);
+
+        if(isset($attributes["MaxWaitingTimePerCorrespondence"]))
+            $filter->setMaxWaitingTimePerCorrespondence($attributes["MaxWaitingTimePerCorrespondence"]);
+        else
+            $filter->setMaxWaitingTimePerCorrespondence(-1);
+
         return $filter;
     }
 }
