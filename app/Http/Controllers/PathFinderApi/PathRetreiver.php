@@ -43,8 +43,8 @@ class PathRetreiver
         {
             if (count($combination)!=0&&!in_array($combination,$this->closed)&&!in_array($combination,$this->toBlacklist))
             {
-                array_push($this->toBlacklist,$combination);
-                array_push($this->levels,$level);
+                array_unshift($this->toBlacklist,$combination);
+                array_unshift($this->levels,$level);
             }
         }
     }
@@ -66,9 +66,9 @@ class PathRetreiver
                     $this->addLinesToStack(PathUtils::getLinesInPath($path),$level);
                 if (count($this->toBlacklist)!=0)
                 {
-                    $next = array_pop($this->toBlacklist);
-                    $level = array_pop($this->levels)+1;
-                    array_push($this->closed,$next);
+                    $next = array_shift($this->toBlacklist);
+                    $level = array_shift($this->levels)+1;
+                    array_unshift($this->closed,$next);
                 }
             }
         } while (count($this->toBlacklist)!=0);

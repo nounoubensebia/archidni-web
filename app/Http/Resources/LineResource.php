@@ -67,6 +67,8 @@ class LineResource extends Resource
     {
         $trips = (($this->transport_mode_id == 2) ? $this->trainTrips : $this->metroTrips);
         $tripsCollection = collect();
+        //TODO CORRECT THIS WHEN TRIPS WILL BE LINKED TO LINES
+        $pushed = false;
         foreach ($trips as $trip) {
             $tripArray = array();
             $tripArray['id'] = $trip->id;
@@ -90,7 +92,11 @@ class LineResource extends Resource
                 array_push($stations, ['id' => $station->id, 'minutes' => $station->pivot->minutes]);
             }
             $tripArray['stations'] = $stations;
-            $tripsCollection->push($tripArray);
+            if (!$pushed||$this->id>2)
+            {
+                $tripsCollection->push($tripArray);
+                $pushed = true;
+            }
         }
 
         return [

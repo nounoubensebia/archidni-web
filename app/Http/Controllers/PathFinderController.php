@@ -28,7 +28,7 @@ class PathFinderController extends Controller
         }
 
 
-        $result = PathRetreiver::getAllPaths($attributes,2);
+        $result = PathRetreiver::getAllPaths($attributes,3);
         $pathsTransformed = array();
         foreach ($result as $path) {
             $transformedPath = new PathTransformer($path);
