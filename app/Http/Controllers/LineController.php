@@ -29,7 +29,7 @@ class LineController extends Controller
             }
             return true;
         });
-        return LineResource::collection($filtered);
+        return LineResource::collection($lines);
     }
 
     public function getLinesPassingByStation (Request $request,$id)

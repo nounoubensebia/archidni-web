@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\PathFinderApi\PathRetreiver;
 use App\Line;
 use App\MetroTrip;
 use App\Station;
@@ -22,23 +23,19 @@ class PathFinderController extends Controller
     public function findPath()
     {
         $attributes = [];
-        if(isset($_GET))
-        {
+        if (isset($_GET)) {
             $attributes = \DataRetriever::retrieveAttributes($_GET);
         }
 
 
-        $result = \PathFinder::findPath($attributes);
+        $result = PathRetreiver::getAllPaths($attributes,2);
         $pathsTransformed = array();
-        foreach ($result as $path)
-        {
+        foreach ($result as $path) {
             $transformedPath = new PathTransformer($path);
-            array_push($pathsTransformed,$transformedPath->getTransformedPath());
+            array_push($pathsTransformed, $transformedPath->getTransformedPath());
         }
-//        return $result;
         return response()->json($pathsTransformed);
     }
-
 
 
 }

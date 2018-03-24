@@ -78,6 +78,7 @@ class PathTransformer
         $instruction = array();
         $instruction['type']='wait_instruction';
         $instruction['duration']=intval($node['waitingTime']);
+        $instruction['exact_waiting_time'] = $node['exactWaitingTime'];
         $instruction['coordinate'] = [
             'latitude' => $node['latitude'],
             'longitude' => $node['longitude']
