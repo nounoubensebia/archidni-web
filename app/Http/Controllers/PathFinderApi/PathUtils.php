@@ -26,6 +26,6 @@ class PathUtils
 
     public static function isPathOnlyWalking ($path)
     {
-        return (count($path)==1);
+        return (count($path)==2);
     }
 }

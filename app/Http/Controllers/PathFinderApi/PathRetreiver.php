@@ -35,15 +35,17 @@ class PathRetreiver
         return $results;
     }
 
-    private function addLinesToStack ($lines,$level)
+    private function addLinesToStack ($lines,$level,$prev)
     {
         sort($lines);
         $combinations = $this->getPossibleCombinations($lines);
         foreach ($combinations as $combination)
         {
-            if (count($combination)!=0&&!in_array($combination,$this->closed)&&!in_array($combination,$this->toBlacklist))
+            $arr_merge = array_merge($prev,$combination);
+            sort($arr_merge);
+            if (count($combination)!=0&&!in_array($arr_merge,$this->closed)&&!in_array($arr_merge,$this->toBlacklist))
             {
-                array_unshift($this->toBlacklist,$combination);
+                array_unshift($this->toBlacklist,$arr_merge);
                 array_unshift($this->levels,$level);
             }
         }
@@ -59,19 +61,32 @@ class PathRetreiver
             $this->attributes['transportLineUnused'] = $next;
             $result = \PathFinder::findPath($this->attributes);
             $path = $result[0];
-            array_push($paths,$path);
+            if (!PathUtils::isPathOnlyWalking($path))
+            {
+                array_push($paths,$path);
+            }
+            else
+            {
+                if (count($paths)==0)
+                    array_push($paths,$path);
+            }
             if (!PathUtils::isPathOnlyWalking($path))
             {
                 if ($level<$maxLevel)
-                    $this->addLinesToStack(PathUtils::getLinesInPath($path),$level);
-                if (count($this->toBlacklist)!=0)
-                {
-                    $next = array_shift($this->toBlacklist);
-                    $level = array_shift($this->levels)+1;
-                    array_unshift($this->closed,$next);
-                }
+                    $this->addLinesToStack(PathUtils::getLinesInPath($path),$level,$next);
+
             }
-        } while (count($this->toBlacklist)!=0);
+            if (count($this->toBlacklist)!=0)
+            {
+                $next = array_shift($this->toBlacklist);
+                $level = array_shift($this->levels)+1;
+                array_unshift($this->closed,$next);
+            }
+            else
+            {
+                break;
+            }
+        } while (true==true);
         return array_unique($paths,SORT_REGULAR);
     }
 

@@ -26,8 +26,7 @@ class PathFinderController extends Controller
         if (isset($_GET)) {
             $attributes = \DataRetriever::retrieveAttributes($_GET);
         }
-
-
+        $attributes['MaxWalkingTimePerCorrespondence'] = 20;
         $result = PathRetreiver::getAllPaths($attributes,3);
         $pathsTransformed = array();
         foreach ($result as $path) {
