@@ -22,9 +22,10 @@ class GraphLinker
      * @param $graph Graph
      * @param $position1
      * @param $position2
+     * @param $filter GeneratorFilter
      * @return array
      */
-    static public function linkOriginDestination($graph,$position1,$position2)
+    static public function linkOriginDestination($graph,$position1,$position2,$filter)
     {
         $origin = new Node("origin");
         $destination = new Node("destination");
@@ -58,19 +59,19 @@ class GraphLinker
             /** @var $station GraphStation */
             $p1 = $node->getData("position");
             $p2 = [$station->getLatitude(),$station->getLongitude()];
-            $edgeVal = UtilFunctions::getTime($p1,$p2);
+            $walkingTime = UtilFunctions::getTime($p1,$p2);
             $node2 = new Node($station->getTag());
-            if($mask & GraphLinker::$sToN) {
+            if($mask & GraphLinker::$sToN && $filter->filterWalkingTimePerCorrespondence($walkingTime)) {
                 $edge = $graph->attachNodes($node2, $node
-                    , $edgeVal*self::$byFootPenalty);
+                    , $walkingTime*self::$byFootPenalty);
                 $edge->addData("type", "byFoot");
-                $edge->addData("time",$edgeVal);
+                $edge->addData("time",$walkingTime);
             }
-            if($mask & GraphLinker::$nToS) {
+            if($mask & GraphLinker::$nToS && $filter->filterWalkingTimePerCorrespondence($walkingTime)) {
                 $edge = $graph->attachNodes($node, $node2
-                    , $edgeVal*self::$byFootPenalty + $station->getWaitingTime($time + $edgeVal));
+                    , $walkingTime*self::$byFootPenalty + $station->getWaitingTime($time + $walkingTime));
                 $edge->addData("type", "byFoot");
-                $edge->addData("time",$edgeVal + $station->getWaitingTime($time + $edgeVal));
+                $edge->addData("time",$walkingTime + $station->getWaitingTime($time + $walkingTime));
             }
 
         }

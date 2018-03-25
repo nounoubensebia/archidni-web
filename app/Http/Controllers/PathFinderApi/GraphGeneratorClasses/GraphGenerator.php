@@ -36,7 +36,7 @@ class GraphGenerator
         // creating graph
         $graph = new Graph();
 
-        $nodes = GraphLinker::linkOriginDestination($graph,$position1,$position2);
+        $nodes = GraphLinker::linkOriginDestination($graph,$position1,$position2,$filter);
         $origin = $nodes[0];
         $destination = $nodes[1];
 
