@@ -9,7 +9,7 @@
 namespace App\Http\Controllers\PathFinderApi;
 
 
-class PathRetreiver
+class PathRetriever
 {
     private $attributes;
     private $toBlacklist;
@@ -35,7 +35,7 @@ class PathRetreiver
         return $results;
     }
 
-    private function addLinesToStack ($lines,$level,$prev)
+    private function addLinesToBlacklist ($lines, $level, $prev)
     {
         sort($lines);
         $combinations = $this->getPossibleCombinations($lines);
@@ -73,7 +73,7 @@ class PathRetreiver
             if (!PathUtils::isPathOnlyWalking($path))
             {
                 if ($level<$maxLevel)
-                    $this->addLinesToStack(PathUtils::getLinesInPath($path),$level,$next);
+                    $this->addLinesToBlacklist(PathUtils::getLinesInPath($path),$level,$next);
 
             }
             if (count($this->toBlacklist)!=0)
@@ -92,7 +92,7 @@ class PathRetreiver
 
     public static function getAllPaths ($attributes,$maxLevel)
     {
-        $pathRetreiver = new PathRetreiver($attributes);
+        $pathRetreiver = new PathRetriever($attributes);
         return $pathRetreiver->getPaths($maxLevel);
     }
 
