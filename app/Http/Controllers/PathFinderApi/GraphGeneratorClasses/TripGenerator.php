@@ -42,11 +42,35 @@ class TripGenerator
         return $result;
     }
 
+    public static function getAllTrips($filter)
+    {
+        $result = [];
+        $ids = [];
+        $trips = \App\MetroTrip::all();
+        foreach ($trips as $trip) {
+            if(!in_array($trip->id,$ids) && self::satisfyFilter($trip,$filter)) {
+                $result[] = GraphTrip::loadFromMetroTrip($trip);
+                $ids[] = $trip->id;
+            }
+        }
+        $trips = \App\TrainTrip::all();
+        foreach ($trips as $trip) {
+            if(!in_array($trip->id,$ids) && self::satisfyFilter($trip,$filter)) {
+                $result[] = GraphTrip::loadFromTrainTrip($trip);
+                $ids[] = $trip->id;
+            }
+        }
+
+        return $result;
+    }
+
     /**
      * @param $trip
      * @param $filter GeneratorFilter
      * @return bool
      */
+
+
 
     private static function satisfyFilter($trip,$filter)
     {

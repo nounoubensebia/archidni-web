@@ -41,10 +41,11 @@ class GraphGenerator
         $destination = $nodes[1];
 
         // generating stations available by foot
-        $stations = StationGenerator::getStationsByFoot($position1,$filter);
-        // generating trips from stations available by foot
-        $trips = TripGenerator::getTripsFromStations($stations,$filter);
+//        $stations = StationGenerator::getStationsByFoot($position1,$filter);
+//        // generating trips from stations available by foot
+//        $trips = TripGenerator::getTripsFromStations($stations,$filter);
 
+        $trips = TripGenerator::getAllTrips($filter);
         // linking trip's stations as nodes in graph
         foreach ($trips as $trip) {
             /**@var $trip GraphTrip */
