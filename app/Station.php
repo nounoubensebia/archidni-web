@@ -21,4 +21,9 @@ class Station extends Model
     {
         return $this->belongsToMany('App\MetroTrip');
     }
+
+    public function transfers ()
+    {
+        return $this->belongsToMany('App\Station',"station_transfers","transfer_id")->withPivot(["walking_time"]);
+    }
 }

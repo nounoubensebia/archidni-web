@@ -23,4 +23,12 @@ class StationController extends Controller
     {
         return new StationResource(Station::find($id));
     }
+
+    public function getTransfersTest (Request $request)
+    {
+        //use this to get transfers
+        $stations = Station::with("transfers")->get();
+
+        return response()->json($stations[200]->transfers,200);
+    }
 }

@@ -35,6 +35,9 @@ Route::get('/test',function () {
     //$lines = \App\Line::with(['operator','transportMode','trainTrips','metroTrips'])->with('sections')->get();
 
 });
+
+Route::get('/transferTest',['uses' => "StationController@getTransfersTest"]);
+
 Route::group(['prefix' => 'v1'],function (){
     Route::group(['prefix' => 'line'],function ()
     {
