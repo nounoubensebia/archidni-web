@@ -56,11 +56,13 @@ class PathRetriever
         $paths = array();
         $next = array();
         $level = 1;
+        $paths_number = 0;
         do
         {
             $this->attributes['transportLineUnused'] = $next;
             $result = \PathFinder::findPath($this->attributes);
             $path = $result[0];
+            $paths_number++;
             if (!PathUtils::isPathOnlyWalking($path))
             {
                 array_push($paths,$path);
@@ -86,6 +88,10 @@ class PathRetriever
             {
                 break;
             }
+            if ($paths_number>3)
+            {
+                break;
+            }
         } while (true==true);
         return array_unique($paths,SORT_REGULAR);
     }
@@ -95,5 +101,6 @@ class PathRetriever
         $pathRetreiver = new PathRetriever($attributes);
         return $pathRetreiver->getPaths($maxLevel);
     }
+
 
 }

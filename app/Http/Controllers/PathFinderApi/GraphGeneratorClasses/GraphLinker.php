@@ -16,7 +16,7 @@ class GraphLinker
     public static $nToS = 1;
     public static $sToN = 2;
     public static $bothWays = 3;
-    public static $byFootPenalty = 2;
+    public static $byFootPenalty = 1.5;
 
     /**
      * @param $graph Graph

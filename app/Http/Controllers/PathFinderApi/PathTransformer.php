@@ -130,7 +130,7 @@ class PathTransformer
         {
             if ($lineSection->origin_id==$section['origin_id']&&$lineSection->destination_id==$section['destination_id'])
             {
-                if ($lineSection->mode == 0||$lineSection->mode == 1)
+                if ($lineSection->mode == 0)
                 {
                     return true;
                 }
