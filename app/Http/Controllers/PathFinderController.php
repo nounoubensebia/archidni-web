@@ -35,14 +35,16 @@ class PathFinderController extends Controller
         if (isset($_GET)) {
             $attributes = \DataRetriever::retrieveAttributes($_GET);
         }
-        $attributes['MaxWalkingTimePerCorrespondence'] = 60;
+        $attributes['MaxWalkingTimePerCorrespondence'] = 25;
+        //$attributes['transportMeanUnused'] = [3];
         $result = PathRetriever::getAllPaths($attributes,3);
         $pathsTransformed = array();
         foreach ($result as $path) {
             $transformedPath = new PathTransformer($path);
             $trPath = $transformedPath->getTransformedPath();
             //print_r($trPath);
-            foreach ($trPath as &$instruction)
+            //TODO re implement this
+            /*foreach ($trPath as &$instruction)
             {
                 if (strcmp($instruction['type'],"walk_instruction")==0)
                 {
@@ -53,7 +55,7 @@ class PathFinderController extends Controller
                     $instruction['polyline'] = $realPolyline;
                     //return json_encode($instruction['polyline']);
                 }
-            }
+            }*/
             array_push($pathsTransformed,$trPath );
         }
 
@@ -79,6 +81,7 @@ class PathFinderController extends Controller
         //return count($queries);
         //return response()->json($queries);
         return response()->json($pathsTransformed);
+        //return response()->json($result);
     }
 
     function getWalkingPolyline ($origin,$destination)

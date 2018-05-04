@@ -22,6 +22,7 @@ class PathTransformer
     public function getTransformedPath()
     {
         $instructions = array();
+        $flag = false;
         array_push($instructions,$this->getWalkInstruction($this->path[0],$this->path[1]));
         if (isset($this->path[1]['idLine']))
         {
@@ -37,15 +38,31 @@ class PathTransformer
                     $i++;
                 }
                 array_push($rideNodes,$this->path[$i]);
-                array_push($instructions,$this->getRideInstruction($rideNodes));
-                array_push($instructions,$this->getWalkInstruction($this->path[$i],$this->path[$i+1]));
-                if (isset($this->path[$i+1]['waitingTime']))
+                if (count($rideNodes)>1)
                 {
-                    array_push($instructions,$this->getWaitInstruction($this->path[$i+1]));
+                        array_push($instructions,$this->getRideInstruction($rideNodes));
+                        array_push($instructions,$this->getWalkInstruction($this->path[$i],$this->path[$i+1]));
+
+                    if (isset($this->path[$i+1]['waitingTime']))
+                    {
+                        array_push($instructions,$this->getWaitInstruction($this->path[$i+1]));
+                    }
+                    else
+                    {
+                        $reachedDestination = true;
+                    }
                 }
                 else
                 {
-                    $reachedDestination = true;
+                    $flag = true;
+                    //array_pop($instructions);
+                    //$waitInstruction = array_pop($instructions);
+                    array_pop($instructions);
+                    array_pop($instructions);
+                    array_push($instructions,$this->getWalkInstruction($this->path[$i-1],$this->path[$i+1]));
+                    array_push($instructions,$this->getWaitInstruction($this->path[$i+1]));
+                    //$this->path[$i+1] = $this->path[$i+2];
+                    //print_r($this->path[$i+1]);
                 }
                 $i++;
             }

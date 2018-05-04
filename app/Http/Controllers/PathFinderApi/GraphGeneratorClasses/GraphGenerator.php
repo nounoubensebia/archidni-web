@@ -28,6 +28,7 @@ class GraphGenerator
      */
     public static function generateGraph($filter)
     {
+        $beforeGeneration =  round(microtime(true) * 1000);
         $position1 = $filter->getOrigin();
         $position2 = $filter->getDestination();
         $time = $filter->getTime();
@@ -46,6 +47,8 @@ class GraphGenerator
 //        $trips = TripGenerator::getTripsFromStations($stations,$filter);
 
         $trips = TripGenerator::getAllTrips($filter);
+        //$stations = StationGenerator::getStationsByFoot($position1,$filter);
+        //$trips = TripGenerator::getTripsFromStations($stations,$filter);
         // linking trip's stations as nodes in graph
         foreach ($trips as $trip) {
             /**@var $trip GraphTrip */
@@ -56,12 +59,14 @@ class GraphGenerator
                                             ,GraphLinker::$sToN,$filter);
         }
         GraphLinker::linkExistingNodesAsTransfer($graph,$filter);
-
-
+        $graph->createNodesStationsMap();
+        $afterNodes = round(microtime(true) * 1000);
         return [
             "origin" => $origin,
             "destination" => $destination,
             "graph" => $graph];
     }
+
+
 
 }

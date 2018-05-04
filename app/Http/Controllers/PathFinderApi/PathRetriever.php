@@ -88,11 +88,60 @@ class PathRetriever
             {
                 break;
             }
-            if ($paths_number>3)
+            if ($paths_number>8)
             {
                 break;
             }
         } while (true==true);
+
+        /*$this->attributes['transportMeanUnused'] = [1];
+        $result = \PathFinder::findPath($this->attributes);
+        $path = $result[0];
+        if (!PathUtils::isPathOnlyWalking($path))
+        {
+            array_push($paths,$path);
+        }
+
+        /*$this->attributes['transportMeanUnused'] = [2];
+        $result = \PathFinder::findPath($this->attributes);
+        $path = $result[0];
+        if (!PathUtils::isPathOnlyWalking($path))
+        {
+            array_push($paths,$path);
+        }*/
+
+        $this->attributes['transportMeanUnused'] = [3];
+        $result = \PathFinder::findPath($this->attributes);
+        $path = $result[0];
+        if (!PathUtils::isPathOnlyWalking($path))
+        {
+            array_push($paths,$path);
+        }
+
+        /*$this->attributes['transportMeanUnused'] = [4];
+        $result = \PathFinder::findPath($this->attributes);
+        $path = $result[0];
+        if (!PathUtils::isPathOnlyWalking($path))
+        {
+            array_push($paths,$path);
+        }*/
+
+        $this->attributes['transportMeanUnused'] = [1,3];
+        $result = \PathFinder::findPath($this->attributes);
+        $path = $result[0];
+        if (!PathUtils::isPathOnlyWalking($path))
+        {
+            array_push($paths,$path);
+        }
+
+        $this->attributes['transportMeanUnused'] = [3,4];
+        $result = \PathFinder::findPath($this->attributes);
+        $path = $result[0];
+        if (!PathUtils::isPathOnlyWalking($path))
+        {
+            array_push($paths,$path);
+        }
+
         return array_unique($paths,SORT_REGULAR);
     }
 

@@ -14,6 +14,7 @@ class GraphStation
     private $longitude;
     private $trip;
     private $minute;
+    private $transfers;
 
     /**
      * GraphStation constructor.
@@ -24,7 +25,7 @@ class GraphStation
      * @param $minute
      * @param $trip GraphTrip
      */
-    private function __construct($id, $name, $latitude, $longitude, $minute, $trip)
+    private function __construct($id, $name, $latitude, $longitude, $minute, $trip,$transfers)
     {
         $this->id = $id;
         $this->name = $name;
@@ -32,6 +33,7 @@ class GraphStation
         $this->longitude = $longitude;
         $this->minute = $minute;
         $this->trip = $trip;
+        $this->transfers = $transfers;
     }
 
     /**
@@ -44,8 +46,19 @@ class GraphStation
     public static function loadFromStation($station,$minutes,$trip)
     {
         return new GraphStation($station->id,$station->name,$station->latitude,
-                                $station->longitude,$minutes,$trip);
+                                $station->longitude,$minutes,$trip,$station->transfers);
     }
+
+    /**
+     * @return mixed
+     */
+    public function getTransfers()
+    {
+        return $this->transfers;
+    }
+
+
+
 
 
     /**

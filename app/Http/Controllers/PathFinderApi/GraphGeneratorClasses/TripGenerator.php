@@ -46,14 +46,14 @@ class TripGenerator
     {
         $result = [];
         $ids = [];
-        $trips = \App\MetroTrip::all();
+        $trips = \App\MetroTrip::with('stations.transfers')->get();
         foreach ($trips as $trip) {
             if(!in_array($trip->id,$ids) && self::satisfyFilter($trip,$filter)) {
                 $result[] = GraphTrip::loadFromMetroTrip($trip);
                 $ids[] = $trip->id;
             }
         }
-        $trips = \App\TrainTrip::all();
+        $trips = \App\TrainTrip::with('stations.transfers')->get();
         foreach ($trips as $trip) {
             if(!in_array($trip->id,$ids) && self::satisfyFilter($trip,$filter)) {
                 $result[] = GraphTrip::loadFromTrainTrip($trip);

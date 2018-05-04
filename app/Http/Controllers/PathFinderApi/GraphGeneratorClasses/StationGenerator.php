@@ -22,7 +22,7 @@ class StationGenerator
     static public function getStationsByFoot($position,$filter)
     {
 
-        $stations = \App\Station::all();
+        $stations = \App\Station::with('transfers')->get();
         $result = [];
         foreach ($stations as $station)
         {

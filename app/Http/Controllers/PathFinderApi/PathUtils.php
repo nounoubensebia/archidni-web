@@ -9,6 +9,8 @@
 namespace App\Http\Controllers\PathFinderApi;
 
 
+use App\Line;
+
 class PathUtils
 {
     public static function getLinesInPath ($path)
@@ -22,6 +24,22 @@ class PathUtils
             }
         }
         return $lines;
+    }
+
+    public static function getTransportMeansInPath ($path)
+    {
+        $transportModes = array();
+        $lines = self::getLinesInPath($path);
+        foreach ($lines as $line)
+        {
+            $lineDb = Line::find($line);
+            $transportMode = $lineDb->transport_mode_id;
+            if (!in_array($transportMode,$transportModes))
+            {
+                array_push($transportModes,$transportMode);
+            }
+        }
+        return $transportModes;
     }
 
     public static function isPathOnlyWalking ($path)

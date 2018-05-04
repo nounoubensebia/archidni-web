@@ -11,6 +11,7 @@ class Graph
 {
     private $nodes = [];
     private $tags = [];
+    private $map = [];
     /** @var  $dynamicContextUpdater DynamicContextUpdater */
     private $dynamicContextUpdater;
 
@@ -30,6 +31,14 @@ class Graph
         return $node;
     }
 
+    public function attachExistingNodes ($node1,$node2,$value = 0)
+    {
+        $e = $node1->getEdgeTo($node2);
+        if($e!=null && $e->getWeight() <= $value)
+            return $e;
+        return $node1->attachNode($node2,$value);
+    }
+
     /**
      * @param $node1 Node
      * @param $node2 Node
@@ -46,6 +55,24 @@ class Graph
             return $e;
         return $node1->attachNode($node2,$value);
     }
+
+    /**
+     * @return array
+     */
+    public function getMap(): array
+    {
+        return $this->map;
+    }
+
+    /**
+     * @param array $map
+     */
+    public function setMap(array $map)
+    {
+        $this->map = $map;
+    }
+
+
 
     public function containsNode($tag)
     {
@@ -121,6 +148,30 @@ class Graph
             $this->getDynamicContextUpdater()->addUpdater($dynamicContextUpdater);
         else
             $this->setDynamicContextUpdater($dynamicContextUpdater);
+    }
+
+    public function createNodesStationsMap ()
+    {
+        $graph = $this;
+        $map = array();
+        foreach ($graph->getNodes() as $node)
+        {
+            $station = $node->getData('station');
+            if (isset($station))
+            {
+                $id = $station->getId();
+                if (isset($map[$id]))
+                {
+                    array_push($map[$id],$node);
+                }
+                else
+                {
+                    $map[$id] = array();
+                    array_push($map[$id],$node);
+                }
+            }
+        }
+        $this->map = $map;
     }
 
 

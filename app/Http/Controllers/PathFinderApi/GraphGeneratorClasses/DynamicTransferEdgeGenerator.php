@@ -78,15 +78,16 @@ class DynamicTransferEdgeLoader extends DynamicEdgeLoader
         $station1 = $node->getData("station");
         $node->addData("timeAtNode",$time);
         $filter = $context->getData("filter");
+
         /** @var $graph Graph
          * @var $node2 Node
          * @var $station1 GraphStation
          * @var $filter GeneratorFilter
          */
-        foreach ($graph->getNodes() as $node2) {
+        /*foreach ($graph->getNodes() as $node2) {
             $station2 = $node2->getData("station");
             /** @var $station2 GraphStation */
-            if(isset($station2) && $node2->getTag() != $node->getTag()
+           /* if(isset($station2) && $node2->getTag() != $node->getTag()
                 && $station1->getTrip()->getLine()->id != $station2->getTrip()->getLine()->id)
             {
                 $walkingTime = UtilFunctions::getTime($node->getData("position"),$node2->getData("position"));
@@ -101,7 +102,64 @@ class DynamicTransferEdgeLoader extends DynamicEdgeLoader
                 }
 
             }
-        }
+        }*/
+           $i=0;
+           foreach ($station1->getTransfers() as $transfer)
+           {
+               $walkingTime = $transfer->pivot->walking_time;
+               if (isset($graph->getMap()[$transfer->id])) {
+                   $transferNodes = $graph->getMap()[$transfer->id];
+                   foreach ($transferNodes as $node2) {
+                       $i++;
+                       $station2 = $node2->getData("station");
+                       if (isset($station2) && $node2->getTag() != $node->getTag()
+                           && $station1->getTrip()->getLine()->id != $station2->getTrip()->getLine()->id) {
+                           $before = round(microtime(true) * 1000);
+                           $waitingTime = $station2->getWaitingTime($time + $walkingTime);
+                           $after = round(microtime(true) * 1000);
+                           $GLOBALS['gettingWaitingTimeTotalTime']+= ($after-$before);
+                           if ($filter->filterWaitingTimePerCorrespondence($waitingTime)
+                               && $filter->filterWalkingTimePerCorrespondence($walkingTime)) {
+                               $before = round(microtime(true) * 1000);
+                               $edge = $graph->attachExistingNodes($node, $node2
+                                   , $walkingTime * GraphLinker::$byFootPenalty + $waitingTime);
+                               $edge->addData("type", "byFoot");
+                               $edge->addData("time", $walkingTime + $waitingTime);
+                               $after = round(microtime(true) * 1000);
+                               $GLOBALS['attachNodeTime'] +=($after-$before);
+                           }
+
+                       }
+                   }
+               }
+           }
+
+           $stationNodes = $graph->getMap()[$station1->getId()];
+           foreach ($stationNodes as $node2)
+           {
+               $station2 = $node2->getData("station");
+               if ($station2->getTrip()->getLine()->id != $station1->getTrip()->getLine()->id)
+               {
+                   $walkingTime = 0;
+                   $before = round(microtime(true) * 1000);
+                   $waitingTime = $station2->getWaitingTime($time + $walkingTime);
+                   $after = round(microtime(true) * 1000);
+                   $GLOBALS['gettingWaitingTimeTotalTime']+= ($after-$before);
+                   if ($filter->filterWaitingTimePerCorrespondence($waitingTime)
+                       && $filter->filterWalkingTimePerCorrespondence($walkingTime)) {
+                       $before = round(microtime(true) * 1000);
+                       $edge = $graph->attachExistingNodes($node, $node2
+                           , $walkingTime * GraphLinker::$byFootPenalty + $waitingTime);
+                       $edge->addData("type", "byFoot");
+                       $edge->addData("time", $walkingTime + $waitingTime);
+                       $after = round(microtime(true) * 1000);
+                       $GLOBALS['attachNodeTime'] +=($after-$before);
+                   }
+               }
+           }
+
+           //echo "Iteration Count ".$i."<br>";
+
         if($this->getNextLoader() != null)
             $this->getNextLoader()->loadEdges($context,$node);
     }
