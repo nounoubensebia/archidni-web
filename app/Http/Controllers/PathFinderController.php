@@ -6,6 +6,7 @@ use App\Http\Controllers\PathFinderApi\PathRetriever;
 use App\Line;
 use App\MetroTrip;
 use App\Station;
+use App\TrainTrip;
 use AStar;
 use HeuristicEstimatorDijkstra;
 use Illuminate\Http\Request;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use PathNode;
 use PathTransformer;
+use UtilFunctions;
 
 
 include "PathFinderApi/DataRetrieving/DataRetriever.php";
@@ -24,6 +26,12 @@ class PathFinderController extends Controller
 
     public function findPath()
     {
+        return UtilFunctions::getTime([36.7688677,3.0217482],[36.7688677,3.0217482]);
+        //return UtilFunctions::strToMin("07:00:00");
+        //$trip = MetroTrip::find(226);
+        //$graphTrip = \GraphTrip::loadFromMetroTrip($trip);
+        //$graphStation = \GraphStation::loadFromStation(Station::find(399),19,$graphTrip);
+        //return $graphTrip->getWaitingTimeOfStation($graphStation,889);
         $tot = 0;
         DB::connection()->enableQueryLog();
         DB::listen(function ($query) use (&$tot) {
@@ -37,6 +45,7 @@ class PathFinderController extends Controller
         }
         $attributes['MaxWalkingTimePerCorrespondence'] = 25;
         //$attributes['transportMeanUnused'] = [3];
+        //$attributes['transportMeanUnused'] = [3];
         $result = PathRetriever::getAllPaths($attributes,3);
         $pathsTransformed = array();
         foreach ($result as $path) {
@@ -44,7 +53,7 @@ class PathFinderController extends Controller
             $trPath = $transformedPath->getTransformedPath();
             //print_r($trPath);
             //TODO re implement this
-            /*foreach ($trPath as &$instruction)
+            foreach ($trPath as &$instruction)
             {
                 if (strcmp($instruction['type'],"walk_instruction")==0)
                 {
@@ -52,10 +61,11 @@ class PathFinderController extends Controller
                     //print_r($birdPolyline);
                     $realPolyline = $this->getWalkingPolyline($birdPolyline[0],$birdPolyline[1]);
                     //print_r($realPolyline);
+                    if (isset($realPolyline))
                     $instruction['polyline'] = $realPolyline;
                     //return json_encode($instruction['polyline']);
                 }
-            }*/
+            }
             array_push($pathsTransformed,$trPath );
         }
 
@@ -87,13 +97,28 @@ class PathFinderController extends Controller
     function getWalkingPolyline ($origin,$destination)
     {
         $url = "https://maps.googleapis.com/maps/api/directions/json?&mode=walking&origin=".$origin['latitude'].",".$origin['longitude'].
-            "&destination=".$destination['latitude'].",".$destination['longitude']."&key=AIzaSyCq7gRmzi9W5QczpfHJZNXZR3tpZYmZPSw";
+            "&destination=".$destination['latitude'].",".$destination['longitude']."&key=AIzaSyBgLesrk8GV1xHQamIKPMCjh5_ury77VJg";
         $response = file_get_contents($url);
         $obj = json_decode($response);
+        if (!isset($obj))
+            return null;
         $routes = $obj->{'routes'};
+        if (!isset($routes))
+            return null;
+        if (!isset($routes[0]))
+        {
+            //echo $url;
+            return null;
+        }
         $route = $routes[0];
+        if (!isset($route))
+            return null;
         $overviewPolyline = $route->{'overview_polyline'};
+        if (!isset($overviewPolyline))
+            return null;
         $points = $overviewPolyline->{'points'};
+        if (!isset($points))
+            return null;
         return $this->decodePolyline($points);
     }
 
