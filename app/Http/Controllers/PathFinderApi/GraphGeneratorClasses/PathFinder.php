@@ -17,18 +17,22 @@ class PathFinder
 {
     public static function findPath($attributes)
     {
+        ini_set('max_execution_time', 1000);
         $filter = self::initFilter($attributes);
 
         $graphInfos = \GraphGenerator::generateGraph($filter);
+
+
         $origin = $graphInfos["origin"];
         $destination = $graphInfos["destination"];
         $graph = $graphInfos["graph"];
 
         // applying A*
-
-        $astar = new AStar(new HeuristicEstimatorDijkstra());
+        $prevTime = $milliseconds = round(microtime(true) * 1000);
+        $astar = new AStar(new HeuristicEstimatorDistance());
         $path = $astar->findPath($origin,$destination,$graph);
-
+        $completeTime = $milliseconds = round(microtime(true) * 1000);
+        echo "AstarTime".($completeTime - $prevTime)."<br>";
         // loading output
         $pNodes = PathNode::loadFromPath($path,$filter->getTime());
         $outPath = [];

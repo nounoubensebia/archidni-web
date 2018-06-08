@@ -127,5 +127,7 @@ class GraphLinker
             }
         }
         $graph->addDynamicContextUpdater(new DynamicTransferContextUpdater($filter,$graph));
+        $completeTime = time();
+        //echo ($completeTime-$prevTime);
     }
 }
