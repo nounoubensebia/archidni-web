@@ -32,7 +32,7 @@ class PathFinder
         $astar = new AStar(new HeuristicEstimatorDistance());
         $path = $astar->findPath($origin,$destination,$graph);
         $completeTime = $milliseconds = round(microtime(true) * 1000);
-        echo "AstarTime".($completeTime - $prevTime)."<br>";
+        //echo "AstarTime".($completeTime - $prevTime)."<br>";
         // loading output
         $pNodes = PathNode::loadFromPath($path,$filter->getTime());
         $outPath = [];
