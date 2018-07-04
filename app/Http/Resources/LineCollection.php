@@ -14,8 +14,15 @@ class LineCollection extends ResourceCollection
      */
     public function toArray($request)
     {
-        return [
-            'data' =>$this->collection
-        ];
+        if ($request->route()->named('lines_close_to_position'))
+        {
+            return [
+                'lines' => $this->collection
+            ];
+        }
+        else
+            return [
+                'data' =>$this->collection
+            ];
     }
 }
