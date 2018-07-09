@@ -16,6 +16,7 @@ class Node
     private $data;
     /** @var  $dynamicEdgeLoader DynamicEdgeLoader */
     private $dynamicEdgeLoader;
+    private $loadedEdges = false;
 
     /**
      * @return int
@@ -49,8 +50,10 @@ class Node
     public function getNextNodesEdges($context)
     {
         // loads dynamic edges
-        if($this->getDynamicEdgeLoader() != null)
-            $this->getDynamicEdgeLoader()->loadEdges($context,$this);
+        if($this->getDynamicEdgeLoader() != null && !$this->loadedEdges) {
+            $this->getDynamicEdgeLoader()->loadEdges($context, $this);
+            $this->loadedEdges = true;
+        }
         return $this->getOEdges();
     }
     public function getOEdges()
