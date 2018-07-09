@@ -25,8 +25,8 @@ include "PathFinderApi/PathTransformer.php";
 class PathFinderController extends Controller
 {
 
-    private static $PATHFINDERURL="https://archidni-path-finder-1.herokuapp.com/path";
-    private static $path_finder_data_generator_url="https://archidni-path-finder-1.herokuapp.com/generatePath";
+    private static $PATHFINDERURL="http://192.168.1.8:8080/path";
+    private static $path_finder_data_generator_url="http://192.168.1.8:8080/generatePath";
     public function findPath()
     {
         /*$attributes = [];
@@ -61,7 +61,7 @@ class PathFinderController extends Controller
             //TODO re implement this
             foreach ($trPath as &$instruction)
             {
-                if (strcmp($instruction['type'],"walk_instruction")==0)
+                /*if (strcmp($instruction['type'],"walk_instruction")==0)
                 {
                     $birdPolyline = $instruction['polyline'];
                     //print_r($birdPolyline);
@@ -70,7 +70,7 @@ class PathFinderController extends Controller
                     if (isset($realPolyline))
                         $instruction['polyline'] = $realPolyline;
                     //return json_encode($instruction['polyline']);
-                }
+                }*/
             }
             array_push($pathsTransformed,$trPath);
         }

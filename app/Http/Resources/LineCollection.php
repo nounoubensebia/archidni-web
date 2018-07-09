@@ -14,7 +14,7 @@ class LineCollection extends ResourceCollection
      */
     public function toArray($request)
     {
-        if ($request->route()->named('lines_close_to_position'))
+        if ($request->route()->named('all_lines_and_places'))
         {
             return [
                 'lines' => $this->collection

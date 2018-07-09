@@ -39,14 +39,12 @@ Route::get('/test',function () {
 
 Route::get('/transferTest',['uses' => "StationController@getTransfersTest"]);
 
-Route::get('/linesAndPlaces',['uses' => 'LineController@getLinesCloseToPosition'])->name('lines_close_to_position');
+
 
 Route::group(['prefix' => 'v1'],function (){
+    Route::get('/linesAndPlaces',['uses' => 'LinesAndPlacesController@getAllPlacesAndLines'])->name('all_lines_and_places');
     Route::group(['prefix' => 'line'],function ()
     {
-        /*Route::get('',[
-            'uses' => 'LineController@getLinesCloseToPosition'
-        ])->name('lines_close_to_position');*/
         Route::get('autocomplete',[
             'uses' => 'LineController@getLineAutocompleteSuggestions'
         ])->name('line_autocomplete');

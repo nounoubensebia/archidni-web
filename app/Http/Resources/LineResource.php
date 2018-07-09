@@ -24,7 +24,7 @@ class LineResource extends Resource
             return $this->getLine();
         }
 
-        if ($request->route()->named('line')||$request->route()->named('lines_close_to_position'))
+        if ($request->route()->named('line')||$request->route()->named('all_lines_and_places'))
         {
             return $this->getLinesWithoutTrips();
         }
