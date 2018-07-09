@@ -30,6 +30,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
  * */
 Route::get('/findPath','PathFinderController@findPath');
 
+Route::get('/generatePath','PathFinderController@generatePath');
 
 Route::get('/test',function () {
     //$lines = \App\Line::with(['operator','transportMode','trainTrips','metroTrips'])->with('sections')->get();
@@ -38,12 +39,14 @@ Route::get('/test',function () {
 
 Route::get('/transferTest',['uses' => "StationController@getTransfersTest"]);
 
+Route::get('/linesAndPlaces',['uses' => 'LineController@getLinesCloseToPosition'])->name('lines_close_to_position');
+
 Route::group(['prefix' => 'v1'],function (){
     Route::group(['prefix' => 'line'],function ()
     {
-        Route::get('',[
+        /*Route::get('',[
             'uses' => 'LineController@getLinesCloseToPosition'
-        ])->name('lines_close_to_position');
+        ])->name('lines_close_to_position');*/
         Route::get('autocomplete',[
             'uses' => 'LineController@getLineAutocompleteSuggestions'
         ])->name('line_autocomplete');

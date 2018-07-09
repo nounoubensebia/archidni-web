@@ -61,7 +61,11 @@ class UtilFunctions
         $dist = rad2deg($dist);
         $miles = $dist * 60 * 1.1515;
 
-        return ($miles * 1.609344);
+        $t = $miles * 1.609344;
+        if (strcmp($t,"NAN")==0)
+            return 0;
+        else
+            return $t;
 
     }
 

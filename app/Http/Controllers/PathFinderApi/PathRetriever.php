@@ -88,7 +88,7 @@ class PathRetriever
             {
                 break;
             }
-            if ($paths_number>8)
+            if ($paths_number>4)
             {
                 break;
             }
@@ -109,7 +109,7 @@ class PathRetriever
         {
             array_push($paths,$path);
         }*/
-
+        $this->attributes['transportLineUnused'] = array();
         $this->attributes['transportMeanUnused'] = [3];
         $result = \PathFinder::findPath($this->attributes);
         $path = $result[0];
@@ -143,6 +143,7 @@ class PathRetriever
         }
 
         return array_unique($paths,SORT_REGULAR);
+        //return $paths;
     }
 
     public static function getAllPaths ($attributes,$maxLevel)

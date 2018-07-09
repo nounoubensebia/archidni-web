@@ -71,6 +71,10 @@ class GraphLinker
                 $edge = $graph->attachNodes($node, $node2
                     , $walkingTime*self::$byFootPenalty + $station->getWaitingTime($time + $walkingTime));
                 $edge->addData("type", "byFoot");
+                if ($station->getId()==399)
+                {
+                    echo $station->getWaitingTime($time + $walkingTime)."<BR>";
+                }
                 $edge->addData("time",$walkingTime + $station->getWaitingTime($time + $walkingTime));
             }
 
@@ -123,5 +127,7 @@ class GraphLinker
             }
         }
         $graph->addDynamicContextUpdater(new DynamicTransferContextUpdater($filter,$graph));
+        $completeTime = time();
+        //echo ($completeTime-$prevTime);
     }
 }

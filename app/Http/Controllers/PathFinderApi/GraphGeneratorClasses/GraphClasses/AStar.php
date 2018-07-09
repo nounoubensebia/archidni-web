@@ -63,6 +63,7 @@ class AStar
             $getLowerScoreTime += ($after-$before);
             /** @var $prev Node*/
             $before = round(microtime(true) * 1000);
+
             if($previous->contains($current))
             {
 
