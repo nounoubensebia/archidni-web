@@ -32,10 +32,6 @@ Route::get('/findPath','PathFinderController@findPath');
 
 Route::get('/generatePath','PathFinderController@generatePath');
 
-Route::get('/test',function () {
-    //$lines = \App\Line::with(['operator','transportMode','trainTrips','metroTrips'])->with('sections')->get();
-
-});
 
 Route::get('/transferTest',['uses' => "StationController@getTransfersTest"]);
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\GeoUtils;
 use App\Http\Controllers\PathFinderApi\PathRetriever;
+use App\Http\Controllers\PathFinderApi\PathsFormatter;
 use App\Http\Controllers\PathFinderApi\PathUtils;
 use App\Line;
 use App\MetroTrip;
@@ -20,7 +21,6 @@ use PathTransformer;
 
 include "PathFinderApi/DataRetrieving/DataRetriever.php";
 include "PathFinderApi/GraphGeneratorClasses/PathFinder.php";
-include "PathFinderApi/PathTransformer.php";
 
 class PathFinderController extends Controller
 {
@@ -29,149 +29,18 @@ class PathFinderController extends Controller
     private static $path_finder_data_generator_url="http://192.168.1.8:8080/generatePath";
     public function findPath()
     {
-        /*$attributes = [];
-        if (isset($_GET)) {
-            $attributes = \DataRetriever::retrieveAttributes($_GET);
-        }
-        $attributes['MaxWalkingTimePerCorrespondence'] = 20;
-        $result = PathRetriever::getAllPaths($attributes,3);
-        $pathsTransformed = array();
-        foreach ($result as $path) {
-            $transformedPath = new PathTransformer($path);
-            array_push($pathsTransformed, $transformedPath->getTransformedPath());
-        }
-        //return response()->json($pathsTransformed);
-        return response()->json($result);*/
         if (isset($_GET)) {
             $attributes = \DataRetriever::retrieveAttributes($_GET);
         }
         $url = self::$PATHFINDERURL."?origin=".$attributes['origin'][0].",".$attributes['origin'][1]."&destination=".
             $attributes['destination'][0].",".$attributes['destination'][1]."&time=36000";
         $pathJson = file_get_contents($url);
-        $result = $this->springPathTransformer($pathJson);
-        //return response()->json($result);
-        $pathsTransformed = array();
-        foreach ($result as $path) {
-            if (count($path)>0)
-            $transformedPath = new PathTransformer($path);
-            //array_push($pathsTransformed, $transformedPath->getTransformedPath());
-            $trPath = $transformedPath->getTransformedPath();
-            //print_r($trPath);
-            $visitedPolylines = array();
-            //TODO re implement this
-            foreach ($trPath as &$instruction)
-            {
-                /*if (strcmp($instruction['type'],"walk_instruction")==0)
-                {
-                    $birdPolyline = $instruction['polyline'];
-                    //print_r($birdPolyline);
-                    $realPolyline = $this->getWalkingPolyline($birdPolyline[0],$birdPolyline[1],$visitedPolylines);
-                    //print_r($realPolyline);
-                    if (isset($realPolyline))
-                        $instruction['polyline'] = $realPolyline;
-                    //return json_encode($instruction['polyline']);
-                }*/
-            }
-            array_push($pathsTransformed,$trPath);
-        }
-        //$transformedPath = new PathTransformer($path);
-        return response()->json($pathsTransformed);
-        //return $transformedPath->getTransformedPath();
-        //return $result;
-        /*for($i=0;$i<10000;$i++)
-        {
-            $station = Station::find($i);
-        }*/
+        $root = json_decode($pathJson);
+        $paths = $root->formattedPaths;
+        $pathsFormatter = new PathsFormatter($paths,false);
+        return response()->json($pathsFormatter->formatPaths());
     }
 
-    private function springPathTransformer ($pathJson)
-    {
-        $jsonObject = json_decode($pathJson);
-        $formattedPathsObj = $jsonObject->formattedPaths;
-        $phpPaths = array();
-        foreach ($formattedPathsObj as $formattedPath)
-        {
-            $phpPath = array();
-            $formattedNodesObj = $formattedPath->formattedNodes;
-            $i=0;
-            foreach ($formattedNodesObj as $formattedNode)
-            {
-                $phpNode = array();
-                $isStation = false;
-                $nodeType = $formattedNode->type;
-                if (strcmp($nodeType,"originNode")==0)
-                {
-                    $phpNode['name']="origin";
-                }
-                else
-                {
-                    if (strcmp($nodeType,"destinationNode")==0)
-                    {
-                        $phpNode['name']="destination";
-                    }
-                    else
-                    {
-                        $phpNode['name']=Station::find($formattedNode->stationId)->name;
-                        $isStation = true;
-                    }
-                }
-                if ($isStation)
-                {
-                    if (isset($formattedNode->waitingTime))
-                        $phpNode['waitingTime']=$formattedNode->waitingTime;
-                    else
-                        $phpNode['waitingTime']=0;
-                    $phpNode['exactWaitingTime']=false;
-                    $phpNode['idLine']=$formattedNode->lineId;
-                    $phpNode['idTrip']=$formattedNode->tripId;
-                    $phpNode['idStation']=$formattedNode->stationId;
-                    if (isset($formattedNodesObj[$i+1])&&isset($formattedNodesObj[$i+1]->timeAtStation))
-                        $phpNode['timeToNextNode']=-($formattedNode->timeAtStation-$formattedNodesObj[$i+1]->timeAtStation);
-                    else
-                        $phpNode['timeToNextNode']=$formattedNodesObj[$i+1]->walkingTime;
-                }
-                else
-                {
-                    $phpNode['waitingTime']=0;
-                    $phpNode['exactWaitingTime']=null;
-                    $phpNode['idLine']=null;
-                    $phpNode['idTrip']=null;
-                    $phpNode['idStation']=null;
-                    if (isset($formattedNodesObj[$i+1]))
-                    $phpNode['timeToNextNode']=$formattedNodesObj[$i+1]->walkingTime;
-                }
-                //$phpNode['walkingTime']=$formattedNode->walkingTime;
-                $coordinate = $formattedNode->coordinate;
-                $phpNode['latitude']=$coordinate->latitude;
-                $phpNode['longitude']=$coordinate->longitude;
-                if ($phpNode['name']=='origin')
-                {
-                    $phpNode['transportModeToNextNode']="byFoot";
-                }
-                else
-                if (isset($formattedNodesObj[$i+1]))
-                {
-                    if (isset($formattedNodesObj[$i+1]->stationId)&&$formattedNodesObj[$i+1]->tripId==$formattedNode->tripId)
-                    {
-                        $phpNode['transportModeToNextNode'] = Line::find($formattedNodesObj[$i+1]->lineId)->transportMode->name;
-                    }
-                    else
-                    {
-                        $phpNode['transportModeToNextNode']="byFoot";
-                    }
-                }
-                else
-                {
-                    $phpNode['transportModeToNextNode']=null;
-                    $phpNode['waitingTime']=null;
-                }
-                array_push($phpPath,$phpNode);
-                $i++;
-            }
-            array_push($phpPaths,$phpPath);
-        }
-        return $phpPaths;
-    }
 
     public function generatePath (Request $request)
     {
@@ -278,95 +147,6 @@ class PathFinderController extends Controller
             array_push($formattedMetroTrips,$formattedMetroTrip);
         }
         return $formattedMetroTrips;
-    }
-
-    function getWalkingPolyline ($origin,$destination,$alreadyVisitedPolylines)
-    {
-        $found = false;
-        $visitedPolyline = null;
-        foreach ($alreadyVisitedPolylines as $alreadyVisitedPolyline)
-        {
-            if ($alreadyVisitedPolyline['origin']['latitude']==$origin['latitude']&&$alreadyVisitedPolyline['origin']['longitude']
-            &&$alreadyVisitedPolyline['destination']['latitude']==$destination['latitude']&&$alreadyVisitedPolyline['destination']['longitude'])
-            {
-                $found = true;
-                $visitedPolyline = $alreadyVisitedPolyline['polyline'];
-            }
-        }
-
-        if (!$found)
-        {
-            $url = "https://maps.googleapis.com/maps/api/directions/json?&mode=walking&origin=".$origin['latitude'].",".$origin['longitude'].
-                "&destination=".$destination['latitude'].",".$destination['longitude']."&key=AIzaSyBgLesrk8GV1xHQamIKPMCjh5_ury77VJg";
-            $response = file_get_contents($url);
-            $obj = json_decode($response);
-            if (!isset($obj))
-                return null;
-            $routes = $obj->{'routes'};
-            if (!isset($routes))
-                return null;
-            if (!isset($routes[0]))
-            {
-                //echo $url;
-                return null;
-            }
-            $route = $routes[0];
-            if (!isset($route))
-                return null;
-            $overviewPolyline = $route->{'overview_polyline'};
-            if (!isset($overviewPolyline))
-                return null;
-            $points = $overviewPolyline->{'points'};
-            if (!isset($points))
-                return null;
-            $decodedPolyline = $this->decodePolyline($points);
-            array_push($alreadyVisitedPolylines,array('polyline'=>$decodedPolyline,'origin'=>$origin,
-                'destination'=>$destination));
-            return $decodedPolyline;
-        }
-        else
-        {
-            return $visitedPolyline;
-        }
-    }
-
-
-    function decodePolyline ($polyline)
-    {
-        $string = $polyline;
-        $byte_array = array_merge(unpack('C*', $string));
-        $results = array();
-
-        $index = 0;
-        do {
-            $shift = 0;
-            $result = 0;
-            do {
-                $char = $byte_array[$index] - 63; # Step 10
-                $result |= ($char & 0x1F) << (5 * $shift);
-                $shift++; $index++;
-            } while ($char >= 0x20);
-            if ($result & 1)
-                $result = ~$result;
-
-            $result = ($result >> 1) * 0.00001;
-            $results[] = $result;
-        } while ($index < count($byte_array));
-
-        for ($i = 2; $i < count($results); $i++) {
-            $results[$i] += $results[$i - 2];
-        }
-
-        $results =  array_chunk($results, 2);
-        $coordinates = array();
-        foreach ($results as $coord)
-        {
-            $coordinate = array();
-            $coordinate['latitude'] = $coord[0];
-            $coordinate['longitude'] = $coord[1];
-            array_push($coordinates,$coordinate);
-        }
-        return $coordinates;
     }
 
 }
