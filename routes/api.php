@@ -36,9 +36,7 @@ Route::get('/generatePath', 'PathFinderController@generatePath');
 Route::get('/transferTest', ['uses' => "StationController@getTransfersTest"]);
 
 
-Route::group(['prefix' => 'v1',
-    'middleware' => ['api', 'cors']
-            ], function () {
+Route::group(['prefix' => 'v1',], function () {
     Route::get('/linesAndPlaces', ['uses' => 'LinesAndPlacesController@getAllPlacesAndLines'])->name('all_lines_and_places');
 
 
