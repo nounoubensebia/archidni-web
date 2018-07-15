@@ -13,6 +13,13 @@ use Illuminate\Http\Request;
 class LineController extends Controller
 {
 
+
+    public function getEtusaLines (Request $request)
+    {
+        $lines = Line::query()->where('transport_mode_id','=','3')->get();
+        return LineResource::collection($lines);
+    }
+
     public function getLinesPassingByStation (Request $request,$id)
     {
         $lines = Line::query()->whereHas('sections',function ($query) use ($id) {

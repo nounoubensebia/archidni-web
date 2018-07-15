@@ -39,8 +39,13 @@ Route::get('/transferTest',['uses' => "StationController@getTransfersTest"]);
 
 Route::group(['prefix' => 'v1'],function (){
     Route::get('/linesAndPlaces',['uses' => 'LinesAndPlacesController@getAllPlacesAndLines'])->name('all_lines_and_places');
+
+
     Route::group(['prefix' => 'line'],function ()
     {
+        Route::get('etusa',[
+            'uses' => 'LineController@getEtusaLines'
+        ])->name('etusa_lines');
         Route::get('autocomplete',[
             'uses' => 'LineController@getLineAutocompleteSuggestions'
         ])->name('line_autocomplete');
@@ -48,6 +53,8 @@ Route::group(['prefix' => 'v1'],function (){
             'uses' => 'LineController@getLine'
         ])->name('line');
     });
+
+
     Route::group(['prefix' => '/station'],function (){
         Route::get('autocomplete',[
            'uses' => 'StationController@getStationAutocompleteSuggestions'
@@ -60,6 +67,8 @@ Route::group(['prefix' => 'v1'],function (){
         ])->name('lines_passing_by_station');
 
     });
+
+
     Route::group(['prefix'=>'user'],function ()
     {
       Route::post('signup',[
@@ -69,6 +78,8 @@ Route::group(['prefix' => 'v1'],function (){
           'uses'=>'UserController@login'
       ]);
     });
+
+    Route::resource('CompanyNotifications', 'CompanyNotificationController');
 
 });
 
