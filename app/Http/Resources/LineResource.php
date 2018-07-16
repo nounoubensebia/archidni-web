@@ -24,7 +24,12 @@ class LineResource extends Resource
             return $this->getLine();
         }
 
-        if ($request->route()->named('line')||$request->route()->named('lines_close_to_position'))
+        if ($request->route()->named('etusa_lines'))
+        {
+            return $this->getEtusaLines();
+        }
+
+        if ($request->route()->named('line')||$request->route()->named('all_lines_and_places'))
         {
             return $this->getLinesWithoutTrips();
         }
@@ -34,6 +39,22 @@ class LineResource extends Resource
             return $this->getLinesWithTrips();
         }
 
+
+
+    }
+
+
+    private function getEtusaLines ()
+    {
+        $aStations = $this->getStations(0);
+        $rStations = $this->getStations(1);
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'number' => $this->number,
+            'aStations' => $aStations,
+            'rStations' => $rStations
+        ];
     }
 
     private function getLine ()
@@ -43,6 +64,34 @@ class LineResource extends Resource
             'name'=>$this->name,
             'transport_mode_id' =>$this->transport_mode_id
         ];
+    }
+
+    private function getStations ($mode)
+    {
+        $sections = $this->sections;
+        $stations = collect();
+        foreach ($sections as $section)
+        {
+            if ($section->pivot->mode==$mode)
+            {
+                if ($section->pivot->order==0)
+                {
+                    $origin = $section->origin;
+                    $station = array();
+                    $station['id'] = $origin->id;
+                    $station['name'] = $origin->name;
+                    $station['coordinate'] = ['latitude' => $origin->latitude,'longitude' => $origin->longitude];
+                    $stations->push($station);
+                }
+                $destination = $section->destination;
+                $station = array();
+                $station['id'] = $destination->id;
+                $station['name'] = $destination->name;
+                $station['coordinate'] = ['latitude' => $destination->latitude,'longitude' => $destination->longitude];
+                $stations->push($station);
+            }
+        }
+        return $stations->values()->all();
     }
 
     private function getSections ()
@@ -56,8 +105,9 @@ class LineResource extends Resource
             $destination = $section->destination;
             $order = $section->pivot->order;
             $mode = $section->pivot->mode;
+            $polyline = $section->polyline;
             $sectionsCollection->push(['id' => $id,'origin' => $origin,'destination' => $destination,'order' => $order,
-                'mode' => $mode]);
+                'mode' => $mode,'polyline'=>$polyline]);
         }
         $sortedSections = $sectionsCollection->sortBy('order');
         return $sortedSections->values()->all();

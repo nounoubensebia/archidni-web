@@ -28,53 +28,55 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
  * sample execution
  * index.php/api/findPath?origin=36.733245,3.156908&destination=36.769238,3.236513&time=5:30&day=2
  * */
-Route::get('/findPath','PathFinderController@findPath');
+Route::get('/findPath', 'PathFinderController@findPath');
 
-Route::get('/generatePath','PathFinderController@generatePath');
+Route::get('/generatePath', 'PathFinderController@generatePath');
 
-Route::get('/test',function () {
-    //$lines = \App\Line::with(['operator','transportMode','trainTrips','metroTrips'])->with('sections')->get();
 
-});
+Route::get('/transferTest', ['uses' => "StationController@getTransfersTest"]);
 
-Route::get('/transferTest',['uses' => "StationController@getTransfersTest"]);
 
-Route::get('/linesAndPlaces',['uses' => 'LineController@getLinesCloseToPosition'])->name('lines_close_to_position');
+Route::group(['prefix' => 'v1',], function () {
+    Route::get('/linesAndPlaces', ['uses' => 'LinesAndPlacesController@getAllPlacesAndLines'])->name('all_lines_and_places');
 
-Route::group(['prefix' => 'v1'],function (){
-    Route::group(['prefix' => 'line'],function ()
-    {
-        /*Route::get('',[
-            'uses' => 'LineController@getLinesCloseToPosition'
-        ])->name('lines_close_to_position');*/
-        Route::get('autocomplete',[
+
+    Route::group(['prefix' => 'line'], function () {
+        Route::get('etusa', [
+            'uses' => 'LineController@getEtusaLines'
+        ])->name('etusa_lines');
+        Route::get('autocomplete', [
             'uses' => 'LineController@getLineAutocompleteSuggestions'
         ])->name('line_autocomplete');
-        Route::get('{id}',[
+        Route::get('{id}', [
             'uses' => 'LineController@getLine'
         ])->name('line');
     });
-    Route::group(['prefix' => '/station'],function (){
-        Route::get('autocomplete',[
-           'uses' => 'StationController@getStationAutocompleteSuggestions'
+
+
+    Route::group(['prefix' => '/station'], function () {
+        Route::get('autocomplete', [
+            'uses' => 'StationController@getStationAutocompleteSuggestions'
         ])->name('station_autocomplete');
-        Route::get('{id}',[
+        Route::get('{id}', [
             'uses' => 'StationController@getStation'
         ]);
-        Route::get('{id}/lines',[
+        Route::get('{id}/lines', [
             'uses' => 'LineController@getLinesPassingByStation'
         ])->name('lines_passing_by_station');
 
     });
-    Route::group(['prefix'=>'user'],function ()
-    {
-      Route::post('signup',[
-          'uses'=>'UserController@signup'
-      ]);
-      Route::post('login',[
-          'uses'=>'UserController@login'
-      ]);
+
+
+    Route::group(['prefix' => 'user'], function () {
+        Route::post('signup', [
+            'uses' => 'UserController@signup'
+        ]);
+        Route::post('login', [
+            'uses' => 'UserController@login'
+        ]);
     });
+
+    Route::resource('CompanyNotifications', 'CompanyNotificationController');
 
 });
 
