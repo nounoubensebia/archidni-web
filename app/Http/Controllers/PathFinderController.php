@@ -25,8 +25,8 @@ include "PathFinderApi/GraphGeneratorClasses/PathFinder.php";
 class PathFinderController extends Controller
 {
 
-    private static $PATHFINDERURL="http://192.168.1.8:8080/path";
-    private static $path_finder_data_generator_url="http://192.168.1.8:8080/generatePath";
+    private static $PATHFINDERURL="http://localhost:8080/path";
+    private static $path_finder_data_generator_url="http://localhost:8080/generatePath";
     public function findPath()
     {
         if (isset($_GET)) {
@@ -100,7 +100,7 @@ class PathFinderController extends Controller
         $formattedMetroTrips = array();
         foreach ($trips as $trip)
         {
-            $formattedMetroTrip = array('id'=>$trip->id,'lineId'=>$trip->line_id);
+            $formattedMetroTrip = array('id'=>$trip->id,'lineId'=>$trip->line_id,'days'=>$trip->days);
             $formattedMetroTrip['stationsTrip']= array();
             foreach ($trip->stations as $station)
             {

@@ -103,7 +103,7 @@ class PathsFormatter
             }
             if (strcmp($nodeType,"destinationNode")==0)
             {
-                $instruction = $this->getWalkInstruction($currentNode,$formattedNodes[$i-1]);
+                $instruction = $this->getWalkInstruction($formattedNodes[$i-1],$currentNode);
                 $instruction['destination_type'] = "user_destination";
                 $instruction['destination'] = "destination";
                 array_push($formattedPath,$instruction);
@@ -129,7 +129,7 @@ class PathsFormatter
         $line = $this->getLine($currentNode->lineId);
         $tripId = $currentNode->tripId;
         $tripType = $nodes[1]->tripType;
-        $isMetroTrip = (strcmp($tripType,"metroTrip")==0) ? true : false;
+        $isMetroTrip = ($tripType ==0 ) ? true : false;
         $instruction = [];
         $instruction['type'] = "ride_instruction";
         $instruction['line_name'] = $line->name;
@@ -150,6 +150,7 @@ class PathsFormatter
             $duration+=$currentNode->timeAtStation - $previousTimeAtStation;
             array_push($stations,$stationArray);
             $i++;
+            $previousTimeAtStation = $currentNode->timeAtStation;
         }
         $instruction['stations'] = $stations;
         $instruction['polyline'] = $this->getPolylineFromRideInstruction($nodes);
