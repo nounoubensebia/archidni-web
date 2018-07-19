@@ -33,7 +33,7 @@ class PathFinderController extends Controller
             $attributes = \DataRetriever::retrieveAttributes($_GET);
         }
         $url = self::$PATHFINDERURL."?origin=".$attributes['origin'][0].",".$attributes['origin'][1]."&destination=".
-            $attributes['destination'][0].",".$attributes['destination'][1]."&time=36000";
+            $attributes['destination'][0].",".$attributes['destination'][1]."&time=".$_GET['time'];
         $pathJson = file_get_contents($url);
         $root = json_decode($pathJson);
         $paths = $root->formattedPaths;

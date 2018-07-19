@@ -20,6 +20,7 @@ class PathsFormatter
     private $useGoogleMaps;
     private $calculatedGoogleMapsPolylines;
     private $lines;
+
     /**
      * PathFormatter constructor.
      * @param $path
@@ -33,27 +34,23 @@ class PathsFormatter
     }
 
 
-    public function formatPaths ()
+    public function formatPaths()
     {
         $formattedPaths = array();
-        foreach ($this->paths as $path)
-        {
-            array_push($formattedPaths,$this->getFormattedPath($path));
+        foreach ($this->paths as $path) {
+            array_push($formattedPaths, $this->getFormattedPath($path));
         }
         return $formattedPaths;
     }
 
-    private function getLinesFromPaths ()
+    private function getLinesFromPaths()
     {
         $trips = array();
-        foreach ($this->paths as $path)
-        {
+        foreach ($this->paths as $path) {
             $formattedNodes = $path->formattedNodes;
-            foreach ($formattedNodes as $formattedNode)
-            {
-                if (isset($formattedNode->lineId)&&!in_array($formattedNode->lineId,$trips))
-                {
-                    array_push($trips,$formattedNode->lineId);
+            foreach ($formattedNodes as $formattedNode) {
+                if (isset($formattedNode->lineId) && !in_array($formattedNode->lineId, $trips)) {
+                    array_push($trips, $formattedNode->lineId);
                 }
             }
         }
@@ -64,56 +61,49 @@ class PathsFormatter
     {
         $formattedPath = array();
         $formattedNodes = $path->formattedNodes;
-        $i=0;
-        while ($i<count($formattedNodes))
-        {
+        $i = 0;
+        while ($i < count($formattedNodes)) {
             $currentNode = $formattedNodes[$i];
             $nodeType = $currentNode->type;
-            if (strcmp($nodeType,"originNode")==0||strcmp($nodeType,"firstStationInTrip")==0)
-            {
-                if (strcmp($nodeType,"originNode")==0) {
+            if (strcmp($nodeType, "originNode") == 0 || strcmp($nodeType, "firstStationInTrip") == 0) {
+                if (strcmp($nodeType, "originNode") == 0) {
                     $i++;
                     $origin = $currentNode;
                     $destination = $formattedNodes[$i];
                     $currentNode = $destination;
-                }
-                else
-                {
-                    $origin = $formattedNodes[$i-1];
+                } else {
+                    $origin = $formattedNodes[$i - 1];
                     $destination = $currentNode;
                 }
-                $instruction = $this->getWalkInstruction($origin,$destination);
+                $instruction = $this->getWalkInstruction($origin, $destination);
                 $instruction['destination_type'] = "station";
                 $instruction['destination'] = $this->getStation($destination->stationId)->name;
-                array_push($formattedPath,$instruction);
+                array_push($formattedPath, $instruction);
             }
             $nodeType = $currentNode->type;
-            if (strcmp($nodeType,"firstStationInTrip")==0)
-            {
-                array_push($formattedPath,$this->getWaitInstruction($currentNode));
+            if (strcmp($nodeType, "firstStationInTrip") == 0) {
+                array_push($formattedPath, $this->getWaitInstruction($currentNode));
                 $i++;
                 $rideNodes = array();
-                array_push($rideNodes,$currentNode);
-                while (strcmp($formattedNodes[$i]->type,"stationInsideTripNode")==0)
-                {
-                    array_push($rideNodes,$formattedNodes[$i]);
+                array_push($rideNodes, $currentNode);
+                while (strcmp($formattedNodes[$i]->type, "stationInsideTripNode") == 0) {
+                    array_push($rideNodes, $formattedNodes[$i]);
                     $i++;
                 }
-                array_push($formattedPath,$this->getRideInstruction($rideNodes));
+                array_push($formattedPath, $this->getRideInstruction($rideNodes));
             }
-            if (strcmp($nodeType,"destinationNode")==0)
-            {
-                $instruction = $this->getWalkInstruction($formattedNodes[$i-1],$currentNode);
+            if (strcmp($nodeType, "destinationNode") == 0) {
+                $instruction = $this->getWalkInstruction($formattedNodes[$i - 1], $currentNode);
                 $instruction['destination_type'] = "user_destination";
                 $instruction['destination'] = "destination";
-                array_push($formattedPath,$instruction);
+                array_push($formattedPath, $instruction);
                 break;
             }
         }
         return $formattedPath;
     }
 
-    private function getWaitInstruction ($node)
+    private function getWaitInstruction($node)
     {
         $instruction = [];
         $instruction['type'] = "wait_instruction";
@@ -123,32 +113,31 @@ class PathsFormatter
         return $instruction;
     }
 
-    private function getRideInstruction ($nodes)
+    private function getRideInstruction($nodes)
     {
         $currentNode = $nodes[0];
         $line = $this->getLine($currentNode->lineId);
         $tripId = $currentNode->tripId;
         $tripType = $nodes[1]->tripType;
-        $isMetroTrip = ($tripType ==0 ) ? true : false;
+        $isMetroTrip = ($tripType == 0) ? true : false;
         $instruction = [];
         $instruction['type'] = "ride_instruction";
         $instruction['line_name'] = $line->name;
         $instruction['transport_mode_id'] = $line->transport_mode_id;
-        $instruction['destination'] = $this->getTripDestination($tripId,$isMetroTrip)->name;
+        $instruction['destination'] = $this->getTripDestination($tripId, $isMetroTrip)->name;
         $duration = 0;
-        $i=0;
+        $i = 0;
         $stations = array();
         $previousTimeAtStation = $currentNode->timeAtStation;
-        while ($i<count($nodes))
-        {
+        while ($i < count($nodes)) {
             $currentNode = $nodes[$i];
             $station = $this->getStation($currentNode->stationId);
             $stationArray = [];
             $stationArray['coordinate'] = $currentNode->coordinate;
             $stationArray['name'] = $station->name;
             $stationArray['id'] = $station->id;
-            $duration+=$currentNode->timeAtStation - $previousTimeAtStation;
-            array_push($stations,$stationArray);
+            $duration += $currentNode->timeAtStation - $previousTimeAtStation;
+            array_push($stations, $stationArray);
             $i++;
             $previousTimeAtStation = $currentNode->timeAtStation;
         }
@@ -158,87 +147,116 @@ class PathsFormatter
         return $instruction;
     }
 
-    private function getPolylineFromRideInstruction ($nodes)
+    private function getPolylineFromRideInstruction($nodes)
     {
-        $polyline = [];
-        foreach ($nodes as $node)
-        {
-            array_push($polyline,$node->coordinate);
+        $line = Line::find($nodes[0]->lineId);
+        if ($nodes[0]->tripType == 0) {
+            $trip = MetroTrip::find($nodes[0]->tripId);
+        } else {
+            $trip = TrainTrip::find($nodes[0]->tripId);
         }
-        return $polyline;
+        $stationIds = array();
+        foreach ($nodes as $node) {
+            array_push($stationIds, $node->stationId);
+        }
+        $sections = $line->sections;
+        $acceptReverse = (!$line->transport_mode==3);
+        $polyline = [];
+        for ($i = 0; $i < count($stationIds) - 1;$i++) {
+            $section = $this->getSection($stationIds[$i],$stationIds[$i+1],$acceptReverse,$sections);
+            $sectionPolyline = $section->polyline;
+            $decodedPolyline = $this->decodePolyline($sectionPolyline);
+            if ($line->transport_mode_id != 3 && $trip->direction == 1) {
+                $decodedPolyline = array_reverse($decodedPolyline);
+            }
+            foreach ($decodedPolyline as $coordinate) {
+
+                array_push($polyline, $coordinate);
+            }
+        }
+        $polylineString = Polyline::encode(Polyline::getPointsFromPolylineArray($polyline));
+
+        return $polylineString;
     }
 
-    private function getTripDestination ($id,$isMetroTrip)
+    private function getSection ($originId,$destinationId,$acceptReverse,$sections)
     {
-        if ($isMetroTrip)
+        foreach ($sections as $section)
         {
-            $trip = MetroTrip::find($id);
+            $condition = $originId == $section->origin_id && $destinationId == $section->destination_id;
+            if ($acceptReverse)
+            {
+                $condition = $condition ||($destinationId == $section->origin_id && $originId == $section->destination_id);
+            }
+            if ($condition)
+            {
+                return $section;
+            }
         }
-        else
-        {
+        return null;
+    }
+
+    private function getTripDestination($id, $isMetroTrip)
+    {
+        if ($isMetroTrip) {
+            $trip = MetroTrip::find($id);
+        } else {
             $trip = TrainTrip::find($id);
         }
         $stations = $trip->stations;
-        return $stations[count($stations)-1];
+        return $stations[count($stations) - 1];
     }
 
-    private function getStation ($id)
+    private function getStation($id)
     {
         return Station::find($id);
     }
 
-    private function getLine ($id)
+    private function getLine($id)
     {
         return Line::find($id);
     }
 
-    private function getWalkInstruction ($originNode,$destinationNode)
+    private function getWalkInstruction($originNode, $destinationNode)
     {
         $instruction = array();
-        $polyline = $this->getWalkInstructionPolyline($originNode,$destinationNode);
+        $polyline = $this->getWalkInstructionPolyline($originNode, $destinationNode);
         $instruction['type'] = "walk_instruction";
         $instruction['polyline'] = $polyline;
         return $instruction;
     }
 
-    private function getWalkInstructionPolyline ($originNode,$destinationNode)
+    private function getWalkInstructionPolyline($originNode, $destinationNode)
     {
         $coordinate1 = $originNode->coordinate;
         $coordinate2 = $destinationNode->coordinate;
-        if ($this->useGoogleMaps)
-        {
-            $polyline = $this->getGoogleMapsPolyline($coordinate1,$coordinate2);
-            if (!isset($polyline))
-            {
-                $polyline = $this->getDirectPolyline($coordinate1,$coordinate2);
+        if ($this->useGoogleMaps) {
+            $polyline = $this->getGoogleMapsPolyline($coordinate1, $coordinate2);
+            if (!isset($polyline)) {
+                $polyline = $this->getDirectPolyline($coordinate1, $coordinate2);
             }
-        }
-        else
-        {
-            $polyline = $this->getDirectPolyline($coordinate1,$coordinate2);
+        } else {
+            $polyline = $this->getDirectPolyline($coordinate1, $coordinate2);
         }
         return $polyline;
     }
 
-    private function getDirectPolyline ($coordinate1,$coordinate2)
+    private function getDirectPolyline($coordinate1, $coordinate2)
     {
         $polyline = array();
-        array_push($polyline,$coordinate1);
-        array_push($polyline,$coordinate2);
+        array_push($polyline, $coordinate1);
+        array_push($polyline, $coordinate2);
         return $polyline;
     }
 
-    private function getGoogleMapsPolyline ($coordinate1,$coordinate2)
+    private function getGoogleMapsPolyline($coordinate1, $coordinate2)
     {
-        $calculatedPolyline = $this->getGoogleMapsCalculatedPolyline($coordinate1,$coordinate2);
-        if (isset($calculatedPolyline))
-        {
+        $calculatedPolyline = $this->getGoogleMapsCalculatedPolyline($coordinate1, $coordinate2);
+        if (isset($calculatedPolyline)) {
             return $calculatedPolyline['polyline'];
-        }
-        else
-        {
-            $url = "https://maps.googleapis.com/maps/api/directions/json?&mode=walking&origin=".$coordinate1->latitude.",".$coordinate1->longitude.
-                "&destination=".$coordinate2->latitude.",".$coordinate2->longitude."&key=AIzaSyBgLesrk8GV1xHQamIKPMCjh5_ury77VJg";
+        } else {
+            $url = "https://maps.googleapis.com/maps/api/directions/json?&mode=walking&origin=" . $coordinate1->latitude . "," . $coordinate1->longitude .
+                "&destination=" . $coordinate2->latitude . "," . $coordinate2->longitude . "&key=AIzaSyBgLesrk8GV1xHQamIKPMCjh5_ury77VJg";
             $response = file_get_contents($url);
             $obj = json_decode($response);
             if (!isset($obj))
@@ -246,8 +264,7 @@ class PathsFormatter
             $routes = $obj->{'routes'};
             if (!isset($routes))
                 return null;
-            if (!isset($routes[0]))
-            {
+            if (!isset($routes[0])) {
                 return null;
             }
             $route = $routes[0];
@@ -260,13 +277,13 @@ class PathsFormatter
             if (!isset($points))
                 return null;
             $decodedPolyline = $this->decodePolyline($points);
-            array_push($this->calculatedGoogleMapsPolylines,array('polyline'=>$decodedPolyline,'origin'=>$coordinate1,
-                'destination'=>$coordinate2));
+            array_push($this->calculatedGoogleMapsPolylines, array('polyline' => $decodedPolyline, 'origin' => $coordinate1,
+                'destination' => $coordinate2));
             return $decodedPolyline;
         }
     }
 
-    private function decodePolyline ($polyline)
+    private function decodePolyline($polyline)
     {
         $string = $polyline;
         $byte_array = array_merge(unpack('C*', $string));
@@ -279,7 +296,8 @@ class PathsFormatter
             do {
                 $char = $byte_array[$index] - 63; # Step 10
                 $result |= ($char & 0x1F) << (5 * $shift);
-                $shift++; $index++;
+                $shift++;
+                $index++;
             } while ($char >= 0x20);
             if ($result & 1)
                 $result = ~$result;
@@ -292,27 +310,24 @@ class PathsFormatter
             $results[$i] += $results[$i - 2];
         }
 
-        $results =  array_chunk($results, 2);
+        $results = array_chunk($results, 2);
         $coordinates = array();
-        foreach ($results as $coord)
-        {
+        foreach ($results as $coord) {
             $coordinate = array();
             $coordinate['latitude'] = $coord[0];
             $coordinate['longitude'] = $coord[1];
-            array_push($coordinates,$coordinate);
+            array_push($coordinates, $coordinate);
         }
         return $coordinates;
     }
 
-    private function getGoogleMapsCalculatedPolyline ($coordinate1, $coordinate2)
+    private function getGoogleMapsCalculatedPolyline($coordinate1, $coordinate2)
     {
-        foreach ($this->calculatedGoogleMapsPolylines as $calculatedGoogleMapsPolyline)
-        {
-            if (($calculatedGoogleMapsPolyline['origin']==$coordinate1&&
-                $calculatedGoogleMapsPolyline['destination']==$coordinate2)||
-                ($calculatedGoogleMapsPolyline['origin']==$coordinate2&&
-                    $calculatedGoogleMapsPolyline['destination']==$coordinate1))
-            {
+        foreach ($this->calculatedGoogleMapsPolylines as $calculatedGoogleMapsPolyline) {
+            if (($calculatedGoogleMapsPolyline['origin'] == $coordinate1 &&
+                    $calculatedGoogleMapsPolyline['destination'] == $coordinate2) ||
+                ($calculatedGoogleMapsPolyline['origin'] == $coordinate2 &&
+                    $calculatedGoogleMapsPolyline['destination'] == $coordinate1)) {
                 return $calculatedGoogleMapsPolyline;
             }
         }
