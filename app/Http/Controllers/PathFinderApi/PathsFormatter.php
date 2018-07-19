@@ -160,10 +160,22 @@ class PathsFormatter
             array_push($stationIds, $node->stationId);
         }
         $sections = $line->sections;
-        $acceptReverse = (!$line->transport_mode==3);
+        if ($line->transport_mode_id==3)
+        {
+            $acceptReverse = false;
+        }
+        else
+        {
+            $acceptReverse = true;
+        }
         $polyline = [];
         for ($i = 0; $i < count($stationIds) - 1;$i++) {
             $section = $this->getSection($stationIds[$i],$stationIds[$i+1],$acceptReverse,$sections);
+            if (!isset($section))
+            {
+                //echo "line ".$line->id." station1 ".$stationIds[$i]." station2 ".$stationIds[$i+1];
+                return "thug";
+            }
             $sectionPolyline = $section->polyline;
             $decodedPolyline = $this->decodePolyline($sectionPolyline);
             if ($line->transport_mode_id != 3 && $trip->direction == 1) {

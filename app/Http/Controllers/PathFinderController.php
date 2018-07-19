@@ -52,7 +52,7 @@ class PathFinderController extends Controller
         $metroTrips = $this->getFormattedTrips($unformattedMetroTrips);
         $transfers = $this->getFormattedTransfers($unformattedTransfers);
         $data = array('trainTrips'=>$trainTrips,'metroTrips'=>$metroTrips,'transfers'=>$transfers);
-        return response()->json($data);
+        //return response()->json($data);
         $url = self::$path_finder_data_generator_url;
         $content = json_encode($data);
 
