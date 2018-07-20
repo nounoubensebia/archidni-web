@@ -20,6 +20,7 @@ class PathsFormatter
     private $useGoogleMaps;
     private $calculatedGoogleMapsPolylines;
     private $lines;
+    private $rideErrorMargin = 0.2;
 
     /**
      * PathFormatter constructor.
@@ -144,6 +145,7 @@ class PathsFormatter
         $instruction['stations'] = $stations;
         $instruction['polyline'] = $this->getPolylineFromRideInstruction($nodes);
         $instruction['duration'] = $duration;
+        $instruction['error_margin'] = $this->rideErrorMargin;
         return $instruction;
     }
 
@@ -234,7 +236,7 @@ class PathsFormatter
         $instruction = array();
         $polyline = $this->getWalkInstructionPolyline($originNode, $destinationNode);
         $instruction['type'] = "walk_instruction";
-        $instruction['polyline'] = $polyline;
+        $instruction['polyline'] = Polyline::encode(Polyline::getPointsFromPolylineObject($polyline));
         return $instruction;
     }
 
