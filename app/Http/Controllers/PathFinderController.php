@@ -25,15 +25,15 @@ include "PathFinderApi/GraphGeneratorClasses/PathFinder.php";
 class PathFinderController extends Controller
 {
 
-    private static $PATHFINDERURL="http://192.168.1.8:8080/path";
-    private static $path_finder_data_generator_url="http://192.168.1.8:8080/generatePath";
+    private static $PATHFINDERURL="http://localhost:8080/path";
+    private static $path_finder_data_generator_url="http://localhost:8080/generatePath";
     public function findPath()
     {
         if (isset($_GET)) {
             $attributes = \DataRetriever::retrieveAttributes($_GET);
         }
         $url = self::$PATHFINDERURL."?origin=".$attributes['origin'][0].",".$attributes['origin'][1]."&destination=".
-            $attributes['destination'][0].",".$attributes['destination'][1]."&time=36000";
+            $attributes['destination'][0].",".$attributes['destination'][1]."&time=".$_GET['time']."&day=".$attributes['day'];
         $pathJson = file_get_contents($url);
         $root = json_decode($pathJson);
         $paths = $root->formattedPaths;
@@ -52,7 +52,7 @@ class PathFinderController extends Controller
         $metroTrips = $this->getFormattedTrips($unformattedMetroTrips);
         $transfers = $this->getFormattedTransfers($unformattedTransfers);
         $data = array('trainTrips'=>$trainTrips,'metroTrips'=>$metroTrips,'transfers'=>$transfers);
-        return response()->json($data);
+        //return response()->json($data);
         $url = self::$path_finder_data_generator_url;
         $content = json_encode($data);
 
@@ -100,7 +100,7 @@ class PathFinderController extends Controller
         $formattedMetroTrips = array();
         foreach ($trips as $trip)
         {
-            $formattedMetroTrip = array('id'=>$trip->id,'lineId'=>$trip->line_id);
+            $formattedMetroTrip = array('id'=>$trip->id,'lineId'=>$trip->line_id,'days'=>$trip->days);
             $formattedMetroTrip['stationsTrip']= array();
             foreach ($trip->stations as $station)
             {
