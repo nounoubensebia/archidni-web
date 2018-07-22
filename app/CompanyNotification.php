@@ -13,4 +13,9 @@ class CompanyNotification extends Model
     {
         return $this->BelongsToMany('App\Line');
     }
+
+    public function transportMode()
+    {
+        return $this->belongsTo('App\TransportMode');
+    }
 }

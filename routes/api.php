@@ -44,6 +44,9 @@ Route::group(['prefix' => 'v1',], function () {
         Route::get('etusa', [
             'uses' => 'LineController@getEtusaLines'
         ])->name('etusa_lines');
+        Route::get('/{id}/notifications', [
+            'uses' => 'LineController@getNotifications'
+        ]);
         Route::get('autocomplete', [
             'uses' => 'LineController@getLineAutocompleteSuggestions'
         ])->name('line_autocomplete');

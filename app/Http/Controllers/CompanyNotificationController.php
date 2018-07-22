@@ -14,10 +14,17 @@ class CompanyNotificationController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         //
-        $companyNotifications = CompanyNotification::with('lines')->get();
+        $companyNotifications = CompanyNotification::with('lines','transportMode')->
+        whereRaw('end_datetime > CURRENT_TIMESTAMP()')->orWhereRaw('end_datetime IS NULL');
+        $mobileHeader = $request->header('mobile');
+        if (isset($mobileHeader))
+        {
+            $companyNotifications = $companyNotifications->whereRaw('start_datetime < CURRENT_TIMESTAMP()');
+        }
+        $companyNotifications = $companyNotifications->get();
         return response()->json($companyNotifications);
     }
 
@@ -84,7 +91,7 @@ class CompanyNotificationController extends Controller
     public function show($id)
     {
         //
-        $notification = CompanyNotification::findOrFail($id)->with('lines')->get();
+        $notification = CompanyNotification::findOrFail($id)->with('lines','transportMode')->get();
         return response()->json($notification,200);
 
     }
@@ -115,10 +122,6 @@ class CompanyNotificationController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
-        //return response()->json($request);
-
-
 
         $title = $request->input('title');
         $type = $request->input('type');
