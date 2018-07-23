@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\CompanyNotification;
+use App\Http\Controllers\FirebaseNotifications\NotificationsUtils;
 use App\Line;
 use App\TransportMode;
 use Illuminate\Http\Request;
@@ -51,6 +52,7 @@ class CompanyNotificationController extends Controller
     public function store(Request $request)
     {
         //
+
         $title = $request->input('title');
         $type = $request->input('type');
         $description = $request->input('description');
@@ -69,9 +71,10 @@ class CompanyNotificationController extends Controller
         $lines = Line::find($lines);
         if ($companyNotification->save()) {
             $companyNotification->lines()->attach($lines);
+            NotificationsUtils::send_notification(json_encode($companyNotification->load('lines')));
             $resonse = [
                 'msg' => 'notification created',
-                'notification' => $companyNotification
+                'notification' => $companyNotification->load('lines')
             ];
             return response()->json($resonse, 201);
         } else {
