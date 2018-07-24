@@ -51,14 +51,16 @@ class LineController extends Controller
             $query->where('line_id','=',$id);
         })->whereRaw('(end_datetime > CURRENT_TIMESTAMP() or end_datetime IS NULL)')
             ->whereRaw('start_datetime < CURRENT_TIMESTAMP()')
+            ->with('lines')
             ->get();
         $notificationsWithoutLines = CompanyNotification::where('transport_mode_id','=',$line->transport_mode_id)
             ->whereRaw('(end_datetime > CURRENT_TIMESTAMP()or end_datetime IS NULL)')
             ->whereRaw('start_datetime < CURRENT_TIMESTAMP()')
             ->doesntHave('lines')
+            ->with('lines')
             ->get();
-        $notificationsArray = $notificationsWithLines->toArray();
-        $notificationsArray = array_merge($notificationsArray,$notificationsWithoutLines->toArray());
+        $notificationsArray = $notificationsWithoutLines->toArray();
+        $notificationsArray = array_merge($notificationsArray,$notificationsWithLines->toArray());
         return response()->json($notificationsArray,200);
     }
 }
