@@ -11,8 +11,15 @@ class LinesAndPlacesController extends Controller
 {
     //
 
+    /*public function __construct()
+    {
+        $this->middleware('token.handler');
+    }*/
+
     public function getAllPlacesAndLines (Request $request)
     {
+        //$headers = $request->headers->all();
+        //return response()->json($headers,200);
         $lines = Line::all();
         $data = array();
         $data['lines'] = LineResource::collection($lines);

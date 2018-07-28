@@ -18,3 +18,5 @@ Route::get('/', function () {
 Route::get('/about',function () {
     return 123;
 });
+
+Route::get('/settings', 'SettingsController@index')->name('settings');

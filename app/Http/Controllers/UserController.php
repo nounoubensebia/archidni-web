@@ -5,11 +5,15 @@ namespace App\Http\Controllers;
 use App\User;
 use Illuminate\Http\Request;
 
-use Illuminate\Support\Facades\Hash;
+use Tymon\JWTAuth\Exceptions\JWTException;
+use JWTAuth;
 
 class UserController extends Controller
 {
     //
+
+
+
     public function signup (Request $request)
     {
         $user = new User(['email'=>$request->input('email'),
@@ -39,7 +43,7 @@ class UserController extends Controller
         $email = $request->input('email');
         $pass = $request->input('password');
 
-        $user = User::query()->where('email',$email)->get();
+        /*$user = User::query()->where('email',$email)->get();
         //return $user->first()->password;
         if ($user->count()==0||!Hash::check($pass,$user->first()->password))
         {
@@ -55,6 +59,20 @@ class UserController extends Controller
                 'user' => $user->first()
             ];
             return response()->json($response,200);
+        }*/
+        $credentials = $request->only('email','password');
+        try {
+            if (!$token = JWTAuth::attempt($credentials))
+            {
+                return response()->json(['msg' =>'Invalid Credentials'],401);
+            }
+
+        } catch (JWTException $JWTException)
+        {
+            return response()->json(['msg' => 'Could not create token']);
         }
+
+        return response()->json(['token' => $token]);
     }
+
 }

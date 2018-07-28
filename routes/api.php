@@ -37,7 +37,7 @@ Route::get('/transferTest', ['uses' => "StationController@getTransfersTest"]);
 
 
 Route::group(['prefix' => 'v1',], function () {
-    Route::get('/linesAndPlaces', ['uses' => 'LinesAndPlacesController@getAllPlacesAndLines'])->name('all_lines_and_places');
+    Route::get('/linesAndPlaces', ['uses' => 'LinesAndPlacesController@getAllPlacesAndLines'])->name('all_lines_and_places')->middleware('token.handler:api');;
 
 
     Route::group(['prefix' => 'line'], function () {
@@ -70,7 +70,8 @@ Route::group(['prefix' => 'v1',], function () {
     });
 
 
-    Route::group(['prefix' => 'user'], function () {
+    Route::group(['middleware' => 'api','prefix' => 'user'], function () {
+
         Route::post('signup', [
             'uses' => 'UserController@signup'
         ]);
