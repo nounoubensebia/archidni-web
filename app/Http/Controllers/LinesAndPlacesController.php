@@ -18,7 +18,6 @@ class LinesAndPlacesController extends Controller
 
     public function getAllPlacesAndLines (Request $request)
     {
-        return response()->json($request->route());
         $lines = Line::all();
         $data = array();
         $data['lines'] = LineResource::collection($lines);

@@ -3,10 +3,37 @@
 namespace App\Http\Controllers;
 
 use App\User;
+use Carbon\Carbon;
+use Illuminate\Database\Connection;
+use Illuminate\Events\Dispatcher;
 use Illuminate\Http\Request;
 
+
+use Illuminate\Support\Facades\DB;
+use Laravel\Passport\Bridge\AccessToken;
+use Laravel\Passport\Bridge\AccessTokenRepository;
+use Laravel\Passport\Bridge\Client;
+use Laravel\Passport\Bridge\RefreshToken;
+use Laravel\Passport\Bridge\RefreshTokenRepository;
+use Laravel\Passport\Events\RefreshTokenCreated;
+use Laravel\Passport\TokenRepository;
+use League\OAuth2\Server\CryptKey;
+use Matthewbdaly\LaravelInternalRequests\Exceptions\FailedInternalRequestException;
+use Matthewbdaly\LaravelInternalRequests\Services\InternalRequest;
 use Tymon\JWTAuth\Exceptions\JWTException;
-use JWTAuth;
+use Illuminate\Support\Facades\Auth;
+
+
+
+use DateTime;
+use GuzzleHttp\Psr7\Response;
+
+use Laravel\Passport\Passport;
+
+use League\OAuth2\Server\Entities\AccessTokenEntityInterface;
+use League\OAuth2\Server\Exception\OAuthServerException;
+use League\OAuth2\Server\Exception\UniqueTokenIdentifierConstraintViolationException;
+use League\OAuth2\Server\ResponseTypes\BearerTokenResponse;
 
 class UserController extends Controller
 {
@@ -23,11 +50,19 @@ class UserController extends Controller
         if(count($found)==0)
         {
             $user->save();
-            $response = [
-                'msg' => 'user_created',
-                'user' => $user
-            ];
-            return response()->json($response,201);
+            try {
+                $tokens = $this->getTokens($request->input('email'), $request->input('password'));
+                $response = [
+                    'msg' => 'user_created',
+                    'user' => $user,
+                    'tokens' => $tokens
+                ];
+                return response()->json($response,201);
+            } catch (FailedInternalRequestException $e) {
+                return response()->json(["msg" => "internal server error"],500);
+            }
+
+
         }
         else
         {
@@ -43,36 +78,43 @@ class UserController extends Controller
         $email = $request->input('email');
         $pass = $request->input('password');
 
-        /*$user = User::query()->where('email',$email)->get();
-        //return $user->first()->password;
-        if ($user->count()==0||!Hash::check($pass,$user->first()->password))
-        {
-            $response = [
-                'msg' => 'error, email or password incorrect'
-            ];
-            return response()->json($response,401);
+        $credentials = $request->only('email','password');
+        if (Auth::once($credentials)) {
+            $user = Auth::user();
+            try {
+                $tokens = $this->getTokens($email,$pass);
+            } catch (FailedInternalRequestException $e) {
+                return response()->json(['message' => 'internal server error'],500);
+            }
+            return response()->json(['user' => $user,'tokens' =>$tokens],200);
         }
         else
         {
-            $response = [
-                'msg' =>'user_logged_in',
-                'user' => $user->first()
-            ];
-            return response()->json($response,200);
-        }*/
-        $credentials = $request->only('email','password');
-        try {
-            if (!$token = JWTAuth::attempt($credentials))
-            {
-                return response()->json(['msg' =>'Invalid Credentials'],401);
-            }
-
-        } catch (JWTException $JWTException)
-        {
-            return response()->json(['msg' => 'Could not create token']);
+            return response()->json(['msg' =>'Invalid Credentials'],401);
         }
+    }
 
-        return response()->json(['token' => $token]);
+    /**
+     * @param $user
+     * @return array
+     * @throws FailedInternalRequestException
+     */
+    private function getTokens ($email,$pass)
+    {
+        $service = new InternalRequest(app());
+            $resp = $service->request('POST', '/oauth/token', [
+                'grant_type' => 'password',
+                'client_id' => '2',
+                'client_secret' => 'YxXYNvrTWIxTpZQaqINcGmUlIl6o6TqJziVB601G',
+                'username' => $email,
+                'password' => $pass,
+                'scope' => '*',
+            ]);
+            $responseObj = json_decode($resp->getContent());
+            $expiresIn = $responseObj->expires_in;
+            $accessToken = $responseObj->access_token;
+            $refreshToken = $responseObj->refresh_token;
+            return ['expires_in' => $expiresIn,'access_token'=>$accessToken,'refresh_token'=>$refreshToken];
     }
 
 }
