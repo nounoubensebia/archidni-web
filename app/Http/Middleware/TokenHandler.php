@@ -22,6 +22,8 @@ use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use JWTAuth;
 use Illuminate\Contracts\Auth\Factory as Auth;
 
+use DeepCopy\DeepCopy;
+
 class TokenHandler
 {
 
@@ -50,9 +52,13 @@ class TokenHandler
      */
     public function handle($request, Closure $next, ...$guards)
     {
-        //return response()->json($guards);
-        $headers = $request->headers->all();
 
+        $headers = $request->headers->all();
+        $copier = new DeepCopy(true);
+        $oldRequst = $copier->copy($request);
+        $oldRequst = $request->duplicate();
+        //return response()->json($oldRequst->route());
+        //$oldRequst = unserialize($oldRequst);
         if (isset($headers['authorization']))
         {
             try {
@@ -65,8 +71,13 @@ class TokenHandler
         }
         else
         {
+
             if (isset($headers['refresh-token']))
             {
+                if (isset($headers['authorization']))
+                {
+                    return response()->json(['message' => 'Unauthenticated'],401);
+                }
 
                 $refreshRequest = Request::create('oauth/token','POST',
                     [
@@ -75,20 +86,20 @@ class TokenHandler
                         'client_id' => '2',
                         'client_secret' => 'YxXYNvrTWIxTpZQaqINcGmUlIl6o6TqJziVB601G',
                         'scope' => '*',
-                    ]);
+                    ],[],[],['HTTP_Accept'             => 'application/json']);
 
-
-
+                $resp = Route::dispatch($refreshRequest);
+                return $resp;
                 $service = new InternalRequest(app());
 
                 try {
-                    $resp = $service->request('POST', '/oauth/token', [
+                    /*$resp = $service->request('POST', '/oauth/token', [
                         'grant_type' => 'refresh_token',
                         'refresh_token' => $headers['refresh-token'][0],
                         'client_id' => '2',
                         'client_secret' => 'YxXYNvrTWIxTpZQaqINcGmUlIl6o6TqJziVB601G',
-                        'scope' => '*',
-                    ]);
+                        'scope' => '',
+                    ]);*/
 
                     /*$resp = $service->request('GET', '/api/test', [
                         'grant_type' => 'refresh_token',
@@ -98,24 +109,24 @@ class TokenHandler
                         'scope' => '*',
                     ]);*/
                 } catch (FailedInternalRequestException $e) {
-
-                    return response()->json($e->getResponse()->content());
+                    return $next($oldRequst);
+                    $str = $e->getResponse()->getContent();
+                    return response($str,401);
                 }
-                //return response()->json($refreshRequest->all());
-                //return response()->json($refreshRequest->input('grant_type'));
-                /*$request->headers->set('grant_type','password');
-                $request->headers->set('refresh_token',$headers['refresh-token']);
-                $request->headers->set('client_id','2');
-                $request->headers->set('client_secret','YxXYNvrTWIxTpZQaqINcGmUlIl6o6TqJziVB601G');
-                $request->headers->set('scope','*');*/
 
-                //$response = $client->get("www.google.com");
-                //return response()->json($headersa);
-
-                //$response = Route::dispatch($refreshRequest);
-                return $resp;
+                return $next($oldRequst);
+                //$content = $resp->getContent();
+                //$jsonObj = json_decode($content);
+                //$error = $jsonObj->error;
+                //return $error;
                 //return $response;
-                return $response;
+                $respObj = json_decode($resp->getContent());
+                $access_token = $respObj->access_token;
+                $refresh_token = $respObj->refresh_token;
+                //$responsea->headers->set('access-token',$access_token);
+                //$responsea->headers->set('refresh-token',$refresh_token);
+
+
             }
         }
 

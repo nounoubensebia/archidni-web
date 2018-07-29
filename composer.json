@@ -13,6 +13,7 @@
         "laravel/passport": "~4.0",
         "laravel/tinker": "~1.0",
         "matthewbdaly/laravel-internal-requests": "^0.0.1",
+        "myclabs/deep-copy": "^1.8",
         "paragonie/random_compat": "2.*",
         "tymon/jwt-auth": "^0.5.12"
     },
