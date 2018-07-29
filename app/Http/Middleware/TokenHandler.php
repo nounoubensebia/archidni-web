@@ -3,11 +3,21 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use GuzzleHttp\Client;
+
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Middleware\Authenticate;
 
 use Illuminate\Contracts\Auth\Guard;
+
+use Illuminate\Http\Request;
+
+use Illuminate\Support\Facades\Route;
+
+
+use Matthewbdaly\LaravelInternalRequests\Exceptions\FailedInternalRequestException;
+use Matthewbdaly\LaravelInternalRequests\Services;
+
+use Matthewbdaly\LaravelInternalRequests\Services\InternalRequest;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use JWTAuth;
 use Illuminate\Contracts\Auth\Factory as Auth;
@@ -57,16 +67,55 @@ class TokenHandler
         {
             if (isset($headers['refresh-token']))
             {
-                $http = new Client();
-                $response = $http->post('http://localhost:8000/oauth/token', [
-                    'form_params' => [
+
+                $refreshRequest = Request::create('oauth/token','POST',
+                    [
                         'grant_type' => 'refresh_token',
                         'refresh_token' => $headers['refresh-token'],
                         'client_id' => '2',
                         'client_secret' => 'YxXYNvrTWIxTpZQaqINcGmUlIl6o6TqJziVB601G',
                         'scope' => '*',
-                    ],
-                ]);
+                    ]);
+
+
+
+                $service = new InternalRequest(app());
+
+                try {
+                    $resp = $service->request('POST', '/oauth/token', [
+                        'grant_type' => 'refresh_token',
+                        'refresh_token' => $headers['refresh-token'][0],
+                        'client_id' => '2',
+                        'client_secret' => 'YxXYNvrTWIxTpZQaqINcGmUlIl6o6TqJziVB601G',
+                        'scope' => '*',
+                    ]);
+
+                    /*$resp = $service->request('GET', '/api/test', [
+                        'grant_type' => 'refresh_token',
+                        'refresh_token' => $headers['refresh-token'],
+                        'client_id' => '2',
+                        'client_secret' => 'YxXYNvrTWIxTpZQaqINcGmUlIl6o6TqJziVB601G',
+                        'scope' => '*',
+                    ]);*/
+                } catch (FailedInternalRequestException $e) {
+
+                    return response()->json($e->getResponse()->content());
+                }
+                //return response()->json($refreshRequest->all());
+                //return response()->json($refreshRequest->input('grant_type'));
+                /*$request->headers->set('grant_type','password');
+                $request->headers->set('refresh_token',$headers['refresh-token']);
+                $request->headers->set('client_id','2');
+                $request->headers->set('client_secret','YxXYNvrTWIxTpZQaqINcGmUlIl6o6TqJziVB601G');
+                $request->headers->set('scope','*');*/
+
+                //$response = $client->get("www.google.com");
+                //return response()->json($headersa);
+
+                //$response = Route::dispatch($refreshRequest);
+                return $resp;
+                //return $response;
+                return $response;
             }
         }
 

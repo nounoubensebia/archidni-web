@@ -28,6 +28,9 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
  * sample execution
  * index.php/api/findPath?origin=36.733245,3.156908&destination=36.769238,3.236513&time=5:30&day=2
  * */
+
+Route::get('/test','test@test');
+
 Route::get('/findPath', 'PathFinderController@findPath');
 
 Route::get('/generatePath', 'PathFinderController@generatePath');
