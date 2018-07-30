@@ -39,8 +39,10 @@ Route::get('/generatePath', 'PathFinderController@generatePath');
 Route::get('/transferTest', ['uses' => "StationController@getTransfersTest"]);
 
 
-Route::group(['prefix' => 'v1',], function () {
-    Route::get('/linesAndPlaces', ['uses' => 'LinesAndPlacesController@getAllPlacesAndLines'])->name('all_lines_and_places')->middleware('token.handler:api');;
+Route::group(['prefix' => 'v1','middleware' => ['token.handler:api']], function () {
+    Route::get('/linesAndPlaces', ['uses' => 'LinesAndPlacesController@getAllPlacesAndLines'])
+        ->name('all_lines_and_places');
+        //->middleware('token.handler:api');
 
 
     Route::group(['prefix' => 'line'], function () {
