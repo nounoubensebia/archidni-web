@@ -21,13 +21,7 @@ class LineController extends Controller
         return LineResource::collection($lines);
     }
 
-    public function getLinesPassingByStation (Request $request,$id)
-    {
-        $lines = Line::query()->whereHas('sections',function ($query) use ($id) {
-           $query->where('origin_id','=',$id)->orWhere('destination_id','=',$id);
-        })->get();
-        return LineResource::collection($lines);
-    }
+
 
     public function getLineAutocompleteSuggestions (Request $request)
     {

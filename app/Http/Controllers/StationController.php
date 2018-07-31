@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\LineResource;
 use App\Http\Resources\StationResource;
+use App\Line;
 use App\Station;
 use Illuminate\Http\Request;
 
@@ -30,5 +32,31 @@ class StationController extends Controller
         $stations = Station::with("transfers")->get();
 
         return response()->json($stations[200]->transfers,200);
+    }
+
+    public function getTransfers (Request $request,$id)
+    {
+        $station = Station::find($id);
+        $transfers = $station->transfers;
+        foreach ($transfers as $transfer)
+        {
+            $transfer['lines'] = $this->getLines($transfer['id']);
+            unset($transfer['pivot']);
+        }
+
+        return response()->json($transfers,200);
+    }
+
+    public function getLinesPassingByStation (Request $request,$id)
+    {
+        return $this->getLines($id);
+    }
+
+    private function getLines ($id)
+    {
+        $lines = Line::query()->whereHas('sections',function ($query) use ($id) {
+            $query->where('origin_id','=',$id)->orWhere('destination_id','=',$id);
+        })->get();
+        return LineResource::collection($lines);
     }
 }

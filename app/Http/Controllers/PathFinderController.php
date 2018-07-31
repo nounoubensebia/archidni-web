@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\GeoUtils;
+use App\Http\Controllers\PathFinderApi\PathCombiner;
 use App\Http\Controllers\PathFinderApi\PathRetriever;
 use App\Http\Controllers\PathFinderApi\PathsFormatter;
 use App\Http\Controllers\PathFinderApi\PathUtils;
@@ -38,7 +39,8 @@ class PathFinderController extends Controller
         $root = json_decode($pathJson);
         $paths = $root->formattedPaths;
         $pathsFormatter = new PathsFormatter($paths,false);
-        return response()->json($pathsFormatter->formatPaths());
+        $combinedPaths = (new PathCombiner())->getCombinedPaths($pathsFormatter->formatPaths());
+        return response()->json($combinedPaths);
     }
 
 

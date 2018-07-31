@@ -69,8 +69,11 @@ Route::group(['prefix' => 'v1'], function () {
             'uses' => 'StationController@getStation'
         ]);
         Route::get('{id}/lines', [
-            'uses' => 'LineController@getLinesPassingByStation'
+            'uses' => 'StationController@getLinesPassingByStation'
         ])->name('lines_passing_by_station');
+        Route::get('{id}/transfers',[
+            'uses' => 'StationController@getTransfers'
+        ])->name('station_transfers');
 
     });
 
