@@ -37,9 +37,6 @@ use League\OAuth2\Server\ResponseTypes\BearerTokenResponse;
 
 class UserController extends Controller
 {
-    //
-
-
 
     public function signup (Request $request)
     {
@@ -61,8 +58,6 @@ class UserController extends Controller
             } catch (FailedInternalRequestException $e) {
                 return response()->json(["msg" => "internal server error"],500);
             }
-
-
         }
         else
         {
@@ -115,6 +110,30 @@ class UserController extends Controller
             $accessToken = $responseObj->access_token;
             $refreshToken = $responseObj->refresh_token;
             return ['expires_in' => $expiresIn,'access_token'=>$accessToken,'refresh_token'=>$refreshToken];
+    }
+
+    public function updatePassword ($id,Request $request)
+    {
+        $user = Auth::user();
+        if ($user->id != $id)
+        {
+            return response()->json(["message" => "Unauthenticated"],401);
+        }
+        $user->password = bcrypt($request->input("new_password"));
+        $user->save();
+        $userTokens = $user->tokens;
+        foreach ($userTokens as $userToken)
+        {
+            $userToken->revoke();
+        }
+        try {
+            $tokens = $this->getTokens($user->email, $request->input("new_password"));
+        } catch (FailedInternalRequestException $e) {
+            //return $e->getResponse();
+            //return response()->json(['email' => $user->email,"password" => $request->input("new_password")]);
+            return response()->json(["msg" => "internal server error"],500);
+        }
+        return response()->json(["message" => "Password Changed","tokens" => $tokens]);
     }
 
 }

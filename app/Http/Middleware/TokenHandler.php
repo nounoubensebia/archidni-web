@@ -54,80 +54,15 @@ class TokenHandler
     {
 
         $headers = $request->headers->all();
-        $copier = new DeepCopy(true);
-        $oldRequst = $copier->copy($request);
-        $oldRequst = $request->duplicate();
-        //return response()->json($oldRequst->route());
-        //$oldRequst = unserialize($oldRequst);
         if (isset($headers['authorization']))
         {
             try {
-            $this->authenticate($guards);
+                $this->authenticate($guards);
             } catch (AuthenticationException $authenticationException)
             {
                 return response()->json(['message' => 'Unauthenticated'],401);
             }
             return $next($request);
-        }
-        else
-        {
-
-            if (isset($headers['refresh-token']))
-            {
-                if (isset($headers['authorization']))
-                {
-                    return response()->json(['message' => 'Unauthenticated'],401);
-                }
-
-                $refreshRequest = Request::create('oauth/token','POST',
-                    [
-                        'grant_type' => 'refresh_token',
-                        'refresh_token' => $headers['refresh-token'],
-                        'client_id' => '2',
-                        'client_secret' => 'YxXYNvrTWIxTpZQaqINcGmUlIl6o6TqJziVB601G',
-                        'scope' => '*',
-                    ],[],[],['HTTP_Accept'             => 'application/json']);
-
-                $resp = Route::dispatch($refreshRequest);
-                return $resp;
-                $service = new InternalRequest(app());
-
-                try {
-                    /*$resp = $service->request('POST', '/oauth/token', [
-                        'grant_type' => 'refresh_token',
-                        'refresh_token' => $headers['refresh-token'][0],
-                        'client_id' => '2',
-                        'client_secret' => 'YxXYNvrTWIxTpZQaqINcGmUlIl6o6TqJziVB601G',
-                        'scope' => '',
-                    ]);*/
-
-                    /*$resp = $service->request('GET', '/api/test', [
-                        'grant_type' => 'refresh_token',
-                        'refresh_token' => $headers['refresh-token'],
-                        'client_id' => '2',
-                        'client_secret' => 'YxXYNvrTWIxTpZQaqINcGmUlIl6o6TqJziVB601G',
-                        'scope' => '*',
-                    ]);*/
-                } catch (FailedInternalRequestException $e) {
-                    return $next($oldRequst);
-                    $str = $e->getResponse()->getContent();
-                    return response($str,401);
-                }
-
-                return $next($oldRequst);
-                //$content = $resp->getContent();
-                //$jsonObj = json_decode($content);
-                //$error = $jsonObj->error;
-                //return $error;
-                //return $response;
-                $respObj = json_decode($resp->getContent());
-                $access_token = $respObj->access_token;
-                $refresh_token = $respObj->refresh_token;
-                //$responsea->headers->set('access-token',$access_token);
-                //$responsea->headers->set('refresh-token',$refresh_token);
-
-
-            }
         }
 
         return response()->json(['message' => 'Unauthenticated'],401);

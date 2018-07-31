@@ -20,11 +20,6 @@ class CompanyNotificationController extends Controller
         //
         $companyNotifications = CompanyNotification::with('lines','transportMode')->
         whereRaw('end_datetime > CURRENT_TIMESTAMP()')->orWhereRaw('end_datetime IS NULL');
-        $mobileHeader = $request->header('mobile');
-        if (isset($mobileHeader))
-        {
-            $companyNotifications = $companyNotifications->whereRaw('start_datetime < CURRENT_TIMESTAMP()');
-        }
         $companyNotifications = $companyNotifications->get();
         return response()->json($companyNotifications);
     }

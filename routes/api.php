@@ -39,13 +39,13 @@ Route::get('/generatePath', 'PathFinderController@generatePath');
 Route::get('/transferTest', ['uses' => "StationController@getTransfersTest"]);
 
 
-Route::group(['prefix' => 'v1','middleware' => ['token.handler:api']], function () {
+Route::group(['prefix' => 'v1'], function () {
     Route::get('/linesAndPlaces', ['uses' => 'LinesAndPlacesController@getAllPlacesAndLines'])
-        ->name('all_lines_and_places');
-        //->middleware('token.handler:api');
+        ->name('all_lines_and_places')
+        ->middleware('token.handler:api');
 
 
-    Route::group(['prefix' => 'line'], function () {
+    Route::group(['prefix' => 'line','middleware' => ['token.handler:api']], function () {
         Route::get('etusa', [
             'uses' => 'LineController@getEtusaLines'
         ])->name('etusa_lines');
@@ -61,7 +61,7 @@ Route::group(['prefix' => 'v1','middleware' => ['token.handler:api']], function 
     });
 
 
-    Route::group(['prefix' => '/station'], function () {
+    Route::group(['prefix' => '/station','middleware' => ['token.handler:api']], function () {
         Route::get('autocomplete', [
             'uses' => 'StationController@getStationAutocompleteSuggestions'
         ])->name('station_autocomplete');
@@ -75,7 +75,7 @@ Route::group(['prefix' => 'v1','middleware' => ['token.handler:api']], function 
     });
 
 
-    Route::group(['middleware' => 'api','prefix' => 'user'], function () {
+    Route::group(['prefix' => 'user'], function () {
 
         Route::post('signup', [
             'uses' => 'UserController@signup'
@@ -83,9 +83,12 @@ Route::group(['prefix' => 'v1','middleware' => ['token.handler:api']], function 
         Route::post('login', [
             'uses' => 'UserController@login'
         ]);
+        Route::post('{id}/update-password',[
+           'uses' => 'UserController@updatePassword'
+        ])->middleware('token.handler:api');
     });
 
-    Route::resource('CompanyNotifications', 'CompanyNotificationController');
+    Route::resource('CompanyNotifications', 'CompanyNotificationController')->middleware('token.handler:api');
 
 });
 

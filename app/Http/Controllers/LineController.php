@@ -55,7 +55,6 @@ class LineController extends Controller
             ->get();
         $notificationsWithoutLines = CompanyNotification::where('transport_mode_id','=',$line->transport_mode_id)
             ->whereRaw('(end_datetime > CURRENT_TIMESTAMP()or end_datetime IS NULL)')
-            ->whereRaw('start_datetime < CURRENT_TIMESTAMP()')
             ->doesntHave('lines')
             ->with('lines')
             ->get();
