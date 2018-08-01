@@ -41,6 +41,8 @@ class PathCombiner
                         $instruction = $this->getCombinedRideInstruction($instruction1,$instruction2);
                         if (isset($instruction))
                         {
+                            array_pop($combinedPath);
+                            array_push($combinedPath,$this->getCombinedWaitInstruction($path1[$i-1],$path2[$i-1]));
                             array_push($combinedPath,$instruction);
                         }
                         else
@@ -90,6 +92,17 @@ class PathCombiner
             $i++;
         }
         return $combinedPaths;
+    }
+
+    private function getCombinedWaitInstruction ($instruction1,$instruction2)
+    {
+        $instruction = $instruction1;
+        foreach ($instruction2['lines'] as $line)
+        {
+            array_push($instruction['lines'],$line);
+        }
+        $instruction['lines'] = array_unique($instruction['lines'],SORT_REGULAR);
+        return $instruction;
     }
 
     private function getCombinedRideInstruction ($instruction1,$instruction2)
