@@ -78,7 +78,6 @@ class PathCombiner
                 $cPath = $this->getCombinedPath($path1,$path2);
                 if (isset($cPath))
                 {
-                    echo "found";
                     $path1 = $cPath;
                     unset($paths[$j]);
                     $paths = array_values($paths);
@@ -155,6 +154,12 @@ class PathCombiner
         }
         $instruction['lines'] = array_unique($instruction['lines'],SORT_REGULAR);
         $instruction['stations'] = $stations;
+        $instruction['duration'] = $instruction1['duration'];
+        $instruction['polyline'] = $instruction1['polyline'];
+        if (isset($instruction1['error_margin']))
+        {
+            $instruction['error_margin'] = $instruction1['error_margin'];
+        }
         return $instruction;
     }
 }
