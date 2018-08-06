@@ -9,6 +9,7 @@
 namespace App\Http\Controllers\PathFinderApi;
 
 
+use App\Http\Controllers\LineHelper;
 use App\Line;
 use App\MetroTrip;
 use App\Station;
@@ -118,6 +119,8 @@ class PathsFormatter
         $instruction['lines'][0]['duration'] = $node->waitingTime;
         $instruction['lines'][0]['destination'] = $this->getTripDestination($tripId,$isMetroTrip)->name;
         $instruction['lines'][0]['exact_waiting_time'] = $node->isExactWaitingTime;
+        $lineHelper = new LineHelper($line);
+        $instruction['lines'][0]['has_perturbations'] = count($lineHelper->getCurrentAlerts())>0;
         $instruction['coordinate'] = $node->coordinate;
         return $instruction;
     }
