@@ -80,6 +80,7 @@
             <div class="content">
                 <div class="title m-b-md">
                     Laravel
+
                 </div>
 
                 <div class="links">
@@ -88,6 +89,16 @@
                     <a href="https://laravel-news.com">News</a>
                     <a href="https://forge.laravel.com">Forge</a>
                     <a href="https://github.com/laravel/laravel">GitHub</a>
+                    <li><a href="{{ route('settings') }}">Settings</a></li>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2">
+                    <passport-authorized-clients></passport-authorized-clients>
+                    <passport-clients></passport-clients>
+                    <passport-personal-access-tokens></passport-personal-access-tokens>
                 </div>
             </div>
         </div>

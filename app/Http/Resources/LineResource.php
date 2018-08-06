@@ -39,9 +39,14 @@ class LineResource extends Resource
             return $this->getLinesWithTrips();
         }
 
-
+        if ($request->route()->named('station_transfers'))
+        {
+            return $this->getLine();
+        }
 
     }
+
+
 
 
     private function getEtusaLines ()

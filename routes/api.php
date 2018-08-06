@@ -28,6 +28,9 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
  * sample execution
  * index.php/api/findPath?origin=36.733245,3.156908&destination=36.769238,3.236513&time=5:30&day=2
  * */
+
+Route::get('/test','test@test');
+
 Route::get('/findPath', 'PathFinderController@findPath');
 
 Route::get('/generatePath', 'PathFinderController@generatePath');
@@ -36,14 +39,19 @@ Route::get('/generatePath', 'PathFinderController@generatePath');
 Route::get('/transferTest', ['uses' => "StationController@getTransfersTest"]);
 
 
-Route::group(['prefix' => 'v1',], function () {
-    Route::get('/linesAndPlaces', ['uses' => 'LinesAndPlacesController@getAllPlacesAndLines'])->name('all_lines_and_places');
+Route::group(['prefix' => 'v1'], function () {
+    Route::get('/linesAndPlaces', ['uses' => 'LinesAndPlacesController@getAllPlacesAndLines'])
+        ->name('all_lines_and_places')
+        ->middleware('token.handler:api');
 
 
-    Route::group(['prefix' => 'line'], function () {
+    Route::group(['prefix' => 'line','middleware' => ['token.handler:api']], function () {
         Route::get('etusa', [
             'uses' => 'LineController@getEtusaLines'
         ])->name('etusa_lines');
+        Route::get('/{id}/notifications', [
+            'uses' => 'LineController@getNotifications'
+        ]);
         Route::get('autocomplete', [
             'uses' => 'LineController@getLineAutocompleteSuggestions'
         ])->name('line_autocomplete');
@@ -53,7 +61,7 @@ Route::group(['prefix' => 'v1',], function () {
     });
 
 
-    Route::group(['prefix' => '/station'], function () {
+    Route::group(['prefix' => '/station','middleware' => ['token.handler:api']], function () {
         Route::get('autocomplete', [
             'uses' => 'StationController@getStationAutocompleteSuggestions'
         ])->name('station_autocomplete');
@@ -61,22 +69,29 @@ Route::group(['prefix' => 'v1',], function () {
             'uses' => 'StationController@getStation'
         ]);
         Route::get('{id}/lines', [
-            'uses' => 'LineController@getLinesPassingByStation'
+            'uses' => 'StationController@getLinesPassingByStation'
         ])->name('lines_passing_by_station');
+        Route::get('{id}/transfers',[
+            'uses' => 'StationController@getTransfers'
+        ])->name('station_transfers');
 
     });
 
 
     Route::group(['prefix' => 'user'], function () {
+
         Route::post('signup', [
             'uses' => 'UserController@signup'
         ]);
         Route::post('login', [
             'uses' => 'UserController@login'
         ]);
+        Route::post('{id}/update-password',[
+           'uses' => 'UserController@updatePassword'
+        ])->middleware('token.handler:api');
     });
 
-    Route::resource('CompanyNotifications', 'CompanyNotificationController');
+    Route::resource('CompanyNotifications', 'CompanyNotificationController')->middleware('token.handler:api');
 
 });
 

@@ -83,8 +83,8 @@ class PathsFormatter
             }
             $nodeType = $currentNode->type;
             if (strcmp($nodeType, "firstStationInTrip") == 0) {
-                array_push($formattedPath, $this->getWaitInstruction($currentNode));
                 $i++;
+                array_push($formattedPath,$this->getWaitInstruction($currentNode));
                 $rideNodes = array();
                 array_push($rideNodes, $currentNode);
                 while (strcmp($formattedNodes[$i]->type, "stationInsideTripNode") == 0) {
@@ -106,10 +106,18 @@ class PathsFormatter
 
     private function getWaitInstruction($node)
     {
+        $tripType = $node->tripType;
+        $tripId = $node->tripId;
+        $isMetroTrip = ($tripType == 0) ? true : false;
+        $line = $this->getLine($node->lineId);
         $instruction = [];
         $instruction['type'] = "wait_instruction";
-        $instruction['duration'] = $node->waitingTime;
-        $instruction['exact_waiting_time'] = $node->isExactWaitingTime;
+        $instruction['lines'][0]['id'] = $line->id;
+        $instruction['lines'][0]['line_name'] = $line->name;
+        $instruction['lines'][0]['transport_mode_id'] = $line->transport_mode_id;
+        $instruction['lines'][0]['duration'] = $node->waitingTime;
+        $instruction['lines'][0]['destination'] = $this->getTripDestination($tripId,$isMetroTrip)->name;
+        $instruction['lines'][0]['exact_waiting_time'] = $node->isExactWaitingTime;
         $instruction['coordinate'] = $node->coordinate;
         return $instruction;
     }
@@ -123,9 +131,14 @@ class PathsFormatter
         $isMetroTrip = ($tripType == 0) ? true : false;
         $instruction = [];
         $instruction['type'] = "ride_instruction";
-        $instruction['line_name'] = $line->name;
+        $instruction['lines'] = array();
+        $instruction['lines'][0]['line_name'] = $line->name;
+        $instruction['lines'][0]['destination'] = $this->getTripDestination($tripId,$isMetroTrip)->name;
+        $instruction['lines'][0]['id'] = $line->id;
+        //$instruction['lines'][0]['waiting_time'] = $currentNode->waitingTime;
+        //$instruction['lines'][0]['exact_waiting_time'] = $currentNode->isExactWaitingTime;
         $instruction['transport_mode_id'] = $line->transport_mode_id;
-        $instruction['destination'] = $this->getTripDestination($tripId, $isMetroTrip)->name;
+        //$instruction['destination'] = $this->getTripDestination($tripId, $isMetroTrip)->name;
         $duration = 0;
         $i = 0;
         $stations = array();
@@ -142,6 +155,7 @@ class PathsFormatter
             $i++;
             $previousTimeAtStation = $currentNode->timeAtStation;
         }
+
         $instruction['stations'] = $stations;
         $instruction['polyline'] = $this->getPolylineFromRideInstruction($nodes);
         $instruction['duration'] = $duration;

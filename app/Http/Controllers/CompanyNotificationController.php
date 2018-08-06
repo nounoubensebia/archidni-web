@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\CompanyNotification;
+use App\Http\Controllers\FirebaseNotifications\NotificationsUtils;
 use App\Line;
 use App\TransportMode;
 use Illuminate\Http\Request;
@@ -14,10 +15,12 @@ class CompanyNotificationController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         //
-        $companyNotifications = CompanyNotification::all()->values();
+        $companyNotifications = CompanyNotification::with('lines','transportMode')->
+        whereRaw('end_datetime > CURRENT_TIMESTAMP()')->orWhereRaw('end_datetime IS NULL');
+        $companyNotifications = $companyNotifications->get();
         return response()->json($companyNotifications);
     }
 
@@ -44,24 +47,29 @@ class CompanyNotificationController extends Controller
     public function store(Request $request)
     {
         //
+
         $title = $request->input('title');
         $type = $request->input('type');
         $description = $request->input('description');
-        $line_id = $request->input('line_id');
+        $transportMode = $request->input('transport_mode_id');
+        $lines = $request->input('lines');
         $startDatetime = $request->input('start_datetime');
         $endDatetime = $request->input('end_datetime');
         $companyNotification = new CompanyNotification(
-            ['title' => $title,
+            [   'title' => $title,
                 'type' => $type,
+                'transport_mode_id' =>$transportMode,
                 'description' => $description,
-                'line_id' => $line_id,
                 'start_datetime' => $startDatetime,
                 'end_datetime' => $endDatetime]
         );
+        $lines = Line::find($lines);
         if ($companyNotification->save()) {
+            $companyNotification->lines()->attach($lines);
+            NotificationsUtils::send_notification(json_encode($companyNotification->load('lines')));
             $resonse = [
                 'msg' => 'notification created',
-                'notification' => $companyNotification
+                'notification' => $companyNotification->load('lines')
             ];
             return response()->json($resonse, 201);
         } else {
@@ -81,7 +89,7 @@ class CompanyNotificationController extends Controller
     public function show($id)
     {
         //
-        $notification = CompanyNotification::findOrFail($id);
+        $notification = CompanyNotification::findOrFail($id)->with('lines','transportMode')->get();
         return response()->json($notification,200);
 
     }
@@ -95,7 +103,7 @@ class CompanyNotificationController extends Controller
     public function edit($id)
     {
         //
-        $notification = CompanyNotification::find($id);
+        $notification = CompanyNotification::find($id)->with('lines')->get();
         $lines = Line::all();
         $transportModes = TransportMode::all();
         $informations = ['lines' => $lines, 'transportModes' => $transportModes];
@@ -112,15 +120,10 @@ class CompanyNotificationController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
-        //return response()->json($request);
-
-
 
         $title = $request->input('title');
         $type = $request->input('type');
         $description = $request->input('description');
-        $line_id = $request->input('line_id');
         $startDatetime = $request->input('start_datetime');
         $endDatetime = $request->input('end_datetime');
 
@@ -132,8 +135,6 @@ class CompanyNotificationController extends Controller
             $companyNotification->type = $type;
         if (isset($description))
             $companyNotification->description = $description;
-        if (isset($line_id))
-            $companyNotification->line_id= $line_id;
         if (isset($startDatetime))
             $companyNotification->start_datetime= $startDatetime;
         if (isset($endDatetime))
@@ -142,7 +143,7 @@ class CompanyNotificationController extends Controller
         if ($companyNotification->save()) {
             $resonse = [
                 'msg' => 'notification updated',
-                'notification' => $companyNotification
+                'notification' => CompanyNotification::find($id)->with('lines')->get()
             ];
             return response()->json($resonse, 201);
         } else {

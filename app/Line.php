@@ -41,4 +41,9 @@ class Line extends Model
     {
         return $this->sections()->first();
     }
+
+    public function notifications()
+    {
+        return $this->BelongsToMany('App\CompanyNotification');
+    }
 }
