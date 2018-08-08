@@ -121,6 +121,7 @@ class PathsFormatter
         $instruction['lines'][0]['exact_waiting_time'] = $node->isExactWaitingTime;
         $lineHelper = new LineHelper($line);
         $instruction['lines'][0]['has_perturbations'] = count($lineHelper->getCurrentAlerts())>0;
+        $instruction['lines'] = array_values($instruction['lines']);
         $instruction['coordinate'] = $node->coordinate;
         return $instruction;
     }
