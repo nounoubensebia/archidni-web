@@ -102,6 +102,10 @@ class PathCombiner
         }
         $instruction['lines'] = array_unique($instruction['lines'],SORT_REGULAR);
         $instruction['lines'] = array_values($instruction['lines']);
+        usort($instruction['lines'],function ($a,$b)
+        {
+            return $a['duration']>$b['duration'];
+        });
         return $instruction;
     }
 

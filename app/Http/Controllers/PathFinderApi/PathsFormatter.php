@@ -253,8 +253,18 @@ class PathsFormatter
     {
         $instruction = array();
         $polyline = $this->getWalkInstructionPolyline($originNode, $destinationNode);
+        if (!$this->useGoogleMaps)
+        {
+            $polyline = Polyline::getPointsFromPolylineObject($polyline);
+        }
+        else
+        {
+            $polyline = Polyline::getPointsFromPolylineArray($polyline);
+        }
         $instruction['type'] = "walk_instruction";
-        $instruction['polyline'] = Polyline::encode(Polyline::getPointsFromPolylineObject($polyline));
+        $instruction['polyline'] = Polyline::encode($polyline);
+        $instruction['duration'] = ceil(PathUtils::getPolylineDuration(
+            $polyline));
         return $instruction;
     }
 

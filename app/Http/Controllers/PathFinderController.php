@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\GeoUtils;
+use App\Http\Controllers\PathFinderApi\FormattedPath;
 use App\Http\Controllers\PathFinderApi\PathCombiner;
 use App\Http\Controllers\PathFinderApi\PathRetriever;
 use App\Http\Controllers\PathFinderApi\PathsFormatter;
@@ -28,6 +29,9 @@ class PathFinderController extends Controller
 
     private static $PATHFINDERURL="http://localhost:8080/path";
     private static $path_finder_data_generator_url="http://localhost:8080/generatePath";
+    private static $MAX_DURATION = "300";
+
+
     public function findPath()
     {
         if (isset($_GET)) {
@@ -40,7 +44,23 @@ class PathFinderController extends Controller
         $paths = $root->formattedPaths;
         $pathsFormatter = new PathsFormatter($paths,false);
         $combinedPaths = (new PathCombiner())->getCombinedPaths($pathsFormatter->formatPaths());
+        $combinedPaths = $this->getOnlyShortDurationPaths($combinedPaths);
         return response()->json($combinedPaths);
+    }
+
+    private function getOnlyShortDurationPaths ($combinedPaths)
+    {
+        $paths = [];
+        for ($i=0;$i<count($combinedPaths);$i++)
+        {
+            $path = $combinedPaths[$i];
+            $formattedPath = new FormattedPath($path);
+            if ($formattedPath->getDuration()<self::$MAX_DURATION)
+            {
+                array_push($paths,$path);
+            }
+        }
+        return $paths;
     }
 
 

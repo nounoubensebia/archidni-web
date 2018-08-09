@@ -22,7 +22,7 @@ class UtilFunctions
      */
     static public function getTime($pos1,$pos2)
     {
-        return self::getDistance($pos1,$pos2)*18;
+        return (self::getDistance($pos1,$pos2)*12);
     }
 
     /**
