@@ -35,9 +35,13 @@ Route::get('/findPath', 'PathFinderController@findPath');
 
 Route::get('/generatePath', 'PathFinderController@generatePath');
 
+Route::get('/testOTP', 'PathFinderController@testOTP');
+
+Route::post('/formatPaths','PathFinderController@formatPaths');
 
 Route::get('/transferTest', ['uses' => "StationController@getTransfersTest"]);
 
+Route::get('/create-gtfs',['uses' => "GtfsController@createFeed"]);
 
 Route::group(['prefix' => 'v1'], function () {
     Route::get('/linesAndPlaces', ['uses' => 'LinesAndPlacesController@getAllPlacesAndLines'])

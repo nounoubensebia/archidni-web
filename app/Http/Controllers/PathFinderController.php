@@ -19,6 +19,7 @@ use HeuristicEstimatorDijkstra;
 use Illuminate\Http\Request;
 use PathNode;
 use PathTransformer;
+use Thread;
 
 
 include "PathFinderApi/DataRetrieving/DataRetriever.php";
@@ -28,7 +29,9 @@ class PathFinderController extends Controller
 {
 
     private static $PATHFINDERURL="http://localhost:8080/path";
+    //private static $PATHFINDERURL="https://archidni-path-finder-1.herokuapp.com/path";
     private static $path_finder_data_generator_url="http://localhost:8080/generatePath";
+    //private static $path_finder_data_generator_url = "https://archidni-path-finder-1.herokuapp.com/generatePath";
     private static $MAX_DURATION = "300";
 
 
@@ -41,6 +44,16 @@ class PathFinderController extends Controller
             $attributes['destination'][0].",".$attributes['destination'][1]."&time=".$_GET['time']."&day=".$attributes['day'];
         $pathJson = file_get_contents($url);
         $root = json_decode($pathJson);
+        $paths = $root->formattedPaths;
+        $pathsFormatter = new PathsFormatter($paths,false);
+        $combinedPaths = (new PathCombiner())->getCombinedPaths($pathsFormatter->formatPaths());
+        $combinedPaths = $this->getOnlyShortDurationPaths($combinedPaths);
+        return response()->json($combinedPaths);
+    }
+
+    public function formatPaths (Request $request)
+    {
+        $root = json_decode($request->getContent());
         $paths = $root->formattedPaths;
         $pathsFormatter = new PathsFormatter($paths,false);
         $combinedPaths = (new PathCombiner())->getCombinedPaths($pathsFormatter->formatPaths());
