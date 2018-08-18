@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\GeoUtils;
 use App\Http\Controllers\PathFinderApi\FormattedPath;
+use App\Http\Controllers\PathFinderApi\OtpPathFormatter;
 use App\Http\Controllers\PathFinderApi\PathCombiner;
 use App\Http\Controllers\PathFinderApi\PathRetriever;
 use App\Http\Controllers\PathFinderApi\PathsFormatter;
@@ -15,6 +16,7 @@ use App\StationTransfers;
 use App\TrainTrip;
 use App\TransportMode;
 use AStar;
+use Carbon\Carbon;
 use HeuristicEstimatorDijkstra;
 use Illuminate\Http\Request;
 use PathNode;
@@ -34,13 +36,15 @@ class PathFinderController extends Controller
     //private static $path_finder_data_generator_url = "https://archidni-path-finder-1.herokuapp.com/generatePath";
     private static $MAX_DURATION = "300";
 
+    private static $OTP_URL = "http://localhost:8801/otp/routers/default/plan?";
 
-    public function findPath()
+
+    public function findPath(Request $request)
     {
         if (isset($_GET)) {
             $attributes = \DataRetriever::retrieveAttributes($_GET);
         }
-        $url = self::$PATHFINDERURL."?origin=".$attributes['origin'][0].",".$attributes['origin'][1]."&destination=".
+        /*$url = self::$PATHFINDERURL."?origin=".$attributes['origin'][0].",".$attributes['origin'][1]."&destination=".
             $attributes['destination'][0].",".$attributes['destination'][1]."&time=".$_GET['time']."&day=".$attributes['day'];
         $pathJson = file_get_contents($url);
         $root = json_decode($pathJson);
@@ -48,7 +52,29 @@ class PathFinderController extends Controller
         $pathsFormatter = new PathsFormatter($paths,false);
         $combinedPaths = (new PathCombiner())->getCombinedPaths($pathsFormatter->formatPaths());
         $combinedPaths = $this->getOnlyShortDurationPaths($combinedPaths);
-        return response()->json($combinedPaths);
+        return response()->json($combinedPaths);*/
+        //return $this->findPathsUsingOtp($request->all());
+        //return response()->json($this->findPathsUsingOtp($request->all()));
+        return response()->json($this->findPathsUsingOtp($request->all()));
+    }
+
+    private function findPathsUsingOtp ($attributes)
+    {
+        $url =  self::$OTP_URL."fromPlace=".$attributes['origin']."&toPlace=".$attributes['destination']."&time=".
+            $attributes['time']."&date=".$this->getDateString($attributes['date'])."&mode=TRANSIT,WALK&arriveBy=false";
+        $otpPathFormatter = new OtpPathFormatter(file_get_contents($url."&numItineraries=6"));
+        $paths = $otpPathFormatter->getFormattedPaths();
+        $url = $url."&bannedAgencies=3";
+        $otpPathFormatter = new OtpPathFormatter(file_get_contents($url."&numItineraries=3"));
+        $paths = array_merge($paths,$otpPathFormatter->getFormattedPaths());
+
+
+        return $paths;
+    }
+
+    private function getDateString ($date)
+    {
+        return date("d-m-y",$date);
     }
 
     public function formatPaths (Request $request)
