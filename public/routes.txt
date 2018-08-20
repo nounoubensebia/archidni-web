@@ -4,10 +4,10 @@ agency_id,route_id,route_short_name,route_long_name,route_type
 1,3,Banlieue Alger Est,Banlieue Alger Est,2
 1,4,Banlieue Alger Ouest,Banlieue Alger Ouest,2
 1,5,Agha-Zeralda,Agha-Zeralda,2
-3,6,Téléphérique Belouizdad,Téléphérique Belouizdad,6
-3,7,Téléphérique palais de la culture,Téléphérique palais de la culture,6
-3,8,Téléphérique du mémorial,Téléphérique du mémorial,6
-3,9,Téléphérique Triolet-Bouzaréah,Téléphérique Triolet-Bouzaréah,6
+3,6,Téléphérique Belouizdad,Téléphérique Belouizdad,0
+3,7,Téléphérique palais de la culture,Téléphérique palais de la culture,0
+3,8,Téléphérique du mémorial,Téléphérique du mémorial,0
+3,9,Téléphérique Triolet-Bouzaréah,Téléphérique Triolet-Bouzaréah,0
 3,34,1,ligne 1: EL HARRACH	 - PLACE AISSAT IDIR	,3
 3,35,3,ligne 3: CHEVALLEY	 - SOUIDANIA	,3
 3,36,4,ligne 4: PLACE  DU 1 ER MAI  	 - BEN OMAR	,3

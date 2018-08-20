@@ -55,17 +55,29 @@ class PathFinderController extends Controller
         return response()->json($combinedPaths);*/
         //return $this->findPathsUsingOtp($request->all());
         //return response()->json($this->findPathsUsingOtp($request->all()));
-        return response()->json($this->findPathsUsingOtp($request->all()));
+        return response()->json($this->findPathsUsingSpring($request->all()));
+    }
+
+    private function findPathsUsingSpring ($attributes)
+    {
+        $origin = $attributes['origin'];
+        $destination = $attributes['destination'];
+        $time = $attributes['date'];
+        $url = "http://localhost:8080/OTPpath?origin=$origin&destination=$destination&time=$time";
+        $otpPathFormatter = new OtpPathFormatter($attributes['origin'],$attributes['destination'],file_get_contents($url."&numItineraries=6"));
+        $paths = $otpPathFormatter->getFormattedPaths();
+        $endTime = round(microtime(true) * 1000);
+        return $paths;
     }
 
     private function findPathsUsingOtp ($attributes)
     {
         $url =  self::$OTP_URL."fromPlace=".$attributes['origin']."&toPlace=".$attributes['destination']."&time=".
             $attributes['time']."&date=".$this->getDateString($attributes['date'])."&mode=TRANSIT,WALK&arriveBy=false";
-        $otpPathFormatter = new OtpPathFormatter(file_get_contents($url."&numItineraries=6"));
+        $otpPathFormatter = new OtpPathFormatter($attributes['origin'],$attributes['destination'],file_get_contents($url."&numItineraries=6"));
         $paths = $otpPathFormatter->getFormattedPaths();
         $url = $url."&bannedAgencies=3";
-        $otpPathFormatter = new OtpPathFormatter(file_get_contents($url."&numItineraries=3"));
+        $otpPathFormatter = new OtpPathFormatter($attributes['origin'],$attributes['destination'],file_get_contents($url."&numItineraries=3"));
         $paths = array_merge($paths,$otpPathFormatter->getFormattedPaths());
 
 

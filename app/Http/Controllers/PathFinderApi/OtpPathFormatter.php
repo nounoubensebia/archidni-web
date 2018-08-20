@@ -9,23 +9,44 @@
 namespace App\Http\Controllers\PathFinderApi;
 
 
+use App\GeoUtils;
 use App\Http\Controllers\LineHelper;
 use App\Line;
 use App\MetroTrip;
 use App\TrainTrip;
+use Tymon\JWTAuth\Utils;
 
 class OtpPathFormatter
 {
+    private $origin;
+    private $destination;
     private $json;
+
+    /**
+     * OtpPathFormatter constructor.
+     * @param $origin
+     * @param $destination
+     * @param $json
+     */
+    public function __construct($origin, $destination, $json)
+    {
+        $this->origin = self::getLatLong($origin);
+        $this->destination = self::getLatLong($destination);
+        $this->json = $json;
+    }
+
+    private static function getLatLong($value)
+    {
+        if(preg_match("/(\d+\.\d+),(\d+\.\d+)/",$value,$tab))
+            $hash = [$tab[1],$tab[2]];
+        return $hash;
+    }
 
     /**
      * OtpPathFormatter constructor.
      * @param $json
      */
-    public function __construct($json)
-    {
-        $this->json = $json;
-    }
+
 
     public function getFormattedPaths ()
     {
@@ -33,7 +54,10 @@ class OtpPathFormatter
         if (!isset($root->error))
         {
             $plan = $root->plan;
-            $itineraries = $plan->itineraries;
+            if (isset($plan->itineraries))
+                $itineraries = $plan->itineraries;
+            else
+                $itineraries = $plan->itinerary;
             $paths = [];
             foreach ($itineraries as $itinerary)
             {
@@ -51,6 +75,7 @@ class OtpPathFormatter
     {
         $legs = $itinerary->legs;
         $instructions = [];
+        $i=0;
         foreach ($legs as $leg)
         {
             $mode = $leg->mode;
@@ -60,11 +85,52 @@ class OtpPathFormatter
             }
             else
             {
-                array_push($instructions,$this->getWaitInstruction($leg));
+                if ($i==0)
+                {
+                    array_push($instructions,$this->generateOriginWalkInstruction($leg));
+                }
+                array_push($instructions,$this->getWaitInstruction($leg,$itinerary));
                 array_push($instructions,$this->getRideInstruction($leg));
+                if ($i==count($legs)-1)
+                {
+                    array_push($instructions,$this->generateDestinationInstruction($leg));
+                }
             }
+            $i++;
         }
         return $instructions;
+    }
+
+    private function getRideDuration ($start,$end,$trip)
+    {
+        $stations = $this->getStationsIn($start,$end,$trip);
+        $startTime = $stations[0]->pivot->minutes;
+        $endTime = $stations[count($stations)-1]->pivot->minutes;
+        return $endTime-$startTime;
+    }
+
+    private function getTimeFromDateObject ($obj)
+    {
+        if (isset($obj->year))
+        {
+            $date = new \DateTime($obj->year."-".$obj->month."-".$obj->dayOfMonth." ".$obj->hourOfDay.":".
+            $obj->minute.":".$obj->second);
+            return $date->getTimestamp()*1000;
+        }
+        else
+            return $obj;
+    }
+
+    private function generateOriginWalkInstruction ($rideLeg)
+    {
+        $instruction = [];
+        $instruction['type'] = "walk_instruction";
+        $instruction['duration'] = \UtilFunctions::getTime($this->origin,[$rideLeg->from->lat,$rideLeg->from->lon]);
+        $destinationName = $rideLeg->from->name;
+        $instruction['destination'] = $destinationName;
+        $instruction['polyline'] = Polyline::encode([[$rideLeg->from->lat,$rideLeg->from->lon],$this->origin]);
+        $instruction['destination_type'] = "station";
+        return $instruction;
     }
 
     private function getWalkInstruction ($leg)
@@ -73,7 +139,7 @@ class OtpPathFormatter
         $instruction['type'] = "walk_instruction";
         $endTime = $leg->endTime;
         $startTime = $leg->startTime;
-        $duration = $endTime-$startTime;
+        $duration = $this->getTimeFromDateObject($endTime)-$this->getTimeFromDateObject($startTime);
         $duration /=1000;
         $duration /=60;
         $duration = (int) $duration;
@@ -88,7 +154,19 @@ class OtpPathFormatter
         return $instruction;
     }
 
-    private function getWaitInstruction ($leg)
+    private function generateDestinationInstruction ($rideLeg)
+    {
+        $instruction = [];
+        $instruction['type'] = "walk_instruction";
+        $instruction['duration'] = \UtilFunctions::getTime($this->destination,[$rideLeg->to->lat,$rideLeg->to->lon]);
+        $destinationName = $rideLeg->to->name;
+        $instruction['polyline'] = Polyline::encode([[$rideLeg->to->lat,$rideLeg->to->lon],$this->destination]);
+        $instruction['destination'] = $destinationName;
+        $instruction['destination_type'] = "station";
+        return $instruction;
+    }
+
+    private function getWaitInstruction ($leg,$itinerary)
     {
         $instruction = [];
         $instruction['type'] = "wait_instruction";
@@ -102,7 +180,12 @@ class OtpPathFormatter
         $lineArray['id'] = $line->id;
         $lineArray['line_name'] = $line->name;
         $lineArray['transport_mode_id'] = $line->transport_mode_id;
-        $duration = $leg->from->departure - $leg->from->arrival;
+        if (isset($leg->from->arrival))
+            $duration = $this->getTimeFromDateObject($leg->from->departure) - $this->getTimeFromDateObject($leg->from->arrival);
+        else
+        {
+            $duration = $this->getTimeFromDateObject($leg->startTime)- $this->getTimeFromDateObject($itinerary->startTime);
+        }
         $duration /=1000;
         $duration /=60;
         $duration = (int) $duration;
@@ -124,13 +207,12 @@ class OtpPathFormatter
         $line = $info['line'];
         $trip = $info['trip'];
         $instruction ['transport_mode_id'] = $line->transport_mode_id;
-        $startId = explode(":",$leg->from->stopId);
-        $startId = $startId[1];
-        $endId = explode(":",$leg->to->stopId);
-        $endId = $endId[1];
-        $instruction['stations'] = $this->getStationsIn($startId,$endId,$trip);
+        //$startId = explode(":",$leg->from->stopId);
+        $startId = $this->getId($leg->from->stopId);
+        $endId = $this->getId($leg->to->stopId);
+        $instruction['stations'] = $this->getFormattedStationsIn($startId,$endId,$trip);
         $instruction['polyline'] = $this->getPolylineFromRideInstruction($line,$trip,$instruction['stations']);
-        $instruction['duration'] = $leg->duration/60;
+        $instruction['duration'] = $this->getRideDuration($startId,$endId,$trip);
         $instruction['error_margin'] = 0.2;
         return $instruction;
     }
@@ -229,7 +311,7 @@ class OtpPathFormatter
         return null;
     }
 
-    private function getStationsIn ($startId,$endId,$trip)
+    private function getStationsIn ($startId, $endId, $trip)
     {
         $stations = [];
         $allStations = $trip->stations;
@@ -242,16 +324,27 @@ class OtpPathFormatter
             }
             if ($inside)
             {
-                $stationArray = [];
-                $stationArray['id'] = $station->id;
-                $stationArray['name'] = $station->name;
-                $stationArray['coordinate'] = [];
-                $stationArray['coordinate']['latitude'] = $station->latitude;
-                $stationArray['coordinate']['longitude'] = $station->longitude;
-                array_push($stations,$stationArray);
+                array_push($stations,$station);
             }
             if ($station->id==$endId)
                 break;
+        }
+        return $stations;
+    }
+
+    private function getFormattedStationsIn ($startId, $endId, $trip)
+    {
+        $stations = [];
+        $allStations = $this->getStationsIn($startId,$endId,$trip);
+        foreach ($allStations as $station)
+        {
+            $stationArray = [];
+            $stationArray['id'] = $station->id;
+            $stationArray['name'] = $station->name;
+            $stationArray['coordinate'] = [];
+            $stationArray['coordinate']['latitude'] = $station->latitude;
+            $stationArray['coordinate']['longitude'] = $station->longitude;
+            array_push($stations,$stationArray);
         }
         return $stations;
     }
@@ -270,20 +363,18 @@ class OtpPathFormatter
     private function getLineTripInfo ($leg)
     {
         $info = [];
-        $routeId = $leg->routeId;
-        $routeId = explode(":",$routeId);
-        $line = Line::find($routeId[1]);
-        $tripId = $leg->tripId;
-        $tripId = explode(":",$tripId);
-        if ($this->strContains("m",$tripId[1]))
+        $routeId = $this->getId($leg->routeId);
+        $line = Line::find($routeId);
+        $tripId = $this->getId($leg->tripId);
+        if ($this->strContains("m",$tripId))
         {
-            $tripId = substr($tripId[1],1);
+            $tripId = substr($tripId,1);
             $trip = MetroTrip::find($tripId);
             $info['is_metro_trip'] = true;
         }
         else
         {
-            $tripId = substr($tripId[1],1);
+            $tripId = substr($tripId,1);
             $trip = TrainTrip::find($tripId);
             $info['is_metro_trip'] = true;
         }
@@ -292,7 +383,18 @@ class OtpPathFormatter
         return $info;
     }
 
-
+    private function getId ($idObj)
+    {
+        if (isset($idObj->agencyId))
+        {
+            return $idObj->id;
+        }
+        else
+        {
+            $routeId = explode(":",$idObj);
+            return $idObj[1];
+        }
+    }
 
     private function strContains($needle, $haystack)
     {

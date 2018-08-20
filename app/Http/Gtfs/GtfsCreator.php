@@ -194,7 +194,7 @@ class GtfsCreator
         }
         if ($transport_mode_id==5)
         {
-            return 6;
+            return 0;
         }
         return 7;
     }
