@@ -21,4 +21,9 @@ class MetroTrip extends Model
     {
         return $this->belongsToMany('App\Station')->withPivot(['minutes']);
     }
+
+    public function commonSections()
+    {
+        return $this->belongsToMany('App\CommonSection');
+    }
 }

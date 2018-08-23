@@ -20,3 +20,5 @@ Route::get('/about',function () {
 });
 
 Route::get('/settings', 'SettingsController@index')->name('settings');
+
+Route::get('/commonSection','CommonSectionController@fillDatabase');
