@@ -9,6 +9,7 @@
 namespace App\Http\Controllers\PathFinderApi;
 
 
+use App\Http\Controllers\LineHelper;
 use App\Line;
 use App\MetroTrip;
 use App\Station;
@@ -118,6 +119,9 @@ class PathsFormatter
         $instruction['lines'][0]['duration'] = $node->waitingTime;
         $instruction['lines'][0]['destination'] = $this->getTripDestination($tripId,$isMetroTrip)->name;
         $instruction['lines'][0]['exact_waiting_time'] = $node->isExactWaitingTime;
+        $lineHelper = new LineHelper($line);
+        $instruction['lines'][0]['has_perturbations'] = count($lineHelper->getCurrentAlerts())>0;
+        $instruction['lines'] = array_values($instruction['lines']);
         $instruction['coordinate'] = $node->coordinate;
         return $instruction;
     }
@@ -249,8 +253,18 @@ class PathsFormatter
     {
         $instruction = array();
         $polyline = $this->getWalkInstructionPolyline($originNode, $destinationNode);
+        if (!$this->useGoogleMaps)
+        {
+            $polyline = Polyline::getPointsFromPolylineObject($polyline);
+        }
+        else
+        {
+            $polyline = Polyline::getPointsFromPolylineArray($polyline);
+        }
         $instruction['type'] = "walk_instruction";
-        $instruction['polyline'] = Polyline::encode(Polyline::getPointsFromPolylineObject($polyline));
+        $instruction['polyline'] = Polyline::encode($polyline);
+        $instruction['duration'] = ceil(PathUtils::getPolylineDuration(
+            $polyline));
         return $instruction;
     }
 

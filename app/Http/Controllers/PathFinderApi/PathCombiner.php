@@ -101,6 +101,11 @@ class PathCombiner
             array_push($instruction['lines'],$line);
         }
         $instruction['lines'] = array_unique($instruction['lines'],SORT_REGULAR);
+        $instruction['lines'] = array_values($instruction['lines']);
+        usort($instruction['lines'],function ($a,$b)
+        {
+            return $a['duration']>$b['duration'];
+        });
         return $instruction;
     }
 
@@ -126,33 +131,18 @@ class PathCombiner
         }
 
         $instruction['lines'] = array();
-        if (isset($instruction1['line_name']))
+        foreach ($instruction1['lines'] as $line)
         {
-            $destination = $instruction1['destination'];
-            $line = ['name' => $instruction1['line_name'],'destination' =>$instruction1['destination']];
             array_push($instruction['lines'],$line);
         }
-        else
+
+        foreach ($instruction2['lines'] as $line)
         {
-            foreach ($instruction1['lines'] as $line)
-            {
-                array_push($instruction['lines'],$line);
-            }
-        }
-        if (isset($instruction2['line_name']))
-        {
-            $destination = $instruction2['destination'];
-            $line = ['name' => $instruction2['line_name'],'destination' =>$instruction2['destination']];
             array_push($instruction['lines'],$line);
         }
-        else
-        {
-            foreach ($instruction2['lines'] as $line)
-            {
-                array_push($instruction['lines'],$line);
-            }
-        }
+
         $instruction['lines'] = array_unique($instruction['lines'],SORT_REGULAR);
+        $instruction['lines'] = array_values($instruction['lines']);
         $instruction['stations'] = $stations;
         $instruction['duration'] = $instruction1['duration'];
         $instruction['polyline'] = $instruction1['polyline'];

@@ -1,0 +1,4 @@
+agency_id,agency_name,agency_url,agency_timezone
+1,SNTF,https://www.sntf.dz,Africa/Algiers
+2,RATP Algérie,test,Africa/Algiers
+3,Etusa,http://www.etusa.dz/etusa/,Africa/Algiers

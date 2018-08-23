@@ -46,4 +46,19 @@ class PathUtils
     {
         return (count($path)==2);
     }
+
+    public static function getPolylineDuration ($polyline)
+    {
+        $duration = 0;
+        $prevPoint = $polyline[0];
+        for ($i=1;$i<count($polyline);$i++)
+        {
+            $currPoint = $polyline[$i];
+            $duration += \UtilFunctions::getTime($prevPoint,$currPoint);
+            $prevPoint = $currPoint;
+        }
+        return $duration;
+    }
+
+
 }

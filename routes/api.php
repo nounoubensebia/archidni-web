@@ -29,15 +29,24 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
  * index.php/api/findPath?origin=36.733245,3.156908&destination=36.769238,3.236513&time=5:30&day=2
  * */
 
+
+Route::get("/create-station-region-map","PathServerController@createRegionStationMap");
+
+Route::get('/testotp','test@testOTP');
+
 Route::get('/test','test@test');
 
 Route::get('/findPath', 'PathFinderController@findPath');
 
 Route::get('/generatePath', 'PathFinderController@generatePath');
 
+Route::get('/testOTP', 'PathFinderController@testOTP');
+
+Route::post('/formatPaths','PathFinderController@formatPaths');
 
 Route::get('/transferTest', ['uses' => "StationController@getTransfersTest"]);
 
+Route::get('/create-gtfs',['uses' => "GtfsController@createFeed"]);
 
 Route::group(['prefix' => 'v1'], function () {
     Route::get('/linesAndPlaces', ['uses' => 'LinesAndPlacesController@getAllPlacesAndLines'])
@@ -91,7 +100,7 @@ Route::group(['prefix' => 'v1'], function () {
         ])->middleware('token.handler:api');
     });
 
-    Route::resource('CompanyNotifications', 'CompanyNotificationController')->middleware('token.handler:api');
+    Route::resource('CompanyNotifications', 'CompanyNotificationController');
 
 });
 
