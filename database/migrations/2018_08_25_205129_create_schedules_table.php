@@ -13,6 +13,7 @@ class CreateSchedulesTable extends Migration
      */
     public function up()
     {
+        Schema::dropIfExists('schedules');
         Schema::create('schedules', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('line_id')->unsigned();
@@ -20,6 +21,7 @@ class CreateSchedulesTable extends Migration
             $table->time('start_time');
             $table->time('end_time');
             $table->integer('days')->unsigned();
+            $table->integer('waiting_time');
             $table->timestamps();
         });
     }
