@@ -6,14 +6,16 @@
  * Time: 13:50
  */
 
-namespace App\Http\Controllers\PathFinderApi;
+namespace App\Http\Controllers\OtpPathFinder;
 
 
 use App\GeoUtils;
 use App\Http\Controllers\LineHelper;
+use App\Http\Controllers\PathFinderApi\Polyline;
 use App\Line;
 use App\MetroTrip;
 use App\TrainTrip;
+use InvalidDataFormatException;
 use Tymon\JWTAuth\Utils;
 
 class OtpPathFormatter
@@ -30,30 +32,46 @@ class OtpPathFormatter
      */
     public function __construct($origin, $destination, $json)
     {
-        $this->origin = self::getLatLong($origin);
-        $this->destination = self::getLatLong($destination);
+        $this->origin = $origin;
+        $this->destination = $destination;
         $this->json = $json;
     }
 
-    private static function getLatLong($value)
+
+    /**
+     * OtpPathFormatter constructor.
+     * @param $origin
+     * @param $destination
+     * @param $adjustWalking
+     * @param $json
+     */
+
+
+    private function getLatLong($value)
     {
+        $hash = [];
         if(preg_match("/(\d+\.\d+),(\d+\.\d+)/",$value,$tab))
-            $hash = [$tab[1],$tab[2]];
+            $hash = [(double)$tab[1],(double)$tab[2]];
+
         return $hash;
     }
 
     /**
      * OtpPathFormatter constructor.
+     * @param $origin
+     * @param $destination
      * @param $json
      */
+
 
 
     public function getFormattedPaths ()
     {
         $root = json_decode($this->json);
-        if (!isset($root->error))
+        $pathResponse = $root->response;
+        if (!isset($pathResponse->error))
         {
-            $plan = $root->plan;
+            $plan = $pathResponse->plan;
             if (isset($plan->itineraries))
                 $itineraries = $plan->itineraries;
             else
@@ -63,7 +81,10 @@ class OtpPathFormatter
             {
                 array_push($paths,$this->formatPath($itinerary));
             }
-            return $paths;
+            $plan = [];
+            $plan['direct_walking'] = $root->directWalking;
+            $plan['paths'] = $paths;
+            return $plan;
         }
         else
         {
@@ -125,10 +146,10 @@ class OtpPathFormatter
     {
         $instruction = [];
         $instruction['type'] = "walk_instruction";
-        $instruction['duration'] = \UtilFunctions::getTime($this->origin,[$rideLeg->from->lat,$rideLeg->from->lon]);
+        $instruction['duration'] = GeoUtils::getWalkingTime($this->origin,[$rideLeg->from->lat,$rideLeg->from->lon]);
         $destinationName = $rideLeg->from->name;
         $instruction['destination'] = $destinationName;
-        $instruction['polyline'] = Polyline::encode([[$rideLeg->from->lat,$rideLeg->from->lon],$this->origin]);
+        $instruction['polyline'] = Polyline::encode([$this->origin,[$rideLeg->from->lat,$rideLeg->from->lon]]);
         $instruction['destination_type'] = "station";
         return $instruction;
     }
@@ -158,11 +179,10 @@ class OtpPathFormatter
     {
         $instruction = [];
         $instruction['type'] = "walk_instruction";
-        $instruction['duration'] = \UtilFunctions::getTime($this->destination,[$rideLeg->to->lat,$rideLeg->to->lon]);
-        $destinationName = $rideLeg->to->name;
+        $instruction['duration'] = GeoUtils::getWalkingTime($this->destination,[$rideLeg->to->lat,$rideLeg->to->lon]);
         $instruction['polyline'] = Polyline::encode([[$rideLeg->to->lat,$rideLeg->to->lon],$this->destination]);
-        $instruction['destination'] = $destinationName;
-        $instruction['destination_type'] = "station";
+        $instruction['destination'] = $this->destination;
+        $instruction['destination_type'] = "user_destination";
         return $instruction;
     }
 

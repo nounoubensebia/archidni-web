@@ -9,6 +9,7 @@ namespace App\Http\Controllers;
 
 use App\CommonSection;
 use App\MetroTrip;
+use Illuminate\Http\Request;
 
 class CommonSectionController
 {
@@ -119,6 +120,28 @@ class CommonSectionController
         $this->createCommonSectionsFromTrips($metroTrips,true);
         $trainTrips = \App\TrainTrip::all();
         $this->createCommonSectionsFromTrips($trainTrips,false);
+    }
+
+    public function findCommonSections (Request $request)
+    {
+        $metroTripId1 = $request->input('id1');
+        $metroTripId2 = $request->input('id2');
+        $metroTrip1 = MetroTrip::find($metroTripId1);
+        $metroTrip2 = MetroTrip::find($metroTripId2);
+        $commonSections1 = $metroTrip1->commonSections;
+        $commonSections2 = $metroTrip2->commonSections;
+        $commonSections = array();
+        foreach ($commonSections1 as $commonSection1)
+        {
+            foreach ($commonSections2 as $commonSection2)
+            {
+                if ($commonSection1->id==$commonSection2->id)
+                {
+                    array_push($commonSections,$commonSection1);
+                }
+            }
+        }
+        return response()->json($commonSections);
     }
 
 }

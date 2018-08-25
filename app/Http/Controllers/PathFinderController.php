@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\GeoUtils;
 use App\Http\Controllers\PathFinderApi\FormattedPath;
-use App\Http\Controllers\PathFinderApi\OtpPathFormatter;
+use App\Http\Controllers\OtpPathFinder\OtpPathFormatter;
 use App\Http\Controllers\PathFinderApi\PathCombiner;
 use App\Http\Controllers\PathFinderApi\PathRetriever;
 use App\Http\Controllers\PathFinderApi\PathsFormatter;
@@ -20,7 +20,6 @@ use Carbon\Carbon;
 use HeuristicEstimatorDijkstra;
 use Illuminate\Http\Request;
 use PathNode;
-use PathTransformer;
 use Thread;
 
 
@@ -42,7 +41,7 @@ class PathFinderController extends Controller
     public function findPath(Request $request)
     {
         if (isset($_GET)) {
-            $attributes = \DataRetriever::retrieveAttributes($_GET);
+            //$attributes = \DataRetriever::retrieveAttributes($_GET);
         }
         /*$url = self::$PATHFINDERURL."?origin=".$attributes['origin'][0].",".$attributes['origin'][1]."&destination=".
             $attributes['destination'][0].",".$attributes['destination'][1]."&time=".$_GET['time']."&day=".$attributes['day'];
@@ -62,11 +61,13 @@ class PathFinderController extends Controller
     {
         $origin = $attributes['origin'];
         $destination = $attributes['destination'];
-        $time = $attributes['date'];
-        $url = "http://localhost:8080/OTPpath?origin=$origin&destination=$destination&time=$time";
-        $otpPathFormatter = new OtpPathFormatter($attributes['origin'],$attributes['destination'],file_get_contents($url."&numItineraries=6"));
+        $date = $attributes['date'];
+        $time = $attributes['time'];
+        $url = "http://localhost:8080/OTPpath?origin=$origin&destination=$destination&date=$date"."&time=".$time.
+            "&arriveBy=".$attributes['arriveBy']."&directWalking=false";
+        $otpPathFormatter = new OtpPathFormatter($attributes['origin'],$attributes['destination'],
+            file_get_contents($url."&numItineraries=6"));
         $paths = $otpPathFormatter->getFormattedPaths();
-        $endTime = round(microtime(true) * 1000);
         return $paths;
     }
 

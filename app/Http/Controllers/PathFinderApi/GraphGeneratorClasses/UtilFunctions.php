@@ -5,7 +5,9 @@
  * User: ressay
  * Date: 09/02/18
  * Time: 20:02
+ *
  */
+
 class UtilFunctions
 {
 

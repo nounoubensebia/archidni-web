@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\GeoUtils;
 use App\Http\Controllers\PathFinderApi\OtpPathFormatter;
 use Illuminate\Http\Request;
+use UtilFunctions;
+
 
 class test extends Controller
 {
     //
-    public function  test (Request $request)
+    public function test (Request $request)
     {
-        $headers = $request->headers->all();
-        return response()->json($headers,200);
+        return GeoUtils::getWalkingTime([36.0000,3.0000],[35.0000,3.0000]);
     }
 
     public function testOTP (Request $request)

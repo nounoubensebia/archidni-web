@@ -56,4 +56,14 @@ class LineController extends Controller
         $notificationsArray = array_merge($notificationsArray,$notificationsWithLines->toArray());
         return response()->json($notificationsArray,200);
     }
+
+    public function getSchedules (Request $request, $id)
+    {
+        $line = Line::find($id);
+        $schedules = $line->schedules;
+        if (count($schedules)>0)
+            return response()->json($schedules);
+        else
+            return response()->json($line->trainTrips);
+    }
 }
