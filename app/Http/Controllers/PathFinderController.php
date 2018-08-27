@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\GeoUtils;
+use App\Http\Controllers\OtpPathFinder\OtpPathFinder;
+use App\Http\Controllers\OtpPathFinder\PathFinderAttributes;
 use App\Http\Controllers\PathFinderApi\FormattedPath;
 use App\Http\Controllers\OtpPathFinder\OtpPathFormatter;
 use App\Http\Controllers\PathFinderApi\PathCombiner;
@@ -18,6 +20,7 @@ use App\TransportMode;
 use AStar;
 use Carbon\Carbon;
 use HeuristicEstimatorDijkstra;
+use http\Env\Response;
 use Illuminate\Http\Request;
 use PathNode;
 use Thread;
@@ -54,7 +57,7 @@ class PathFinderController extends Controller
         return response()->json($combinedPaths);*/
         //return $this->findPathsUsingOtp($request->all());
         //return response()->json($this->findPathsUsingOtp($request->all()));
-        return response()->json($this->findPathsUsingSpring($request->all()));
+        return response()->json($this->findPathsUsingSpring($request->all()),200);
     }
 
     private function findPathsUsingSpring ($attributes)
@@ -63,12 +66,14 @@ class PathFinderController extends Controller
         $destination = $attributes['destination'];
         $date = $attributes['date'];
         $time = $attributes['time'];
-        $url = "http://localhost:8080/OTPpath?origin=$origin&destination=$destination&date=$date"."&time=".$time.
+        /*$url = "http://localhost:8080/OTPpath?origin=$origin&destination=$destination&date=$date"."&time=".$time.
             "&arriveBy=".$attributes['arriveBy']."&directWalking=false";
         $otpPathFormatter = new OtpPathFormatter($attributes['origin'],$attributes['destination'],
             file_get_contents($url."&numItineraries=6"));
         $paths = $otpPathFormatter->getFormattedPaths();
-        return $paths;
+        return $paths;*/
+        $otpPathFinder = new OtpPathFinder(new PathFinderAttributes($origin,$destination,$time,$date,$attributes['arriveBy']));
+        return $otpPathFinder->findPaths();
     }
 
     private function findPathsUsingOtp ($attributes)
