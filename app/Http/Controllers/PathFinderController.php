@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\GeoUtils;
+use App\Http\Controllers\OtpPathFinder\Coordinate;
 use App\Http\Controllers\OtpPathFinder\OtpPathFinder;
 use App\Http\Controllers\OtpPathFinder\PathFinderAttributes;
 use App\Http\Controllers\PathFinderApi\FormattedPath;
@@ -22,6 +23,7 @@ use Carbon\Carbon;
 use HeuristicEstimatorDijkstra;
 use http\Env\Response;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use PathNode;
 use Thread;
 
@@ -57,23 +59,33 @@ class PathFinderController extends Controller
         return response()->json($combinedPaths);*/
         //return $this->findPathsUsingOtp($request->all());
         //return response()->json($this->findPathsUsingOtp($request->all()));
+
+
         return response()->json($this->findPathsUsingSpring($request->all()),200);
     }
 
     private function findPathsUsingSpring ($attributes)
     {
-        $origin = $attributes['origin'];
-        $destination = $attributes['destination'];
+        DB::enableQueryLog();
+        $originStr = explode(",",$attributes['origin']);
+        $destinationStr = explode(",",$attributes['destination']);
+        $origin = new Coordinate($originStr[0],$originStr[1]);
+        $destination = new Coordinate($destinationStr[0],$destinationStr[1]);
         $date = $attributes['date'];
         $time = $attributes['time'];
-        /*$url = "http://localhost:8080/OTPpath?origin=$origin&destination=$destination&date=$date"."&time=".$time.
-            "&arriveBy=".$attributes['arriveBy']."&directWalking=false";
-        $otpPathFormatter = new OtpPathFormatter($attributes['origin'],$attributes['destination'],
-            file_get_contents($url."&numItineraries=6"));
-        $paths = $otpPathFormatter->getFormattedPaths();
-        return $paths;*/
         $otpPathFinder = new OtpPathFinder(new PathFinderAttributes($origin,$destination,$time,$date,$attributes['arriveBy']));
-        return $otpPathFinder->findPaths();
+        $paths = $otpPathFinder->findPaths();
+        return $paths;
+    }
+
+    private function getQueryTime($queryLog)
+    {
+        $time = 0;
+        foreach ($queryLog as $q)
+        {
+            $time+=$q['time'];
+        }
+        return $time;
     }
 
     private function findPathsUsingOtp ($attributes)

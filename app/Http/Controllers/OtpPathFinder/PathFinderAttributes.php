@@ -21,8 +21,8 @@ class PathFinderAttributes
 
     /**
      * PathFinderAttributes constructor.
-     * @param $origin
-     * @param $destination
+     * @param Coordinate $origin
+     * @param Coordinate $destination
      * @param $time
      * @param $date
      * @param $arriveBy
@@ -62,7 +62,7 @@ class PathFinderAttributes
     }
 
     /**
-     * @return mixed
+     * @return Coordinate
      */
     public function getOrigin()
     {
@@ -70,7 +70,7 @@ class PathFinderAttributes
     }
 
     /**
-     * @return mixed
+     * @return Coordinate
      */
     public function getDestination()
     {

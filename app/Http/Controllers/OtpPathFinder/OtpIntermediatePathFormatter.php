@@ -28,8 +28,11 @@ class OtpIntermediatePathFormatter
 
     public function getFormattedPaths ()
     {
+        $before = round(microtime(true) * 1000);
         $root = json_decode($this->json);
+        $after = round(microtime(true) * 1000);
         $pathResponse = $root->response;
+
         if (!isset($pathResponse->error))
         {
             $plan = $pathResponse->plan;
@@ -38,12 +41,14 @@ class OtpIntermediatePathFormatter
             else
                 $itineraries = $plan->itinerary;
             $paths = [];
+            $before = round(microtime(true) * 1000);
             foreach ($itineraries as $itinerary)
             {
                 $pathBuilder = new OtpIntermediatePathBuilder($root->directWalking,$itinerary,$this->PathFinderAttributes);
                 $path = $pathBuilder->buildIntermediatePath();
                 array_push($paths,$path);
             }
+            $after = round(microtime(true) * 1000);
             return $paths;
         }
         else

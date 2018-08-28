@@ -11,6 +11,9 @@ namespace App\Http\Controllers\OtpPathFinder;
 
 use App\GeoUtils;
 use App\Http\Controllers\LineHelper;
+use App\Http\Controllers\OtpPathFinder\PathInstruction\RideInstructionIntermediate;
+use App\Http\Controllers\OtpPathFinder\PathInstruction\WaitLineIntermediate;
+use App\Http\Controllers\OtpPathFinder\PathInstruction\WalkInstruction;
 use App\Http\Controllers\PathFinderApi\Polyline;
 use App\Line;
 use App\MetroTrip;
@@ -70,7 +73,7 @@ class OtpIntermediatePathBuilder
                     array_push($instructions,$this->generateOriginWalkInstruction($leg));
                 }
                 array_push($instructions,$this->buildWaitInstruction($leg,$this->itinerary));
-                array_push($instructions,$this->buildRideInstruction($leg,$this->itinerary));
+                //array_push($instructions,$this->buildRideInstruction($leg,$this->itinerary));
                 if ($i==count($this->itinerary->legs)-1)
                 {
                     array_push($instructions,$this->generateDestinationInstruction($leg));
@@ -78,7 +81,7 @@ class OtpIntermediatePathBuilder
             }
             $i++;
         }
-        $otpPath =  new OtpPath($this->directWalking,$this->pathFinderAttributes,$instructions);
+        $otpPath =  new OtpPathIntermediate($this->directWalking,$this->pathFinderAttributes,$instructions);
         return $otpPath;
     }
 
@@ -86,10 +89,13 @@ class OtpIntermediatePathBuilder
     {
         $instruction = [];
         $instruction['type'] = "walk_instruction";
-        $instruction['duration'] = GeoUtils::getWalkingTime($this->pathFinderAttributes->getDestination(),[$rideLeg->to->lat,$rideLeg->to->lon]);
-        $instruction['polyline'] = Polyline::encode([[$rideLeg->to->lat,$rideLeg->to->lon],$this->pathFinderAttributes->getDestination()]);
+        $origin = new Coordinate($rideLeg->to->lat,$rideLeg->to->lon);
+        $destination = $this->pathFinderAttributes->getDestination();
+        $instruction['duration'] = GeoUtils::getWalkingTimeCoord($origin,$destination);
+        $instruction['polyline'] = Polyline::encodeCoord([$origin,$destination]);
         $instruction['destination'] = $this->pathFinderAttributes->getDestination();
         $instruction['destination_type'] = "user_destination";
+        $instruction = new WalkInstruction($origin,$destination,$instruction['polyline'],$instruction['duration'],"destination");
         return $instruction;
     }
 
@@ -97,11 +103,14 @@ class OtpIntermediatePathBuilder
     {
         $instruction = [];
         $instruction['type'] = "walk_instruction";
-        $instruction['duration'] = GeoUtils::getWalkingTime($this->pathFinderAttributes->getOrigin(),[$rideLeg->from->lat,$rideLeg->from->lon]);
+        $destination = new Coordinate($rideLeg->from->lat,$rideLeg->from->lon);
+        $instruction['duration'] = GeoUtils::getWalkingTimeCoord($this->pathFinderAttributes->getOrigin(),$destination);
         $destinationName = $rideLeg->from->name;
         $instruction['destination'] = $destinationName;
-        $instruction['polyline'] = Polyline::encode([$this->pathFinderAttributes->getOrigin(),[$rideLeg->from->lat,$rideLeg->from->lon]]);
+        $instruction['polyline'] = Polyline::encodeCoord([$this->pathFinderAttributes->getOrigin(),$destination]);
         $instruction['destination_type'] = "station";
+        $origin = $this->pathFinderAttributes->getOrigin();
+        $instruction = new WalkInstruction($origin,$destination,$instruction['polyline'],$instruction['duration'],$instruction['destination']);
         return $instruction;
     }
 
@@ -109,22 +118,16 @@ class OtpIntermediatePathBuilder
 
     public function buildWalkInstruction($leg)
     {
-        $instruction = [];
-        $instruction['type'] = "walk_instruction";
         $endTime = $leg->endTime;
         $startTime = $leg->startTime;
         $duration = Utils::getTimeFromDateObject($endTime)-Utils::getTimeFromDateObject($startTime);
         $duration /=1000;
         $duration /=60;
         $duration = (int) $duration;
-        $instruction['duration'] = $duration;
         $destinationName = $leg->to->name;
-        if (strcmp($destinationName,"Destination")==0)
-            $instruction['destination_type'] = "user_destination";
-        else
-            $instruction['destination_type'] = "station";
-        $instruction['destination'] = $destinationName;
-        $instruction['polyline'] = $leg->legGeometry->points;
+        $origin = new Coordinate($leg->from->lat,$leg->from->lon);
+        $destination = new Coordinate($leg->to->lat,$leg->to->lon);
+        $instruction = new WalkInstruction($origin,$destination,$leg->legGeometry->points,$duration,$destinationName);
         return $instruction;
     }
 
@@ -156,8 +159,14 @@ class OtpIntermediatePathBuilder
         $lineArray['exact_waiting_time'] = !$info['is_metro_trip'];
         $lineHelper = new LineHelper($line);
         $lineArray['has_perturbations'] = count($lineHelper->getCurrentAlerts())>0;
-        array_push($lines,$lineArray);
+        $lineObject = new WaitLineIntermediate($line,$trip,$lineArray['transport_mode_id'],$lineArray['duration'],
+            $lineArray['destination'],$lineArray['exact_waiting_time'],$lineArray['has_perturbations']);
+        array_push($lines,$lineObject);
         $instruction['lines'] = $lines;
+        $rideInstruction = $this->buildRideInstruction($leg,$itinerary);
+        $instruction = new RideInstructionIntermediate($rideInstruction['polyline'],$rideInstruction['stations'],$rideInstruction['duration'],
+            new Coordinate($instruction['coordinate']['latitude'],$instruction['coordinate']['longitude']),
+            $rideInstruction['error_margin'],$lines);
         return $instruction;
     }
 

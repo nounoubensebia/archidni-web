@@ -11,12 +11,13 @@ namespace App\Http\Controllers\OtpPathFinder;
 
 class OtpPathFinder
 {
+
     private $pathFinderAttributes;
     private static $URL = "http://localhost:8801/otp/routers/default/plan?";
     private $numItineraries = 6;
     /**
      * OtpPathFinder constructor.
-     * @param $pathFinderAttributes
+     * @param PathFinderAttributes $pathFinderAttributes
      */
     public function __construct($pathFinderAttributes)
     {
@@ -25,9 +26,65 @@ class OtpPathFinder
 
     public function findPaths()
     {
+
         $directWalkingPaths = $this->findPathsDirectWalking();
-        return $directWalkingPaths;
+        $streetWalkingPaths = $this->findPathsStreetWalking();
+        $walkingCachEntries = [];
+        $walkingCach = new WalkingCache($walkingCachEntries);
+        foreach ($streetWalkingPaths as $path)
+        {
+            /**
+             * @var $path OtpPathIntermediate
+             */
+            $entries = $path->getWalkingCacheEntries();
+            foreach ($entries as $entry)
+            {
+                $walkingCach->addEntry($entry);
+            }
+        }
+        $originsDestinations = [];
+        foreach ($directWalkingPaths as $path)
+        {
+            /**
+             * @var $path OtpPathIntermediate
+             */
+            $entries = $path->getWalkingCacheEntries();
+            foreach ($entries as $entry)
+            {
+                /**
+                 * @var $entry WalkingCacheEntry
+                 */
+                if (!$walkingCach->contains($entry))
+                {
+                    $originDestination = ['origin'=>$entry->getOrigin(),'destination'=>
+                        $entry->getDestination()];
+                    if (!in_array($originDestination,$originsDestinations))
+                        array_push($originsDestinations,$originDestination);
+                }
+            }
+        }
+        $walkingPathFinder = new WalkingPathFinder($originsDestinations);
+        $newCashEntries = $walkingPathFinder->getPaths();
+        foreach ($newCashEntries as $newCashEntry)
+        {
+            $walkingCach->addEntry($newCashEntry);
+        }
+        $newDirectPaths = [];
+        foreach ($directWalkingPaths as $directWalkingPath)
+        {
+            $pathWalkingAdjuster = new WalkingPathAdjuster($directWalkingPath,$walkingCach);
+            array_push($newDirectPaths,$pathWalkingAdjuster->getAdjustedPath());
+        }
+        $newDirectPaths = array_merge($newDirectPaths,$streetWalkingPaths);
+        $paths = [];
+        foreach ($newDirectPaths as $path)
+        {
+            $formatter = new OtpIntermediateToOutputPathFormatter($path);
+            array_push($paths,$formatter->formatPath());
+        }
+        return $paths;
     }
+
 
     private function createPathUrl ($directWalking)
     {
@@ -36,7 +93,10 @@ class OtpPathFinder
         $destination = $attributes->getDestination();
         $date = $attributes->getDate();
         $time = $attributes->getTime();
-        return "http://localhost:8080/OTPpath?origin=$origin&destination=$destination&date=$date"."&time=".$time.
+        $originStr = $origin->getLatitude().",".$origin->getLongitude();
+        $destinationStr = $destination->getLatitude().",".$destination->getLongitude();
+        $directWalking = ($directWalking) ? "true" : "false";
+        return "http://localhost:8080/OTPpath?origin=$originStr&destination=$destinationStr&date=$date"."&time=".$time.
             "&arriveBy=".$attributes->getArriveBy()."&directWalking=".$directWalking;
     }
 
@@ -44,20 +104,19 @@ class OtpPathFinder
     {
         $attributes = $this->pathFinderAttributes;
         $url = $this->createPathUrl(true);
-        /*$otpPathFormatter = new OtpPathFormatter( $attributes->getOrigin(), $attributes->getDestination(),
-            file_get_contents($url."&numItineraries=6"));*/
-        $otpIntermediatePathFormatter = new OtpIntermediatePathFormatter(file_get_contents($url."&numItineraries=".$this->numItineraries)
-            ,$attributes);
-        return $otpIntermediatePathFormatter->getFormattedPaths();
+        $json = file_get_contents($url."&numItineraries=".$this->numItineraries);
+        $otpIntermediatePathFormatter = new OtpIntermediatePathFormatter($json,$attributes);
+        $formattedPaths = $otpIntermediatePathFormatter->getFormattedPaths();
+        return $formattedPaths;
     }
 
     private function findPathsStreetWalking ()
     {
         $attributes = $this->pathFinderAttributes;
         $url = $this->createPathUrl(false);
-        $otpPathFormatter = new OtpPathFormatter($attributes['origin'],$attributes['destination'],
-            file_get_contents($url."&numItineraries=6"));
-        return $otpPathFormatter->getFormattedPaths();
+        $otpIntermediatePathFormatter = new OtpIntermediatePathFormatter(file_get_contents($url."&numItineraries=".$this->numItineraries)
+            ,$attributes);
+        return $otpIntermediatePathFormatter->getFormattedPaths();
     }
 
 

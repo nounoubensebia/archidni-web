@@ -32,6 +32,16 @@ class Polyline
      *
      * @return string encoded string
      */
+
+
+    public static function encodeCoord ($coordinates)
+    {
+        $points = [];
+        foreach ($coordinates as $coordinate)
+        {
+            array_push($points,[$coordinate->getLatitude(),$coordinate->getLongitude()]);
+        }
+    }
     final public static function encode( $points )
     {
         $points = self::flatten($points);
@@ -81,7 +91,7 @@ class Polyline
             $index++;
             $points[] = $number * 1 / pow(10, static::$precision);
         }
-        return $points;
+        return self::pair($points);
     }
     /**
      * Reduce multi-dimensional to single list

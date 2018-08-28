@@ -9,12 +9,15 @@
 namespace App;
 
 
+use App\Http\Controllers\OtpPathFinder\Coordinate;
+use App\Http\Controllers\PathFinderApi\Polyline;
+
 class GeoUtils
 {
     /**
      * @var int human speed in km/h
      */
-    private static $HUMAN_SPEED = 5;
+    private static $HUMAN_SPEED = 5.0001;
 
     /**
      * Calculates the great-circle distance between two points, with
@@ -51,6 +54,29 @@ class GeoUtils
 
     public static function getWalkingTime ($pos1,$pos2)
     {
-        return self::distance($pos1[0],$pos1[1],$pos2[0],$pos2[1])/(self::$HUMAN_SPEED/60);
+        return (double)self::distance($pos1[0],$pos1[1],$pos2[0],$pos2[1])/((double)self::$HUMAN_SPEED/60.000001);
+    }
+
+    /**
+     * @param $coord1 Coordinate
+     * @param $coord2 Coordinate
+     * @return float
+     */
+    public static function getWalkingTimeCoord ($coord1,$coord2)
+    {
+        return self::distance($coord1->getLatitude(),$coord1->getLongitude(),$coord2->getLatitude(),$coord2->getLongitude());
+    }
+
+    public static function getPolylineDuration ($polyline)
+    {
+        $polylineArr = Polyline::decode($polyline);
+        $duration = 0;
+        $prevPoint = $polylineArr[0];
+        foreach ($polylineArr as $point)
+        {
+            $duration+=self::getWalkingTime($prevPoint,$point);
+            $prevPoint = $point;
+        }
+        return $duration;
     }
 }
