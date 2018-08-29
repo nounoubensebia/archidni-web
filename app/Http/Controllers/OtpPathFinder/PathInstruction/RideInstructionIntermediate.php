@@ -13,9 +13,7 @@ use App\Http\Controllers\OtpPathFinder\Coordinate;
 
 class RideInstructionIntermediate extends RideInstruction implements \JsonSerializable
 {
-    /**
-     * @var Coordinate
-     */
+
     private $waitLinesIntermediate;
 
     /**
@@ -38,6 +36,32 @@ class RideInstructionIntermediate extends RideInstruction implements \JsonSerial
     public function getWaitLinesIntermediate()
     {
         return $this->waitLinesIntermediate;
+    }
+
+    public function getStationStartId ()
+    {
+        return $this->getStations()[0]['id'];
+    }
+
+    public function getStationEndId ()
+    {
+        return $this->getStations()[count($this->getStations())-1]['id'];
+    }
+
+    public function addWaitLine (WaitLineIntermediate $waitLineIntermediate)
+    {
+        if (!$this->containsWaitLine($waitLineIntermediate))
+        array_push($this->waitLinesIntermediate,$waitLineIntermediate);
+    }
+
+    private function containsWaitLine (WaitLineIntermediate $waitLineIntermediate)
+    {
+        foreach ($this->waitLinesIntermediate as $item)
+        {
+            if ($item->getTrip()->id==$waitLineIntermediate->getTrip()->id)
+                return true;
+        }
+        return false;
     }
 
     public function jsonSerialize()

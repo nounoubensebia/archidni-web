@@ -95,7 +95,7 @@ class OtpIntermediatePathBuilder
         $instruction['polyline'] = Polyline::encodeCoord([$origin,$destination]);
         $instruction['destination'] = $this->pathFinderAttributes->getDestination();
         $instruction['destination_type'] = "user_destination";
-        $instruction = new WalkInstruction($origin,$destination,$instruction['polyline'],$instruction['duration'],"destination");
+        $instruction = new WalkInstruction($origin,$destination,$instruction['polyline'],$instruction['duration'],"Destination");
         return $instruction;
     }
 
@@ -181,11 +181,39 @@ class OtpIntermediatePathBuilder
         //$startId = explode(":",$leg->from->stopId);
         $startId = $this->getId($leg->from->stopId);
         $endId = $this->getId($leg->to->stopId);
-        $instruction['stations'] = Utils::getFormattedStationsIn($startId,$endId,$trip);
+       // $instruction['stations'] = Utils::getFormattedStationsIn($startId,$endId,$trip);
+        $instruction['stations'] = $this->getStationsFromLeg($leg,$itinerary);
         $instruction['polyline'] = Utils::getPolylineFromRideInstruction($line,$trip,$instruction['stations']);
         $instruction['duration'] = Utils::getRideDuration($startId,$endId,$trip);
         $instruction['error_margin'] = 0.2;
         return $instruction;
+    }
+
+    private function getStationsFromLeg ($leg,$transportMode)
+    {
+        $stops = $leg->stop;
+        $stations = [];
+        $station = [];
+        $station['id'] = $this->getId($leg->from->stopId);
+        $station['coordinate'] = new Coordinate($leg->from->lat,$leg->from->lon);
+        $station['name'] = $leg->from->name;
+        $station['transport_mode_id'] = $transportMode;
+        array_push($stations,$station);
+        foreach ($stops as $stop)
+        {
+            $station = [];
+            $station['id'] = $this->getId($stop->stopId);
+            $station['coordinate'] = new Coordinate($stop->lat,$stop->lon);
+            $station['name'] = $stop->name;
+            $station['transport_mode_id'] = $transportMode;
+            array_push($stations,$station);
+        }
+        $station['id'] = $this->getId($leg->to->stopId);
+        $station['coordinate'] = new Coordinate($leg->to->lat,$leg->to->lon);
+        $station['name'] = $leg->to->name;
+        $station['transport_mode_id'] = $transportMode;
+        array_push($stations,$station);
+        return $stations;
     }
 
     private function getLineTripInfo ($leg)

@@ -6,6 +6,7 @@ use App\GeoUtils;
 use App\Http\Controllers\OtpPathFinder\Coordinate;
 use App\Http\Controllers\OtpPathFinder\WalkingCacheEntry;
 use App\Http\Controllers\PathFinderApi\OtpPathFormatter;
+use App\MetroTrip;
 use Illuminate\Http\Request;
 use UtilFunctions;
 
@@ -15,20 +16,8 @@ class test extends Controller
     //
     public function test (Request $request)
     {
-        $entry1 = new WalkingCacheEntry(new Coordinate(32,35),new Coordinate(32,35)
-        ,"qsd");
-        $entry2 = new WalkingCacheEntry(new Coordinate(32,35),new Coordinate(32,35)
-            ,"qsd");
-        $arr = [];
-        array_push($arr,$entry1);
-        if (in_array($entry2,$arr))
-        {
-            return response("true");
-        }
-        else
-        {
-            return response("false");
-        }
+        $trip = MetroTrip::with('stations')->find(202)->first();
+        return response()->json($trip->stations);
     }
 
     public function testOTP (Request $request)

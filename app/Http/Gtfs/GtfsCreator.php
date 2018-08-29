@@ -97,6 +97,7 @@ class GtfsCreator
         fclose($file);
     }
 
+
     private function createTripsFile ()
     {
         $trainTrips = TrainTrip::all();

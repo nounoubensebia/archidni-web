@@ -41,6 +41,7 @@ class Polyline
         {
             array_push($points,[$coordinate->getLatitude(),$coordinate->getLongitude()]);
         }
+        return self::encode($points);
     }
     final public static function encode( $points )
     {

@@ -144,4 +144,6 @@ class CommonSectionController
         return response()->json($commonSections);
     }
 
+
+
 }
