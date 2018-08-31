@@ -17,9 +17,6 @@ class CommonSectionController
         $commonSection = \App\CommonSection::where(function ($query) use ($idStation1, $idStation2) {
             $query->where('station1_id','=',$idStation1)
                 ->where('station2_id','=',$idStation2);
-        })->orWhere(function ($query) use ($idStation1, $idStation2){
-            $query->where('station1_id','=',$idStation2)
-                ->where('station2_id','=',$idStation1);
         })->get();
         if(count($commonSection) == 0) {
             $commonSection = new CommonSection();
@@ -47,13 +44,14 @@ class CommonSectionController
         return $trip;
     }
 
-    private function addTripToCommonSectionFromId($idTrip, $idStation1, $idStation2,$metroTrip)
+    private function addTripToCommonSectionFromId($idTrip, $idStation1, $idStation2,$metroTrip,$indexes)
     {
         $trip = $this->findTrip($idTrip,$metroTrip);
-        $this->addTripToCommonSection($trip,$idStation1,$idStation2,$metroTrip);
+        $this->addTripToCommonSection($trip,$idStation1,$idStation2,$metroTrip,$indexes);
     }
 
-    private function addTripToCommonSection($trip, $idStation1, $idStation2,$metroTrip)
+    private function addTripToCommonSection($trip, $idStation1, $idStation2,$metroTrip
+    ,$indexes)
     {
         $commonSection = $this->findCommonSection($idStation1,$idStation2);
         $tripField = ($metroTrip)?"metro_trip_id":"train_trip_id";
@@ -64,7 +62,9 @@ class CommonSectionController
             ->where("common_section_id", '=', $commonSection->id)->get();
         if(count($pivot) == 0)
             $trip->commonSections()->newPivot([$tripField => $trip->id,
-                "common_section_id" => $commonSection->id])
+                "common_section_id" => $commonSection->id,
+                "station1_index" => $indexes[0],
+                "station2_index" => $indexes[1]])
                 ->save();
     }
 
@@ -91,10 +91,14 @@ class CommonSectionController
 
                     if($saveId != $lastId) // there is common section:
                     {
-                        $i = $i + $k -1;
+
 //                        $j = $j + $k -1;
-                        $this->addTripToCommonSection($trip1,$saveId,$lastId,$metroTrip);
-                        $this->addTripToCommonSection($trip2,$saveId,$lastId,$metroTrip);
+//                        echo "id1: ".$saveId. " id2: ".$lastId;
+                        $this->addTripToCommonSection($trip1,$saveId,$lastId,$metroTrip,
+                            [$i,$i+$k-1]);
+                        $this->addTripToCommonSection($trip2,$saveId,$lastId,$metroTrip,
+                            [$j,$j+$k-1]);
+                        $i = $i + $k -1;
                         break;
                     }
                 }
@@ -114,7 +118,10 @@ class CommonSectionController
 
     public function fillDatabase()
     {
-//        $this->addTripToCommonSection(1,7,2,true);
+//        $trip1 = \App\MetroTrip::find(255);
+//        $trip2 = \App\MetroTrip::find(254);
+//        $this->addCommonSections($trip1,$trip2,true);
+//        $this->addTripToCommonSection(254,7,2,true);
         $metroTrips = \App\MetroTrip::all();
         $this->createCommonSectionsFromTrips($metroTrips,true);
         $trainTrips = \App\TrainTrip::all();

@@ -17,6 +17,8 @@ class CreateCommonSectionTrainTripTable extends Migration
             $table->increments('id');
             $table->integer('train_trip_id')->unsigned();
             $table->integer('common_section_id')->unsigned();
+            $table->integer("station1_index");
+            $table->integer('station2_index');
             $table->foreign('train_trip_id')->references('id')->on('train_trips')->onDelete('cascade');
             $table->foreign('common_section_id')->references('id')->on('common_sections');
             $table->engine = 'InnoDB';
