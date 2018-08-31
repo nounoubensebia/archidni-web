@@ -46,4 +46,9 @@ class Line extends Model
     {
         return $this->BelongsToMany('App\CompanyNotification');
     }
+
+    public function schedules()
+    {
+        return $this->hasMany('App\schedule');
+    }
 }

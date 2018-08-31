@@ -1,0 +1,2 @@
+http://localhost:8801/otp/routers/default/plan?fromPlace=36.7313228,3.1729311&toPlace=36.712997,3.0979135&time=16:44&date=18-08-18&mode=TRANSIT,WALK&arriveBy=false&numItineraries=3
+http://localhost:8801/otp/routers/default/plan?fromPlace=36.7313228,3.1729311&toPlace=36.712997,3.0979135&time=16:44&date=18-08-18&mode=TRANSIT,WALK&arriveBy=false&bannedAgencies=3&numItineraries=3

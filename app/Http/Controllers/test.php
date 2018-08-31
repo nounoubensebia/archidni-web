@@ -2,16 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\GeoUtils;
+use App\Http\Controllers\OtpPathFinder\Coordinate;
+use App\Http\Controllers\OtpPathFinder\WalkingCacheEntry;
 use App\Http\Controllers\PathFinderApi\OtpPathFormatter;
+use App\MetroTrip;
 use Illuminate\Http\Request;
+use UtilFunctions;
+
 
 class test extends Controller
 {
     //
-    public function  test (Request $request)
+    public function test (Request $request)
     {
-        $headers = $request->headers->all();
-        return response()->json($headers,200);
+        $trip = MetroTrip::with('stations')->find(202)->first();
+        return response()->json($trip->stations);
     }
 
     public function testOTP (Request $request)

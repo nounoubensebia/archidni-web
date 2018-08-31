@@ -16,9 +16,9 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
+//Route::middleware('auth:api')->get('/user', function (Request $request) {
+//    return $request->user();
+//});
 //Route::get('/test',function () {
 //    $lines = \App\Line::with(['operator','transportMode','trainTrips','metroTrips'])->with('sections')->get();
 //    return response()->json($lines,200);
@@ -48,6 +48,8 @@ Route::get('/transferTest', ['uses' => "StationController@getTransfersTest"]);
 
 Route::get('/create-gtfs',['uses' => "GtfsController@createFeed"]);
 
+Route::get('/find-common-sections',['uses' => 'CommonSectionController@findCommonSections']);
+
 Route::group(['prefix' => 'v1'], function () {
     Route::get('/linesAndPlaces', ['uses' => 'LinesAndPlacesController@getAllPlacesAndLines'])
         ->name('all_lines_and_places')
@@ -64,6 +66,9 @@ Route::group(['prefix' => 'v1'], function () {
         Route::get('autocomplete', [
             'uses' => 'LineController@getLineAutocompleteSuggestions'
         ])->name('line_autocomplete');
+        Route::get('{id}/schedules',[
+            'uses' => 'LineController@getSchedules'
+        ]);
         Route::get('{id}', [
             'uses' => 'LineController@getLine'
         ])->name('line');
@@ -83,7 +88,6 @@ Route::group(['prefix' => 'v1'], function () {
         Route::get('{id}/transfers',[
             'uses' => 'StationController@getTransfers'
         ])->name('station_transfers');
-
     });
 
 
