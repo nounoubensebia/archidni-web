@@ -21,7 +21,10 @@ use App\TrainTrip;
 
 class OtpIntermediatePathBuilder
 {
-
+    /**
+     * @var Context
+     */
+    private $context;
     private $directWalking;
     private $itinerary;
     /**
@@ -31,16 +34,26 @@ class OtpIntermediatePathBuilder
 
     /**
      * OtpIntermediatePathBuilder constructor.
+     * @param $context
      * @param $directWalking
      * @param $itinerary
-     * @param $pathFinderAttributes
+     * @param PathFinderAttributes $pathFinderAttributes
      */
-    public function __construct($directWalking, $itinerary, $pathFinderAttributes)
+    public function __construct(Context $context, $directWalking, $itinerary, PathFinderAttributes $pathFinderAttributes)
     {
+        $this->context = $context;
         $this->directWalking = $directWalking;
         $this->itinerary = $itinerary;
         $this->pathFinderAttributes = $pathFinderAttributes;
     }
+
+    /**
+     * OtpIntermediatePathBuilder constructor.
+     * @param $directWalking
+     * @param $itinerary
+     * @param $pathFinderAttributes
+     */
+
 
     /**
      * OtpIntermediatePathBuilder constructor.
@@ -64,7 +77,10 @@ class OtpIntermediatePathBuilder
             $mode = $leg->mode;
             if (strcmp($mode,"WALK")==0)
             {
+                $before = Utils::getTimeInMilis();
                 array_push($instructions,$this->buildWalkInstruction($leg));
+                $after = Utils::getTimeInMilis();
+                $this->context->incrementValue("walking_instruction_formatting",$after-$before);
             }
             else
             {
@@ -72,7 +88,10 @@ class OtpIntermediatePathBuilder
                 {
                     array_push($instructions,$this->generateOriginWalkInstruction($leg));
                 }
+                $before = Utils::getTimeInMilis();
                 array_push($instructions,$this->buildWaitInstruction($leg,$this->itinerary));
+                $after = Utils::getTimeInMilis();
+                $this->context->incrementValue("ride_instruction_formatting",$after-$before);
                 //array_push($instructions,$this->buildRideInstruction($leg,$this->itinerary));
                 if ($i==count($this->itinerary->legs)-1)
                 {
@@ -139,7 +158,10 @@ class OtpIntermediatePathBuilder
         $instruction['coordinate'] = ['latitude' => $waitStation->lat, 'longitude' => $waitStation->lon];
         $lines = [];
         $lineArray = [];
+        $before = Utils::getTimeInMilis();
         $info = $this->getLineTripInfo($leg);
+        $after = Utils::getTimeInMilis();
+        $this->context->incrementValue("gettint_line_trip_info",$after-$before);
         $line = $info['line'];
         $trip = $info['trip'];
         $lineArray['id'] = $line->id;
@@ -155,15 +177,24 @@ class OtpIntermediatePathBuilder
         $duration /=60;
         $duration = (int) $duration;
         $lineArray['duration'] = $duration;
+        $before = Utils::getTimeInMilis();
         $lineArray['destination'] = Utils::getTripDestination($trip->id,$info['is_metro_trip'])->name;
+        $after = Utils::getTimeInMilis();
+        $this->context->incrementValue("gettint_trip_destination",$after-$before);
         $lineArray['exact_waiting_time'] = !$info['is_metro_trip'];
         $lineHelper = new LineHelper($line);
+        $before = Utils::getTimeInMilis();
         $lineArray['has_perturbations'] = count($lineHelper->getCurrentAlerts())>0;
+        $after = Utils::getTimeInMilis();
+        $this->context->incrementValue("getting_alerts",$after-$before);
         $lineObject = new WaitLineIntermediate($line,$trip,$lineArray['transport_mode_id'],$lineArray['duration'],
             $lineArray['destination'],$lineArray['exact_waiting_time'],$lineArray['has_perturbations']);
         array_push($lines,$lineObject);
         $instruction['lines'] = $lines;
+        $before = Utils::getTimeInMilis();
         $rideInstruction = $this->buildRideInstruction($leg,$itinerary);
+        $after = Utils::getTimeInMilis();
+        $this->context->incrementValue("building_ride_inside_wait",$after-$before);
         $instruction = new RideInstructionIntermediate($rideInstruction['polyline'],$rideInstruction['stations'],$rideInstruction['duration'],
             new Coordinate($instruction['coordinate']['latitude'],$instruction['coordinate']['longitude']),
             $rideInstruction['error_margin'],$lines);
@@ -182,7 +213,7 @@ class OtpIntermediatePathBuilder
         $startId = $this->getId($leg->from->stopId);
         $endId = $this->getId($leg->to->stopId);
        // $instruction['stations'] = Utils::getFormattedStationsIn($startId,$endId,$trip);
-        $instruction['stations'] = $this->getStationsFromLeg($leg,$itinerary);
+        $instruction['stations'] = $this->getStationsFromLeg($leg,$line->transport_mode_id);
         $instruction['polyline'] = Utils::getPolylineFromRideInstruction($line,$trip,$instruction['stations']);
         $instruction['duration'] = Utils::getRideDuration($startId,$endId,$trip);
         $instruction['error_margin'] = 0.2;

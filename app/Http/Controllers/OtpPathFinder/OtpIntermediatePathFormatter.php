@@ -11,50 +11,36 @@ namespace App\Http\Controllers\OtpPathFinder;
 
 class OtpIntermediatePathFormatter
 {
+    /**
+     * @var Context
+     */
+    private $context;
     private $PathFinderAttributes;
-    private $json;
 
     /**
      * OtpIntermediatePathFormatter constructor.
+     * @param Context $context
      * @param $PathFinderAttributes
      * @param $json
      */
-    public function __construct($json,$PathFinderAttributes)
+    public function __construct(Context $context, $PathFinderAttributes)
     {
+        $this->context = $context;
         $this->PathFinderAttributes = $PathFinderAttributes;
-        $this->json = $json;
     }
 
 
-    public function getFormattedPaths ()
+    public function getFormattedPaths ($itineraries)
     {
-        $before = round(microtime(true) * 1000);
-        $root = json_decode($this->json);
-        $after = round(microtime(true) * 1000);
-        $pathResponse = $root->response;
-
-        if (!isset($pathResponse->error))
+        $paths = [];
+        foreach ($itineraries as $itinerary)
         {
-            $plan = $pathResponse->plan;
-            if (isset($plan->itineraries))
-                $itineraries = $plan->itineraries;
-            else
-                $itineraries = $plan->itinerary;
-            $paths = [];
-            $before = round(microtime(true) * 1000);
-            foreach ($itineraries as $itinerary)
-            {
-                $pathBuilder = new OtpIntermediatePathBuilder($root->directWalking,$itinerary,$this->PathFinderAttributes);
-                $path = $pathBuilder->buildIntermediatePath();
-                array_push($paths,$path);
-            }
-            $after = round(microtime(true) * 1000);
-            return $paths;
+            //TODO remove direct walking
+            $pathBuilder = new OtpIntermediatePathBuilder($this->context,false,$itinerary,$this->PathFinderAttributes);
+            $path = $pathBuilder->buildIntermediatePath();
+            array_push($paths,$path);
         }
-        else
-        {
-            return [];
-        }
+        return $paths;
     }
 
 

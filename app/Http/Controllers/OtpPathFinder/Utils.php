@@ -183,11 +183,29 @@ class Utils
         return $polylineString;
     }
 
+    public static function getTimeInMilis ()
+    {
+        return round(microtime(true) * 1000);
+    }
+
     public static function array_unique_multidimensional($input)
     {
         $serialized = array_map('serialize', $input);
         $unique = array_unique($serialized);
         return array_intersect_key($input, $unique);
+    }
+
+    public static function getId ($idObj)
+    {
+        if (isset($idObj->agencyId))
+        {
+            return $idObj->id;
+        }
+        else
+        {
+            $routeId = explode(":",$idObj);
+            return $idObj[1];
+        }
     }
 
 }

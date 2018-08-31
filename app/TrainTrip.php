@@ -19,7 +19,7 @@ class TrainTrip extends Model
 
     public function stations ()
     {
-        return $this->belongsToMany('App\Station','train_trip_station')->withPivot('minutes');
+        return $this->belongsToMany('App\Station','train_trip_station')->withPivot('minutes')->orderBy('minutes');
     }
 
     public function commonSections()

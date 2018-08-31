@@ -19,11 +19,11 @@ class MetroTrip extends Model
 
     public function stations ()
     {
-        return $this->belongsToMany('App\Station')->withPivot(['minutes']);
+        return $this->belongsToMany('App\Station')->withPivot(['minutes'])->orderBy('minutes');
     }
 
     public function commonSections()
     {
-        return $this->belongsToMany('App\CommonSection');
+        return $this->belongsToMany('App\CommonSection')->withPivot(['station1_index','station2_index']);
     }
 }
