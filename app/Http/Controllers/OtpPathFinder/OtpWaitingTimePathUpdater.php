@@ -94,7 +94,7 @@ class OtpWaitingTimePathUpdater
                     /**
                      * @var $completedInstruction array
                      */
-                    $duration = $this->getWaitLinesDuration($completedInstruction);
+                    $duration = $this->getWaitLinesDuration($completedInstruction)*60;
                 }
             }
         if (!$this->context->getPathFinderAttributes()->getArriveBy())
@@ -105,6 +105,7 @@ class OtpWaitingTimePathUpdater
         {
             $currentTime-=$duration;
         }
+
         return $currentTime;
     }
 

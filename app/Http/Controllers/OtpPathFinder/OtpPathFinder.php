@@ -152,7 +152,14 @@ class OtpPathFinder
             $otpPathUpdater->updateWaitTimes($adjustedPath);
         }
 
+
+        //filtering paths
+
+        $otpPathFilter = new OtpPathFilter($this->context);
+        $adjustedPaths = $otpPathFilter->getFilteredPaths($adjustedPaths);
+
         //formatting paths for output
+
         $formattedPaths = [];
         foreach ($adjustedPaths as $path)
         {

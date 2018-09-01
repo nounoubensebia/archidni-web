@@ -9,6 +9,8 @@
 namespace App\Http\Controllers\OtpPathFinder;
 
 
+use App\Http\Controllers\OtpPathFinder\PathInstruction\RideInstructionIntermediate;
+use App\Http\Controllers\OtpPathFinder\PathInstruction\WaitLineIntermediate;
 use App\Http\Controllers\OtpPathFinder\PathInstruction\WalkInstruction;
 
 class OtpPathIntermediate implements \JsonSerializable
@@ -72,6 +74,43 @@ class OtpPathIntermediate implements \JsonSerializable
 
 
 
+    public function getPathDuration ()
+    {
+        $duration = 0;
+        foreach ($this->instructions as $instruction)
+        {
+            if ($instruction instanceof WalkInstruction)
+            {
+                $duration+= $instruction->getDuration();
+            }
+            else
+            {
+                /**
+                 * @var $instruction RideInstructionIntermediate
+                 */
+                $duration+=$instruction->getRideDuration();
+                $duration+=$this->getWaitLinesDuration($instruction->getWaitLinesIntermediate());
+            }
+        }
+        return $duration;
+    }
+
+    private function getWaitLinesDuration ($waitLinesArray)
+    {
+        $min = 10000000;
+        foreach ($waitLinesArray as $item)
+        {
+            /**
+             * @var $item WaitLineIntermediate
+             */
+            if ($item->getDuration()<$min)
+            {
+                $min = $item->getDuration();
+            }
+        }
+        return $min;
+    }
+
     /**
      * Specify data which should be serialized to JSON
      * @link http://php.net/manual/en/jsonserializable.jsonserialize.php
@@ -89,4 +128,26 @@ class OtpPathIntermediate implements \JsonSerializable
         }
         return $var;
     }
+
+    public function getPathLines ()
+    {
+        $lines = [];
+        foreach ($this->instructions as $instruction)
+        {
+            if ($instruction instanceof RideInstructionIntermediate)
+            {
+                $ll = [];
+                foreach ($instruction->getWaitLinesIntermediate() as $item)
+                {
+                    /**
+                     * @var $item WaitLineIntermediate
+                     */
+                    array_push($ll,$item->getLine()->id);
+                }
+                array_push($lines,$ll);
+            }
+        }
+        return $lines;
+    }
+
 }
