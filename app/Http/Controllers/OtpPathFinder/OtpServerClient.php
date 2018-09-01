@@ -68,6 +68,6 @@ class OtpServerClient
         $withoutBus = ($withoutBus) ? "true" : "false";
         $arriveBy = ($attributes->getArriveBy()) ? "true" : "false";
         return "http://localhost:8080/OTPpath?origin=$originStr&destination=$destinationStr&date=$date"."&time=".$time.
-            "&arriveBy=".$attributes->getArriveBy()."&directWalking=".$directWalking."&withoutBus=".$withoutBus;
+            "&arriveBy=".$arriveBy."&directWalking=".$directWalking."&withoutBus=".$withoutBus;
     }
 }

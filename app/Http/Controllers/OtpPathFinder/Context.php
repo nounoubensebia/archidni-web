@@ -13,16 +13,23 @@ use App\Http\Controllers\OtpPathFinder\DataLoader\PathsDataLoader;
 
 class Context
 {
+    /**
+     * @var PathFinderAttributes
+     */
+    protected $pathFinderAttributes;
     protected $debug;
     protected $data;
+
+
 
     /**
      * Context constructor.
      * @param $debug
      */
-    public function __construct()
+    public function __construct($pathFinderAttributes)
     {
         $this->debug = array();
+        $this->pathFinderAttributes = $pathFinderAttributes;
     }
 
     public function addToDebug ($key,$value)
@@ -50,6 +57,16 @@ class Context
             array_push($this->debug[$key],$value);
         }
     }
+
+    /**
+     * @return PathFinderAttributes
+     */
+    public function getPathFinderAttributes(): PathFinderAttributes
+    {
+        return $this->pathFinderAttributes;
+    }
+
+
 
     /**
      * @return array

@@ -68,6 +68,7 @@ class RideInstructionIntermediate extends RideInstruction implements \JsonSerial
     {
         $var = get_object_vars($this);
         $var['type'] = "wait_instruction";
+        $var['duration'] = $this->getRideDuration();
         foreach ($var as &$value) {
             if (is_object($value) && method_exists($value,'getJsonData')) {
                 $value = $value->getJsonData();

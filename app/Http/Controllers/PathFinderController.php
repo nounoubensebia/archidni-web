@@ -73,7 +73,8 @@ class PathFinderController extends Controller
         $destination = new Coordinate($destinationStr[0],$destinationStr[1]);
         $date = $attributes['date'];
         $time = $attributes['time'];
-        $otpPathFinder = new OtpPathFinder(new PathFinderAttributes($origin,$destination,$time,$date,$attributes['arriveBy']));
+        $arriveBy = (strcmp($attributes['arriveBy'],"true")==0) ? true : false;
+        $otpPathFinder = new OtpPathFinder(new PathFinderAttributes($origin,$destination,$time,$date,$arriveBy));
         $paths = $otpPathFinder->findPaths();
         return $paths;
     }

@@ -74,6 +74,14 @@ abstract class WaitLine
         return $this->hasPerturbations;
     }
 
+    /**
+     * @param mixed $duration
+     */
+    public function setDuration($duration)
+    {
+        $this->duration = $duration;
+    }
+
 
 
 

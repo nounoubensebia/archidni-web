@@ -29,7 +29,7 @@ class OtpPathFinder
     public function __construct($pathFinderAttributes)
     {
         $this->pathFinderAttributes = $pathFinderAttributes;
-        $this->context = new Context();
+        $this->context = new Context($this->pathFinderAttributes);
     }
 
     public function findPaths()
@@ -129,7 +129,10 @@ class OtpPathFinder
         $after = round(microtime(true) * 1000);
 
         $this->context->addToDebug("adjusting_walking_paths",($after-$before));
+
         //adding other possible trips
+
+
         $before = round(microtime(true) * 1000);
         foreach ($adjustedPaths as $adjustedPath)
         {
@@ -139,6 +142,16 @@ class OtpPathFinder
         $after = round(microtime(true) * 1000);
         $this->context->addToDebug("adding common trips",($after-$before));
         $before = round(microtime(true) * 1000);
+
+        // updating waiting times
+
+        $otpPathUpdater = new OtpWaitingTimePathUpdater($this->context);
+
+        foreach ($adjustedPaths as $adjustedPath)
+        {
+            $otpPathUpdater->updateWaitTimes($adjustedPath);
+        }
+
         //formatting paths for output
         $formattedPaths = [];
         foreach ($adjustedPaths as $path)
