@@ -59,6 +59,16 @@ class Context
         return $this->debug;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getData()
+    {
+        return $this->data;
+    }
+
+
+
     public function loadData ($paths)
     {
         $before = Utils::getTimeInMilis();

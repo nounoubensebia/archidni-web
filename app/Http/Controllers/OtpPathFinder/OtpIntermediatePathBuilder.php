@@ -11,6 +11,7 @@ namespace App\Http\Controllers\OtpPathFinder;
 
 use App\GeoUtils;
 use App\Http\Controllers\LineHelper;
+use App\Http\Controllers\OtpPathFinder\DataLoader\PathDataRetriever;
 use App\Http\Controllers\OtpPathFinder\PathInstruction\RideInstructionIntermediate;
 use App\Http\Controllers\OtpPathFinder\PathInstruction\WaitLineIntermediate;
 use App\Http\Controllers\OtpPathFinder\PathInstruction\WalkInstruction;
@@ -27,6 +28,10 @@ class OtpIntermediatePathBuilder
     private $context;
     private $directWalking;
     private $itinerary;
+    /**
+     * @var PathDataRetriever
+     */
+    private $pathDataRetriever;
     /**
      * @var PathFinderAttributes
      */
@@ -70,6 +75,7 @@ class OtpIntermediatePathBuilder
 
     public function buildIntermediatePath()
     {
+        $this->pathDataRetriever = new PathDataRetriever($this->context->getData());
         $instructions = [];
         $i=0;
         foreach ($this->itinerary->legs as $leg)
@@ -152,6 +158,7 @@ class OtpIntermediatePathBuilder
 
     public function buildWaitInstruction ($leg,$itinerary)
     {
+        $beforeAll = Utils::getTimeInMilis();
         $instruction = [];
         $instruction['type'] = "wait_instruction";
         $waitStation = $leg->from;
@@ -159,9 +166,10 @@ class OtpIntermediatePathBuilder
         $lines = [];
         $lineArray = [];
         $before = Utils::getTimeInMilis();
-        $info = $this->getLineTripInfo($leg);
+        //$info = $this->getLineTripInfo($leg);
+        $info = $this->pathDataRetriever->getLineTripInfo($leg);
         $after = Utils::getTimeInMilis();
-        $this->context->incrementValue("gettint_line_trip_info",$after-$before);
+        $this->context->incrementValue("getting_line_trip_info",$after-$before);
         $line = $info['line'];
         $trip = $info['trip'];
         $lineArray['id'] = $line->id;
@@ -178,13 +186,13 @@ class OtpIntermediatePathBuilder
         $duration = (int) $duration;
         $lineArray['duration'] = $duration;
         $before = Utils::getTimeInMilis();
-        $lineArray['destination'] = Utils::getTripDestination($trip->id,$info['is_metro_trip'])->name;
+        $lineArray['destination'] = Utils::getTripDestination($trip)->name;
         $after = Utils::getTimeInMilis();
-        $this->context->incrementValue("gettint_trip_destination",$after-$before);
+        $this->context->incrementValue("getting_trip_destination",$after-$before);
         $lineArray['exact_waiting_time'] = !$info['is_metro_trip'];
         $lineHelper = new LineHelper($line);
         $before = Utils::getTimeInMilis();
-        $lineArray['has_perturbations'] = count($lineHelper->getCurrentAlerts())>0;
+        $lineArray['has_perturbations'] = $lineHelper->hasPerturbations();
         $after = Utils::getTimeInMilis();
         $this->context->incrementValue("getting_alerts",$after-$before);
         $lineObject = new WaitLineIntermediate($line,$trip,$lineArray['transport_mode_id'],$lineArray['duration'],
@@ -198,6 +206,8 @@ class OtpIntermediatePathBuilder
         $instruction = new RideInstructionIntermediate($rideInstruction['polyline'],$rideInstruction['stations'],$rideInstruction['duration'],
             new Coordinate($instruction['coordinate']['latitude'],$instruction['coordinate']['longitude']),
             $rideInstruction['error_margin'],$lines);
+        $afterAll = Utils::getTimeInMilis();
+        $this->context->incrementValue("wait_instruction_total",($afterAll-$beforeAll));
         return $instruction;
     }
 
@@ -205,7 +215,7 @@ class OtpIntermediatePathBuilder
     {
         $instruction = [];
         $instruction['type'] = "ride_instruction";
-        $info = $this->getLineTripInfo($leg);
+        $info = $this->pathDataRetriever->getLineTripInfo($leg);
         $line = $info['line'];
         $trip = $info['trip'];
         $instruction ['transport_mode_id'] = $line->transport_mode_id;
@@ -213,10 +223,22 @@ class OtpIntermediatePathBuilder
         $startId = $this->getId($leg->from->stopId);
         $endId = $this->getId($leg->to->stopId);
        // $instruction['stations'] = Utils::getFormattedStationsIn($startId,$endId,$trip);
+        $before = Utils::getTimeInMilis();
         $instruction['stations'] = $this->getStationsFromLeg($leg,$line->transport_mode_id);
-        $instruction['polyline'] = Utils::getPolylineFromRideInstruction($line,$trip,$instruction['stations']);
+        $after = Utils::getTimeInMilis();
+        $this->context->incrementValue("getting_stations_building_ride",($after-$before));
+        $before = Utils::getTimeInMilis();
+        $instruction['polyline'] = Utils::getPolylineFromRideInstruction($this->context,$line,$trip,$instruction['stations']);
+        $after = Utils::getTimeInMilis();
+        $this->context->incrementValue("getting_polyline_building_ride",($after-$before));
+        $before = Utils::getTimeInMilis();
         $instruction['duration'] = Utils::getRideDuration($startId,$endId,$trip);
+        $after = Utils::getTimeInMilis();
+        $this->context->incrementValue("getting_duration_building_ride",($after-$before));
+        $before = Utils::getTimeInMilis();
         $instruction['error_margin'] = 0.2;
+        $after = Utils::getTimeInMilis();
+        $this->context->incrementValue("getting_error_margin_building_ride",($after-$before));
         return $instruction;
     }
 
@@ -247,28 +269,6 @@ class OtpIntermediatePathBuilder
         return $stations;
     }
 
-    private function getLineTripInfo ($leg)
-    {
-        $info = [];
-        $routeId = $this->getId($leg->routeId);
-        $line = Line::find($routeId);
-        $tripId = $this->getId($leg->tripId);
-        if (Utils::strContains("m",$tripId))
-        {
-            $tripId = substr($tripId,1);
-            $trip = MetroTrip::find($tripId);
-            $info['is_metro_trip'] = true;
-        }
-        else
-        {
-            $tripId = substr($tripId,1);
-            $trip = TrainTrip::find($tripId);
-            $info['is_metro_trip'] = true;
-        }
-        $info['line'] = $line;
-        $info['trip'] = $trip;
-        return $info;
-    }
 
     private function getId ($idObj)
     {

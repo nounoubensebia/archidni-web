@@ -11,12 +11,14 @@ namespace App\Http\Controllers\PathFinderApi;
 
 use App\CommonSection;
 use App\Http\Controllers\LineHelper;
+use App\Http\Controllers\OtpPathFinder\Context;
 use App\Http\Controllers\OtpPathFinder\PathInstruction\RideInstructionIntermediate;
 use App\Http\Controllers\OtpPathFinder\PathInstruction\WaitLineIntermediate;
 use App\Http\Controllers\OtpPathFinder\Utils;
 
 class CommonSectionsFinder
 {
+    private $context;
     /**
      * @var RideInstructionIntermediate
      */
@@ -30,11 +32,12 @@ class CommonSectionsFinder
      * @param $currentTime
      * @param $day
      */
-    public function __construct(RideInstructionIntermediate $rideInstruction, $currentTime, $day)
+    public function __construct(Context $context,RideInstructionIntermediate $rideInstruction, $currentTime, $day)
     {
         $this->rideInstruction = $rideInstruction;
         $this->currentTime = $currentTime;
         $this->day = $day;
+        $this->context = $context;
     }
 
 
@@ -54,30 +57,31 @@ class CommonSectionsFinder
         $endId = $this->rideInstruction->getStationEndId();
         $trip = $waitLine->getTrip();
         $stations = $trip->stations;
-        $commonSections = $trip->commonSections->load('metroTrips');
-        $commonSections->load('trainTrips');
+        $commonSections = $trip->commonSections;
         foreach ($commonSections as $commonSection)
         {
             if ($this->tripContainsSection($commonSection,$startId,$endId,$stations))
-            foreach ($commonSection->metroTrips as $metroTrip)
             {
-                if (!(($metroTrip->id == $waitLine->getTrip()->id)))
+                foreach ($commonSection->metroTrips as $metroTrip)
                 {
-                    $lineHelper = new LineHelper($metroTrip->line);
-                    $this->rideInstruction->addWaitLine(new WaitLineIntermediate($metroTrip->line,
-                        $metroTrip,$waitLine->getTransportModeId(),$waitLine->getDuration(),$waitLine->getDestination(),
-                        false,count($lineHelper->getCurrentAlerts())>0));
+                    if (!(($metroTrip->id == $waitLine->getTrip()->id)))
+                    {
+                        $lineHelper = new LineHelper($metroTrip->line);
+                        $this->rideInstruction->addWaitLine(new WaitLineIntermediate($metroTrip->line,
+                            $metroTrip,$waitLine->getTransportModeId(),$waitLine->getDuration(),$waitLine->getDestination(),
+                            false,$lineHelper->hasPerturbations()));
+                    }
                 }
-            }
 
-            foreach ($commonSection->trainTrips as $trainTrip)
-            {
-                if (!(($trainTrip->id == $waitLine->getTrip()->id)&&($waitLine->getExactWaitingTime())))
+                foreach ($commonSection->trainTrips as $trainTrip)
                 {
-                    $lineHelper = new LineHelper($trainTrip->line);
-                $this->rideInstruction->addWaitLine(new WaitLineIntermediate($waitLine->getLine(),
-                    $waitLine->getTrip(),$waitLine->getTransportModeId(),$waitLine->getDuration(),$waitLine->getDestination(),
-                    false,count($lineHelper->getCurrentAlerts())>0));
+                    if (!(($trainTrip->id == $waitLine->getTrip()->id)&&($waitLine->getExactWaitingTime())))
+                    {
+                        $lineHelper = new LineHelper($trainTrip->line);
+                    $this->rideInstruction->addWaitLine(new WaitLineIntermediate($waitLine->getLine(),
+                        $waitLine->getTrip(),$waitLine->getTransportModeId(),$waitLine->getDuration(),$waitLine->getDestination(),
+                        true,$lineHelper->hasPerturbations()));
+                    }
                 }
             }
         }
@@ -89,7 +93,7 @@ class CommonSectionsFinder
         $sO2 = $this->getStationOrder($stations,$section->station2_id);
         $iO1 = $this->getStationOrder($stations,$startId);
         $iO2 = $this->getStationOrder($stations,$endId);
-        return ($sO1>=$iO1&&$sO2<=$iO2);
+        return ($iO1>=$sO1&&$iO2<=$sO2);
     }
 
 
@@ -99,7 +103,7 @@ class CommonSectionsFinder
         $i=0;
         foreach ($stations as $station)
         {
-            if ($station->id = $stationId)
+            if ($station->id == $stationId)
                 return $i;
             $i++;
         }

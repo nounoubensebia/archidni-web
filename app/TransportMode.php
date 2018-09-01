@@ -16,4 +16,9 @@ class TransportMode extends Model
     {
         return $this->hasMany('App\Station');
     }
+
+    public function notifications()
+    {
+        return $this->hasMany('App\CompanyNotification');
+    }
 }

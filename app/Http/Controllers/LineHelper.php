@@ -10,6 +10,7 @@ namespace App\Http\Controllers;
 
 
 use App\CompanyNotification;
+use App\Http\Controllers\OtpPathFinder\Utils;
 
 class LineHelper
 {
@@ -46,6 +47,27 @@ class LineHelper
         $notificationsArray = array_merge($notificationsArray,$notificationsWithLines->toArray());
         return $notificationsArray;
 
+    }
+
+    private function getAlertsOptimised ()
+    {
+        $notifications = $this->line->notifications;
+        $transportModeNotifications = $this->line->transportMode->notifications;
+        $merged = $notifications->merge($transportModeNotifications);
+        return $merged->all();
+    }
+
+    public function hasPerturbations ()
+    {
+        $notifications = $this->getAlertsOptimised();
+        foreach ($notifications as $notification)
+        {
+            if ($notification->type==1&&((!isset($notification->end_datetime))||strtotime($notification->end_datetime)>(Utils::getTimeInMilis()/1000)))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

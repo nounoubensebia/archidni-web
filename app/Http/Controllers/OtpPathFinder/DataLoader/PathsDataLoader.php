@@ -68,10 +68,12 @@ class PathsDataLoader
         //loading trips
         $metroTrips = MetroTrip::with('line','timePeriods','commonSections','stations','line.sections',
             'commonSections.metroTrips','commonSections.trainTrips','commonSections.metroTrips.timePeriods',
-            'commonSections.trainTrips.departures','commonSections.trainTrips.stations')->find($metroTripsIds);
+            'commonSections.trainTrips.departures','commonSections.trainTrips.stations','line.notifications',
+            'line.transportMode.notifications','commonSections.metroTrips.line','commonSections.trainTrips.line')->find($metroTripsIds);
         $trainTrips = TrainTrip::with('line','departures','commonSections','stations','line.sections',
             'commonSections.metroTrips','commonSections.trainTrips','commonSections.metroTrips.timePeriods',
-            'commonSections.trainTrips.departures','commonSections.trainTrips.stations')->find($trainTripsIds);
+            'commonSections.trainTrips.departures','commonSections.trainTrips.stations','line.notifications',
+            'line.transportMode.notifications','commonSections.metroTrips.line','commonSections.trainTrips.line')->find($trainTripsIds);
         $info = [];
         $info['metroTrips'] = $metroTrips;
         $info['trainTrips'] = $trainTrips;

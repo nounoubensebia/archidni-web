@@ -16,29 +16,32 @@ use App\Http\Controllers\PathFinderApi\CommonSectionsFinder;
 class OtpPathCommonSectionsFinder
 {
     /**
-     * @var OtpPathIntermediate
+     * @var Context
      */
-    private $path;
+    private $context;
 
     /**
      * OtpPathCommonSectionsFinder constructor.
-     * @param OtpPathIntermediate $path
+     * @param Context $context
      */
-    public function __construct(OtpPathIntermediate $path)
+    public function __construct(Context $context)
     {
-        $this->path = $path;
+        $this->context = $context;
     }
 
-    public function addPossibleTrips ()
+    /**
+     * @param $path OtpPathIntermediate
+     */
+    public function addPossibleTrips ($path)
     {
-        foreach ($this->path->getInstructions() as $instruction)
+        foreach ($path->getInstructions() as $instruction)
         {
             /**
              * @var $instruction Instruction
              */
             if ($instruction instanceof RideInstructionIntermediate)
             {
-                $commonSectionFinder = new CommonSectionsFinder($instruction,12,1);
+                $commonSectionFinder = new CommonSectionsFinder($this->context,$instruction,12,1);
                 $commonSectionFinder->addPossibleTrips();
             }
         }

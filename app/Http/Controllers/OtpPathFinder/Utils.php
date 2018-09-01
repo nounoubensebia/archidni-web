@@ -32,13 +32,8 @@ class Utils
         return strpos($haystack, $needle) !== false;
     }
 
-    public static function getTripDestination($id, $isMetroTrip)
+    public static function getTripDestination($trip)
     {
-        if ($isMetroTrip) {
-            $trip = MetroTrip::find($id);
-        } else {
-            $trip = TrainTrip::find($id);
-        }
         $stations = $trip->stations;
         return $stations[count($stations) - 1];
     }
@@ -144,7 +139,7 @@ class Utils
         return $coordinates;
     }
 
-    public static function getPolylineFromRideInstruction($line,$trip,$stations)
+    public static function getPolylineFromRideInstruction(Context $context,$line,$trip,$stations)
     {
 
         $stationIds = array();
@@ -169,7 +164,10 @@ class Utils
                 return "thug";
             }
             $sectionPolyline = $section->polyline;
+            $before = Utils::getTimeInMilis();
             $decodedPolyline = self::decodePolyline($sectionPolyline);
+            $after = Utils::getTimeInMilis();
+            $context->incrementValue("decoding_polyline",($after-$before));
             if ($line->transport_mode_id != 3 && $trip->direction == 1) {
                 $decodedPolyline = array_reverse($decodedPolyline);
             }
@@ -178,8 +176,10 @@ class Utils
                 array_push($polyline, $coordinate);
             }
         }
+        $before = Utils::getTimeInMilis();
         $polylineString = Polyline::encode(Polyline::getPointsFromPolylineArray($polyline));
-
+        $after = Utils::getTimeInMilis();
+        $context->incrementValue("encoding_polyline",($after-$before));
         return $polylineString;
     }
 

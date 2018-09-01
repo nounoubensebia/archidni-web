@@ -10,6 +10,7 @@ namespace App\Http\Controllers\OtpPathFinder;
 
 
 use App\Http\Controllers\OtpPathFinder\DataLoader\PathsDataLoader;
+use Illuminate\Support\Facades\DB;
 
 class OtpPathFinder
 {
@@ -33,6 +34,7 @@ class OtpPathFinder
 
     public function findPaths()
     {
+        DB::enableQueryLog();
         $beforeAll = round(microtime(true) * 1000);
         //getting itineraries
         $before = round(microtime(true) * 1000);
@@ -50,8 +52,12 @@ class OtpPathFinder
 
         $intermediatePathFormatter = new OtpIntermediatePathFormatter($this->context,$this->pathFinderAttributes);
 
+
+        $before = Utils::getTimeInMilis();
         $streetWalkingPaths = $intermediatePathFormatter->getFormattedPaths($streetWalkingItineraries);
         $directWalkingPaths = $intermediatePathFormatter->getFormattedPaths($directWalkingItineraries);
+        $after = Utils::getTimeInMilis();
+        $this->context->incrementValue("intermediate_formatting",($after-$before));
 
         //initializing walking cache in order to do not calculate the same walking portion more than a single time
 
@@ -124,15 +130,14 @@ class OtpPathFinder
 
         $this->context->addToDebug("adjusting_walking_paths",($after-$before));
         //adding other possible trips
-        /*$before = round(microtime(true) * 1000);
+        $before = round(microtime(true) * 1000);
         foreach ($adjustedPaths as $adjustedPath)
         {
-            $commonSectionsFinder = new OtpPathCommonSectionsFinder($adjustedPath);
-            $commonSectionsFinder->addPossibleTrips();
+            $commonSectionsFinder = new OtpPathCommonSectionsFinder($this->context);
+            $commonSectionsFinder->addPossibleTrips($adjustedPath);
         }
         $after = round(microtime(true) * 1000);
-        $debug['getting_common_sections'] = $after-$before;*/
-
+        $this->context->addToDebug("adding common trips",($after-$before));
         $before = round(microtime(true) * 1000);
         //formatting paths for output
         $formattedPaths = [];
@@ -141,12 +146,15 @@ class OtpPathFinder
             $formatter = new OtpIntermediateToOutputPathFormatter($path);
             array_push($formattedPaths,$formatter->formatPath());
         }
+
         $formattedPaths = array_unique($formattedPaths,SORT_REGULAR);
         $formattedPaths = array_values($formattedPaths);
         $after = round(microtime(true) * 1000);
         $this->context->addToDebug("formatting_paths_for_output",($after-$before));
         $afterAll = round(microtime(true) * 1000);
         $this->context->addToDebug("total",($afterAll-$beforeAll));
+        $queryLog = DB::getQueryLog();
+        $this->context->addToDebug("query_log",$queryLog);
         return new OtpPathFinderResponse($formattedPaths,$this->context->getDebug());
     }
 
