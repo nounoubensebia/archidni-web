@@ -17,7 +17,8 @@ class OtpPathFinder
 
     private $pathFinderAttributes;
     private static $URL = "http://localhost:8801/otp/routers/default/plan?";
-    private $numItineraries = 4;
+    private $numItineraries = 6;
+    private $transferPenalty = 0;
     /**
      * @var Context
      */
@@ -181,16 +182,16 @@ class OtpPathFinder
     private function retreiveDirectWalkingItineraries ()
     {
         $otpServerClient = new OtpServerClient($this->pathFinderAttributes);
-        $itineraries = $otpServerClient->getItineraries(true,false,$this->numItineraries);
-        $itineraries = array_merge($itineraries,$otpServerClient->getItineraries(true,true,3));
+        $itineraries = $otpServerClient->getItineraries(true,false,$this->numItineraries,$this->transferPenalty);
+        $itineraries = array_merge($itineraries,$otpServerClient->getItineraries(true,true,3,$this->transferPenalty));
         return $itineraries;
     }
 
     private function retreiveStreetWalkingItineraries()
     {
         $otpServerClient = new OtpServerClient($this->pathFinderAttributes);
-        $itineraries = $otpServerClient->getItineraries(false,false,$this->numItineraries);
-        $itineraries = array_merge($itineraries,$otpServerClient->getItineraries(false,true,3));
+        $itineraries = $otpServerClient->getItineraries(false,false,$this->numItineraries,$this->transferPenalty);
+        $itineraries = array_merge($itineraries,$otpServerClient->getItineraries(false,true,3,$this->transferPenalty));
         return $itineraries;
     }
 

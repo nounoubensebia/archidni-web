@@ -28,7 +28,7 @@ class WalkingPathFinder
 
     public function getPaths ()
     {
-        $url = "http://localhost:8080/getWalkPaths";
+        $url = "http://localhost:8950/getWalkPaths";
         $content = [];
         $content['timeout'] = 50;
         $content['entries'] = $this->originsDestinations;

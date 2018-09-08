@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\GeoUtils;
+use App\Http\Controllers\OtpPathFinder\Utils;
 use App\Http\Resources\LineResource;
 use App\Http\Resources\StationResource;
 use App\Line;
@@ -58,5 +60,21 @@ class StationController extends Controller
             $query->where('origin_id','=',$id)->orWhere('destination_id','=',$id);
         })->get();
         return LineResource::collection($lines);
+    }
+
+    public function getNearbyPlaces ($id)
+    {
+        $searchStation = Station::find($id);
+        $stations = Station::all();
+        $nearbyStations = [];
+        foreach ($stations as $station)
+        {
+            $distance = GeoUtils::distance($station->latitude,$station->longitude,$searchStation->latitude,$searchStation->longitude);
+            if ($distance<0.5&&$station->id!=$id)
+            {
+                array_push($nearbyStations,$station);
+            }
+        }
+        return $nearbyStations;
     }
 }

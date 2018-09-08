@@ -24,10 +24,10 @@ class OtpServerClient
     }
 
 
-    public function getItineraries ($directWalking,$withoutBus,$numItineraries)
+    public function getItineraries ($directWalking,$withoutBus,$numItineraries,$transferPenalty)
     {
         $url = $this->createTransitPathUrl($directWalking,$withoutBus);
-        return $this->getItinerariesFromJson(file_get_contents($url."&numItineraries=".$numItineraries));
+        return $this->getItinerariesFromJson(file_get_contents($url."&numItineraries=".$numItineraries."&transferPenalty=".$transferPenalty));
     }
 
     private function getItinerariesFromJson ($json)
@@ -67,7 +67,7 @@ class OtpServerClient
         $directWalking = ($directWalking) ? "true" : "false";
         $withoutBus = ($withoutBus) ? "true" : "false";
         $arriveBy = ($attributes->getArriveBy()) ? "true" : "false";
-        return "http://localhost:8080/OTPpath?origin=$originStr&destination=$destinationStr&date=$date"."&time=".$time.
+        return "http://localhost:8950/OTPpath?origin=$originStr&destination=$destinationStr&date=$date"."&time=".$time.
             "&arriveBy=".$arriveBy."&directWalking=".$directWalking."&withoutBus=".$withoutBus;
     }
 }

@@ -88,6 +88,9 @@ Route::group(['prefix' => 'v1'], function () {
         Route::get('{id}/transfers',[
             'uses' => 'StationController@getTransfers'
         ])->name('station_transfers');
+        Route::get('{id}/nearby-places',[
+           'uses' => 'StationController@getNearbyPlaces'
+        ]);
     });
 
 
