@@ -107,6 +107,9 @@ Route::group(['prefix' => 'v1'], function () {
         ])->middleware('token.handler:api');
     });
 
+    Route::post('/create-train-trips',
+        ['uses' => 'TripController@createTrainTrips']);
+
     Route::resource('CompanyNotifications', 'CompanyNotificationController');
 
 });

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class TrainTrip extends Model
 {
     //
+    protected $fillable = ['days','line_id','direction'];
     public function line()
     {
         return $this->belongsTo('App\Line');
