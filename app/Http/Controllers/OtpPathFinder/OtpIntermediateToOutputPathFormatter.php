@@ -12,6 +12,7 @@ namespace App\Http\Controllers\OtpPathFinder;
 use App\Http\Controllers\OtpPathFinder\PathInstruction\RideInstructionIntermediate;
 use App\Http\Controllers\OtpPathFinder\PathInstruction\WaitLineIntermediate;
 use App\Http\Controllers\OtpPathFinder\PathInstruction\WalkInstruction;
+use App\TrainTrip;
 
 class OtpIntermediateToOutputPathFormatter
 {
@@ -64,6 +65,11 @@ class OtpIntermediateToOutputPathFormatter
                     $line['destination'] = $intermediateWaitLine->getDestination();
                     $line['exact_waiting_time'] = $intermediateWaitLine->getExactWaitingTime();
                     $line['has_perturbations'] = $intermediateWaitLine->getHasPerturbations();
+                    if ($intermediateWaitLine->getTrip() instanceof TrainTrip)
+                    {
+                        $line['arrival_time'] = $this->getStationTrainArrivalTime($intermediateWaitLine->getTrip(),
+                            $instruction->getStationStartId());
+                    }
                     array_push($linesArray,$line);
                 }
                 $newInstruction['lines'] = $linesArray;
@@ -80,6 +86,19 @@ class OtpIntermediateToOutputPathFormatter
             $i++;
         }
         return $instructions;
+    }
+
+    private function getStationTrainArrivalTime ($trip,$startStationId)
+    {
+        foreach ($trip->stations as $station)
+        {
+            if ($station->id==$startStationId)
+            {
+                return Utils::getSecondsSinceMidnight(
+                    $trip->departures->first()->time)+$station->pivot->minutes*60;
+            }
+        }
+        return -1;
     }
 
 }

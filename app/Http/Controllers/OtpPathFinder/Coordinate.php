@@ -11,8 +11,8 @@ namespace App\Http\Controllers\OtpPathFinder;
 
 class Coordinate implements \JsonSerializable
 {
-    private $latitude;
-    private $longitude;
+    public $latitude;
+    public $longitude;
 
     /**
      * Coordinate constructor.

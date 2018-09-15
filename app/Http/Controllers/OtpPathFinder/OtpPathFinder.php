@@ -182,16 +182,27 @@ class OtpPathFinder
     private function retreiveDirectWalkingItineraries ()
     {
         $otpServerClient = new OtpServerClient($this->pathFinderAttributes);
-        $itineraries = $otpServerClient->getItineraries(true,false,$this->numItineraries,$this->transferPenalty);
-        $itineraries = array_merge($itineraries,$otpServerClient->getItineraries(true,true,3,$this->transferPenalty));
+        $itineraries = $otpServerClient->getItineraries(true,false,false,$this->numItineraries,$this->transferPenalty);
+        $itineraries = array_merge($itineraries,$otpServerClient->getItineraries(true,false,
+            true,3,$this->transferPenalty));
+        $itineraries = array_merge($itineraries,$otpServerClient->getItineraries(true,true,
+            false,3,$this->transferPenalty));
+        $itineraries = array_merge($itineraries,$otpServerClient->getItineraries(false,true,
+            true,1,$this->transferPenalty));
         return $itineraries;
     }
 
     private function retreiveStreetWalkingItineraries()
     {
         $otpServerClient = new OtpServerClient($this->pathFinderAttributes);
-        $itineraries = $otpServerClient->getItineraries(false,false,$this->numItineraries,$this->transferPenalty);
-        $itineraries = array_merge($itineraries,$otpServerClient->getItineraries(false,true,3,$this->transferPenalty));
+        $itineraries = $otpServerClient->getItineraries(false,false,false
+            ,$this->numItineraries,$this->transferPenalty);
+        $itineraries = array_merge($itineraries,$otpServerClient->getItineraries(false,false,
+            true,3,$this->transferPenalty));
+        $itineraries = array_merge($itineraries,$otpServerClient->getItineraries(false,true,
+            false,3,$this->transferPenalty));
+        $itineraries = array_merge($itineraries,$otpServerClient->getItineraries(false,true,
+            true,1,$this->transferPenalty));
         return $itineraries;
     }
 

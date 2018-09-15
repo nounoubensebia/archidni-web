@@ -46,6 +46,8 @@ class OtpPathFilter
 
 
 
+        //removing duplicates
+
         for ($i=0;$i<count($pathsMap);$i++)
         {
             for ($j=$i+1;$j<count($pathsMap);$j++)
@@ -56,15 +58,38 @@ class OtpPathFilter
                     $duration2 = $pathsMap[$j]['path']->getPathDuration();
                     if ($duration1<$duration2)
                     {
-                        $pathsMap[$i]['admissible'] = true;
+                        if (!isset($pathsMap[$i]['admissible'])||$pathsMap[$i]['admissible'])
+                            $pathsMap[$i]['admissible'] = true;
                         $pathsMap[$j]['admissible'] = false;
                     }
                     else
                     {
                         $pathsMap[$i]['admissible'] = false;
-                        $pathsMap[$j]['admissible'] = true;
+                        if (!isset($pathsMap[$j]['admissible'])||$pathsMap[$i]['admissible'])
+                            $pathsMap[$j]['admissible'] = true;
                     }
                 }
+            }
+        }
+
+        //removing long paths
+
+        $minDuration = 10000000;
+        foreach ($pathsMap as $pathEntry)
+        {
+            if ($pathEntry['path']->getPathDuration()<$minDuration)
+            {
+                $minDuration = $pathEntry['path']->getPathDuration();
+            }
+        }
+
+        //echo $minDuration;
+
+        foreach ($pathsMap as &$pathEntry)
+        {
+            if ($pathEntry['path']->getPathDuration()>=$minDuration*2)
+            {
+                $pathEntry['admissible'] = false;
             }
         }
 

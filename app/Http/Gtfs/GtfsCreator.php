@@ -9,6 +9,7 @@
 namespace App\Http\Gtfs;
 
 
+use App\Http\Controllers\OtpPathFinder\Utils;
 use App\Line;
 use App\MetroTrip;
 use App\Operator;
@@ -115,8 +116,8 @@ class GtfsCreator
         {
             $stringToInsert.=PHP_EOL;
             $stringToInsert.=$trainTrip->line_id.",";
-            $stringToInsert.="m".$trainTrip->id.",";
-            $stringToInsert.="m".$trainTrip->id;
+            $stringToInsert.="t".$trainTrip->id.",";
+            $stringToInsert.="t".$trainTrip->id;
         }
         $file = fopen("trips.txt","w");
         fwrite($file,$stringToInsert);
@@ -143,6 +144,24 @@ class GtfsCreator
                 $i++;
             }
         }
+        $trainTrips = TrainTrip::all();
+        foreach ($trainTrips as $trainTrip)
+        {
+            $i=0;
+            $stations = $trainTrip->stations;
+            foreach ($stations as $station)
+            {
+                $stringToInsert.=PHP_EOL;
+                $stringToInsert.="t".$trainTrip->id.",";
+                $stringToInsert.=$this->getArrivalTimeTrain($trainTrip,$station->pivot->minutes).",";
+                $stringToInsert.=$this->getArrivalTimeTrain($trainTrip,$station->pivot->minutes).",";
+                $stringToInsert.=$station->id.",";
+                $stringToInsert.=$i.",";
+                $stringToInsert.="0";
+                $i++;
+            }
+        }
+
         $file = fopen("stop_times.txt","w");
         fwrite($file,$stringToInsert);
         fclose($file);
@@ -164,6 +183,13 @@ class GtfsCreator
         $file = fopen("frequencies.txt","w");
         fwrite($file,$stringToInsert);
         fclose($file);
+    }
+
+    private function getArrivalTimeTrain (TrainTrip $trip,$minutes)
+    {
+        $departure = $trip->departures->first();
+        $departure = Utils::getSecondsSinceMidnight($departure->time);
+        return $this->getArrivalTime(($minutes+$departure/60));
     }
 
     private function getArrivalTime ($minutes)

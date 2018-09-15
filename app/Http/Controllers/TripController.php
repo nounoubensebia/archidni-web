@@ -31,7 +31,12 @@ class TripController extends Controller
         for ($i=1;$i<count($lines)-1;$i++)
         {
             $line = $lines[$i];
-            $departureTime = $line[1];
+            $k=1;
+            while (strcmp($line[$k],'-')==0)
+            {
+                $k++;
+            }
+            $departureTime = $line[$k];
             $departureTimeSeconds = Utils::getSecondsSinceMidnight($departureTime.":00");
 
             $j=0;

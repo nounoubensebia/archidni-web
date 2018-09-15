@@ -147,41 +147,57 @@ class Utils
             array_push($stationIds, $station['id']);
         }
         $sections = $line->sections;
-        if ($line->transport_mode_id==3)
+        if ($line->transport_mode_id!=2)
         {
-            $acceptReverse = false;
+            if ($line->transport_mode_id==3)
+            {
+                $acceptReverse = false;
+            }
+            else
+            {
+                $acceptReverse = true;
+            }
+            $polyline = [];
+            for ($i = 0; $i < count($stationIds) - 1;$i++) {
+                $section = self::getSection($stationIds[$i],$stationIds[$i+1],$acceptReverse,$sections);
+                if (!isset($section))
+                {
+                    //echo "line ".$line->id." station1 ".$stationIds[$i]." station2 ".$stationIds[$i+1];
+                    return "thug";
+                }
+                $sectionPolyline = $section->polyline;
+                $before = Utils::getTimeInMilis();
+                $decodedPolyline = self::decodePolyline($sectionPolyline);
+                $after = Utils::getTimeInMilis();
+                $context->incrementValue("decoding_polyline",($after-$before));
+                if ($line->transport_mode_id != 3 && $trip->direction == 1) {
+                    $decodedPolyline = array_reverse($decodedPolyline);
+                }
+                foreach ($decodedPolyline as $coordinate) {
+
+                    array_push($polyline, $coordinate);
+                }
+            }
+            $before = Utils::getTimeInMilis();
+            $polylineString = Polyline::encode(Polyline::getPointsFromPolylineArray($polyline));
+            $after = Utils::getTimeInMilis();
+            $context->incrementValue("encoding_polyline",($after-$before));
+            return $polylineString;
         }
         else
         {
-            $acceptReverse = true;
-        }
-        $polyline = [];
-        for ($i = 0; $i < count($stationIds) - 1;$i++) {
-            $section = self::getSection($stationIds[$i],$stationIds[$i+1],$acceptReverse,$sections);
-            if (!isset($section))
-            {
-                //echo "line ".$line->id." station1 ".$stationIds[$i]." station2 ".$stationIds[$i+1];
-                return "thug";
-            }
-            $sectionPolyline = $section->polyline;
-            $before = Utils::getTimeInMilis();
-            $decodedPolyline = self::decodePolyline($sectionPolyline);
-            $after = Utils::getTimeInMilis();
-            $context->incrementValue("decoding_polyline",($after-$before));
-            if ($line->transport_mode_id != 3 && $trip->direction == 1) {
-                $decodedPolyline = array_reverse($decodedPolyline);
-            }
-            foreach ($decodedPolyline as $coordinate) {
+            $polyline = [];
+            //TODO get Real Polyline
 
-                array_push($polyline, $coordinate);
+            foreach ($stations as $station)
+            {
+                array_push($polyline,$station['coordinate']);
             }
+            $polylineString = Polyline::encode(Polyline::getPointsFromPolylineObject($polyline));
+            return $polylineString;
         }
-        $before = Utils::getTimeInMilis();
-        $polylineString = Polyline::encode(Polyline::getPointsFromPolylineArray($polyline));
-        $after = Utils::getTimeInMilis();
-        $context->incrementValue("encoding_polyline",($after-$before));
-        return $polylineString;
     }
+
 
     public static function getTimeInMilis ()
     {

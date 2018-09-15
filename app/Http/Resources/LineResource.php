@@ -144,7 +144,9 @@ class LineResource extends Resource
             }
             $stations = array();
             foreach ($trip->stations as $station) {
-                array_push($stations, ['id' => $station->id, 'minutes' => $station->pivot->minutes]);
+                array_push($stations, ['id' => $station->id,'name'=>$station->name,
+                    'coordinate'=>['latitude'=>$station->latitude,'longitude' => $station->longitude],
+                    'minutes' => $station->pivot->minutes]);
             }
             $tripArray['stations'] = $stations;
             if (!$pushed||$this->id>2)
