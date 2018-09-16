@@ -74,6 +74,10 @@ Route::group(['prefix' => 'v1'], function () {
         ])->name('line');
     });
 
+    Route::get('lines',[
+        'uses' => 'LineController@index'
+    ])->name('line');
+
 
     Route::group(['prefix' => '/station','middleware' => ['token.handler:api']], function () {
         Route::get('autocomplete', [

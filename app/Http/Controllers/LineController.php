@@ -15,6 +15,12 @@ class LineController extends Controller
 {
 
 
+    public function index(Request $request)
+    {
+        $lines = Line::with('sections')->get();
+        return LineResource::collection($lines);
+    }
+
     public function getEtusaLines (Request $request)
     {
         $lines = Line::with('sections','trips')->query()->where('transport_mode_id','=','3')->get();
