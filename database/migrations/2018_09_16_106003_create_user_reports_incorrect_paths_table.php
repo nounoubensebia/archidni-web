@@ -13,13 +13,14 @@ class CreateUserReportsIncorrectPathsTable extends Migration
      */
     public function up()
     {
-        Schema::dropIfExists('user_reports_incorrect_paths');
-        Schema::create('user_reports_incorrect_paths', function (Blueprint $table) {
+        Schema::dropIfExists('user_reports_paths');
+        Schema::create('user_reports_paths', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('user_id')->unsigned();
             $table->foreign('user_id')->references('id')->on('users');
             $table->text('path_data');
-            $table->text('description');
+            $table->text('description')->nullable();
+            $table->integer('is_good');
             $table->timestamps();
         });
     }

@@ -111,6 +111,27 @@ Route::group(['prefix' => 'v1'], function () {
         ])->middleware('token.handler:api');
     });
 
+    Route::group(['prefix' => 'user-reports'],function ()
+    {
+       Route::get('disruption',[
+          'uses' => 'UserReportController@getDisruptionReports'
+       ]);
+       Route::post('disruption/create',
+           ['uses' => 'UserReportController@storeDisruptionReport']);
+       Route::get('path',[
+           'uses' => 'UserReportController@getPathReports'
+       ]);
+       Route::post('path/create',
+           ['uses' => 'UserReportController@storePathReport']
+       );
+       Route::get('other',[
+           'uses' => 'UserReportController@getOtherReports'
+       ]);
+       Route::post('other/create',[
+          'uses' => 'UserReportController@storeOtherReport'
+       ]);
+    });
+
     Route::post('/create-train-trips',
         ['uses' => 'TripController@createTrainTrips']);
 
