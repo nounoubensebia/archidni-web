@@ -20,6 +20,7 @@ use App\TrainTrip;
 use App\TransportMode;
 use AStar;
 use Carbon\Carbon;
+use DateTime;
 use HeuristicEstimatorDijkstra;
 use http\Env\Response;
 use Illuminate\Http\Request;

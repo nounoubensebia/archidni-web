@@ -15,6 +15,7 @@ use App\Http\Controllers\OtpPathFinder\Context;
 use App\Http\Controllers\OtpPathFinder\PathInstruction\RideInstructionIntermediate;
 use App\Http\Controllers\OtpPathFinder\PathInstruction\WaitLineIntermediate;
 use App\Http\Controllers\OtpPathFinder\Utils;
+use DateTime;
 
 class CommonSectionsFinder
 {
@@ -52,7 +53,8 @@ class CommonSectionsFinder
         /**
          * @var $waitLine WaitLineIntermediate
          */
-
+        $dateTime = DateTime::createFromFormat('!m-d-Y', $this->context->getPathFinderAttributes()->getDate());
+        $day = date("w",$dateTime->format('U'));
         $startId = $this->rideInstruction->getStationStartId();
         $endId = $this->rideInstruction->getStationEndId();
         $trip = $waitLine->getTrip();
@@ -64,7 +66,7 @@ class CommonSectionsFinder
             {
                 foreach ($commonSection->metroTrips as $metroTrip)
                 {
-                    if (!(($metroTrip->id == $waitLine->getTrip()->id)))
+                    if (!(($metroTrip->id == $waitLine->getTrip()->id))&&Utils::isTripScheduledForDay($trip,$day))
                     {
                         $lineHelper = new LineHelper($metroTrip->line);
                         $this->rideInstruction->addWaitLine(new WaitLineIntermediate($metroTrip->line,
@@ -86,6 +88,8 @@ class CommonSectionsFinder
             }
         }
     }
+
+
 
     private function tripContainsSection (CommonSection $section,$startId,$endId,$stations)
     {

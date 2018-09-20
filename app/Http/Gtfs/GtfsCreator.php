@@ -85,17 +85,80 @@ class GtfsCreator
         {
             $stringToInsert.=PHP_EOL;
             $stringToInsert.="m".$metroTrip->id.",";
-            $stringToInsert.="1,1,1,1,1,1,1,20170101,20240101";
+            $stringToInsert.=$this->getDaysString($metroTrip)."20170101,20240101";
         }
         foreach ($trainTrips as $trainTrip)
         {
             $stringToInsert.=PHP_EOL;
             $stringToInsert.="t".$trainTrip->id.",";
-            $stringToInsert.="1,1,1,1,1,1,1,20170101,20240101";
+            $stringToInsert.=$this->getDaysString($trainTrip)."20170101,20240101";
         }
         $file = fopen("calendar.txt","w");
         fwrite($file,$stringToInsert);
         fclose($file);
+    }
+
+    private function getDaysString ($trip)
+    {
+        $days = $trip->days;
+        $string ="";
+        if (($days&2)!=0)
+        {
+            $string.="1,";
+        }
+        else
+        {
+            $string.="0,";
+        }
+        if (($days&4)!=0)
+        {
+            $string.="1,";
+        }
+        else
+        {
+            $string.="0,";
+        }
+        if (($days&8)!=0)
+        {
+            $string.="1,";
+        }
+        else
+        {
+            $string.="0,";
+        }
+        if (($days&16)!=0)
+        {
+            $string.="1,";
+        }
+        else
+        {
+            $string.="0,";
+        }
+        if (($days&32)!=0)
+        {
+            $string.="1,";
+        }
+        else
+        {
+            $string.="0,";
+        }
+        if (($days&64)!=0)
+        {
+            $string.="1,";
+        }
+        else
+        {
+            $string.="0,";
+        }
+        if (($days&1)!=0)
+        {
+            $string.="1,";
+        }
+        else
+        {
+            $string.="0,";
+        }
+        return $string;
     }
 
 

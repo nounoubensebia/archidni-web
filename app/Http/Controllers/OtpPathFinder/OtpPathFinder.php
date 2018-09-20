@@ -17,7 +17,7 @@ class OtpPathFinder
 
     private $pathFinderAttributes;
     private static $URL = "http://localhost:8801/otp/routers/default/plan?";
-    private $numItineraries = 6;
+    private $numItineraries = 8;
     private $transferPenalty = 0;
     /**
      * @var Context
@@ -182,11 +182,12 @@ class OtpPathFinder
     private function retreiveDirectWalkingItineraries ()
     {
         $otpServerClient = new OtpServerClient($this->pathFinderAttributes);
-        $itineraries = $otpServerClient->getItineraries(true,false,false,$this->numItineraries,$this->transferPenalty);
-        $itineraries = array_merge($itineraries,$otpServerClient->getItineraries(true,false,
+        $itineraries = $otpServerClient->getItineraries(true,false,false,$this->numItineraries,
+            $this->transferPenalty);
+        /*$itineraries = array_merge($itineraries,$otpServerClient->getItineraries(true,false,
             true,3,$this->transferPenalty));
         $itineraries = array_merge($itineraries,$otpServerClient->getItineraries(true,true,
-            false,3,$this->transferPenalty));
+            false,3,$this->transferPenalty));*/
         $itineraries = array_merge($itineraries,$otpServerClient->getItineraries(false,true,
             true,1,$this->transferPenalty));
         return $itineraries;
@@ -197,10 +198,10 @@ class OtpPathFinder
         $otpServerClient = new OtpServerClient($this->pathFinderAttributes);
         $itineraries = $otpServerClient->getItineraries(false,false,false
             ,$this->numItineraries,$this->transferPenalty);
-        $itineraries = array_merge($itineraries,$otpServerClient->getItineraries(false,false,
+        /*$itineraries = array_merge($itineraries,$otpServerClient->getItineraries(false,false,
             true,3,$this->transferPenalty));
         $itineraries = array_merge($itineraries,$otpServerClient->getItineraries(false,true,
-            false,3,$this->transferPenalty));
+            false,3,$this->transferPenalty));*/
         $itineraries = array_merge($itineraries,$otpServerClient->getItineraries(false,true,
             true,1,$this->transferPenalty));
         return $itineraries;

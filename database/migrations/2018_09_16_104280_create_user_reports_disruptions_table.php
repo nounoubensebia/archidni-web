@@ -18,7 +18,7 @@ class CreateUserReportsDisruptionsTable extends Migration
             $table->increments('id');
             $table->integer('user_id')->unsigned();
             $table->foreign('user_id')->references('id')->on('users');
-            $table->integer('line_id')->unsigned();
+            $table->integer('line_id')->unsigned()->nullable();
             $table->foreign('line_id')->references('id')->on('lines');
             $table->integer('transport_mode_id')->unsigned();
             $table->foreign('transport_mode_id')->references('id')->on('transport_modes');

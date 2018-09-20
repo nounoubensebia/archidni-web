@@ -232,4 +232,82 @@ class Utils
         return $time_seconds;
     }
 
+    public static function isTripScheduledForDay($trip,$day)
+    {
+        $days = $trip->day;
+        switch ($day)
+        {
+            case 0://dimanche
+                if ($days&1!=0)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+                break;
+            case 1://lundi
+                if ($days&2!=0)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+                break;
+            case 2://mardi
+                if ($days&4!=0)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+                break;
+            case 3 ://mercredi
+                if ($days&8!=0)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+                break;
+            case  4://jeudi
+                if ($days&16!=0)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+                break;
+            case 5://vendredi
+                if ($days&32!=0)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+                break;
+            case 6://samedi
+                if ($days&64!=0)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+                break;
+        }
+    }
+
 }
