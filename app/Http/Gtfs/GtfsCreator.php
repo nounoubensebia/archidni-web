@@ -16,6 +16,7 @@ use App\Operator;
 use App\Station;
 use App\TimePeriod;
 use App\TrainTrip;
+use ZipArchive;
 
 class GtfsCreator
 {
@@ -299,5 +300,25 @@ class GtfsCreator
         $this->createTripsFile();
         $this->createStopTimesFile();
         $this->createFrequencyFile();
+
+    }
+
+    public function deployGtfsFeed()
+    {
+        $this->createGtfsFeed();
+        $zip = new ZipArchive();
+        if ($zip->open("test.zip", ZipArchive::CREATE)!==TRUE) {
+            exit("cannot open zip\n");
+        }
+        $zip->addFile("agency.txt");
+        $zip->addFile('calendar.txt');
+        $zip->addFile('stops.txt');
+        $zip->addFile('routes.txt');
+        $zip->addFile('trips.txt');
+        $zip->addFile('stop_times.txt');
+        $zip->addFile('frequencies.txt');
+        $zip->close();
+        $f = file_get_contents('test.zip');
+        echo base64_encode($f);
     }
 }

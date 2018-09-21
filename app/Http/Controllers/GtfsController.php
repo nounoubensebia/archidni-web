@@ -13,4 +13,10 @@ class GtfsController extends Controller
         $gtfsCreator = new GtfsCreator();
         $gtfsCreator->createGtfsFeed();
     }
+
+    public function deployFeed ()
+    {
+        $gtfsCreator = new GtfsCreator();
+        $gtfsCreator->deployGtfsFeed();
+    }
 }

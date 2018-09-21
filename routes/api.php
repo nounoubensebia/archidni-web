@@ -48,6 +48,8 @@ Route::get('/transferTest', ['uses' => "StationController@getTransfersTest"]);
 
 Route::get('/create-gtfs',['uses' => "GtfsController@createFeed"]);
 
+Route::get('/deploy-gtfs',["uses" => "GtfsController@deployFeed"]);
+
 Route::get('/find-common-sections',['uses' => 'CommonSectionController@findCommonSections']);
 
 Route::group(['prefix' => 'v1'], function () {

@@ -53,7 +53,7 @@ class CommonSectionsFinder
         /**
          * @var $waitLine WaitLineIntermediate
          */
-        $dateTime = DateTime::createFromFormat('!m-d-Y', $this->context->getPathFinderAttributes()->getDate());
+        $dateTime = DateTime::createFromFormat('!Y-m-d', $this->context->getPathFinderAttributes()->getDate());
         $day = date("w",$dateTime->format('U'));
         $startId = $this->rideInstruction->getStationStartId();
         $endId = $this->rideInstruction->getStationEndId();
