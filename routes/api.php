@@ -139,5 +139,7 @@ Route::group(['prefix' => 'v1'], function () {
 
     Route::resource('CompanyNotifications', 'CompanyNotificationController');
 
+    Route::resource('places', 'PlaceController');
+
 });
 
