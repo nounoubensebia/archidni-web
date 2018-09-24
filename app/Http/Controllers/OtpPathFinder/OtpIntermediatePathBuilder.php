@@ -236,7 +236,10 @@ class OtpIntermediatePathBuilder
         $after = Utils::getTimeInMilis();
         $this->context->incrementValue("getting_duration_building_ride",($after-$before));
         $before = Utils::getTimeInMilis();
-        $instruction['error_margin'] = 0.2;
+        if ($line->transport_mode_id==3)
+            $instruction['error_margin'] = 0.2;
+        else
+            $instruction['error_margin'] = 0;
         $after = Utils::getTimeInMilis();
         $this->context->incrementValue("getting_error_margin_building_ride",($after-$before));
         return $instruction;

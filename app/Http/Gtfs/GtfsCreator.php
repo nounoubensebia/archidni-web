@@ -16,6 +16,9 @@ use App\Operator;
 use App\Station;
 use App\TimePeriod;
 use App\TrainTrip;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Psr7\Request;
 use ZipArchive;
 
 class GtfsCreator
@@ -318,7 +321,13 @@ class GtfsCreator
         $zip->addFile('stop_times.txt');
         $zip->addFile('frequencies.txt');
         $zip->close();
-        $f = file_get_contents('test.zip');
-        echo base64_encode($f);
+        $guzzleClient = new Client();
+        $request = new Request('POST','http://localhost:8950/storeGtfs',[],
+            base64_encode(file_get_contents('test.zip')));
+        try {
+            $guzzleClient->send($request);
+        } catch (GuzzleException $e) {
+            print_r($e->getTrace());
+        }
     }
 }

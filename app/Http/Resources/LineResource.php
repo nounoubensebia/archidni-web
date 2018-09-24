@@ -156,12 +156,15 @@ class LineResource extends Resource
             }
         }
 
+        $schedules = $this->schedules;
+
         return [
             'id' => $this->id,
             'name' => $this->name,
             'transport_mode_id' => $this->transport_mode_id,
             'sections' => $this->getSections(),
             'trips' => $tripsCollection->all(),
+            'schedules' => $schedules
         ];
     }
 
