@@ -139,7 +139,14 @@ Route::group(['prefix' => 'v1'], function () {
 
     Route::resource('CompanyNotifications', 'CompanyNotificationController');
 
-    Route::resource('places', 'PlaceController');
+
+
+    Route::group(['prefix' => 'places'] ,function ()
+    {
+        Route::resource('', 'PlaceController');
+        Route::resource('/parkings','ParkingController');
+        Route::resource('/hospitals','HospitalController');
+    });
 
 });
 
