@@ -139,5 +139,22 @@ Route::group(['prefix' => 'v1'], function () {
 
     Route::resource('CompanyNotifications', 'CompanyNotificationController');
 
+
+
+    Route::group(['prefix' => 'places'] ,function ()
+    {
+        Route::resource('', 'PlaceController');
+        Route::resource('/parkings','ParkingController');
+        Route::resource('/hospitals','HospitalController');
+    });
+
+    Route::get('/buses/update',
+        ['uses' => 'BusController@updateLocations']
+    );
+
+    Route::get('buses',[
+        'uses' => 'BusController@index'
+    ]);
+
 });
 
