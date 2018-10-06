@@ -148,5 +148,13 @@ Route::group(['prefix' => 'v1'], function () {
         Route::resource('/hospitals','HospitalController');
     });
 
+    Route::get('/buses/update',
+        ['uses' => 'BusController@updateLocations']
+    );
+
+    Route::get('buses',[
+        'uses' => 'BusController@index'
+    ]);
+
 });
 
