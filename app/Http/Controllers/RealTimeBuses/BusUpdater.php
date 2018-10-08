@@ -41,6 +41,7 @@ class BusUpdater
         foreach ($buses as $bus)
         {
             Bus::updateOrCreate(
+                ["id" =>$bus["id"]],
                 $bus
             );
         }

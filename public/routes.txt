@@ -1,6 +1,6 @@
 agency_id,route_id,route_short_name,route_long_name,route_type
 2,1,Tramway d'alger,Tramway d'alger,0
-2,2,Métro d'Alger,Métro d'Alger,1
+2,2,Métro Place des martyrs El Harrach,Métro Place des martyrs El Harrach,1
 1,3,Banlieue Alger Est,Banlieue Alger Est,2
 1,4,Banlieue Alger Ouest,Banlieue Alger Ouest,2
 1,5,Agha-Zeralda,Agha-Zeralda,2
@@ -74,3 +74,4 @@ agency_id,route_id,route_short_name,route_long_name,route_type
 3,141,,ligne 695: EL HARRACH	 - STATION SIDI MOUSSA 	,3
 3,150,,ligne 708: CHEVALLEY	 - SOUIDANIA	,3
 3,159,,ligne 726: BEN AKNOUN	 - BIR MOURAD RAIS	,3
+2,160,Métro Hai El Badr Ain Naadja,Métro Hai El Badr Ain Naadja,1
