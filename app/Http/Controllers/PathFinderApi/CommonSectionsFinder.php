@@ -11,7 +11,7 @@ namespace App\Http\Controllers\PathFinderApi;
 
 use App\CommonSection;
 use App\Http\Controllers\LineHelper;
-use App\Http\Controllers\OtpPathFinder\Context;
+use App\Http\Controllers\OtpPathFinder\PathFinderContext;
 use App\Http\Controllers\OtpPathFinder\PathInstruction\RideInstructionIntermediate;
 use App\Http\Controllers\OtpPathFinder\PathInstruction\WaitLineIntermediate;
 use App\Http\Controllers\OtpPathFinder\Utils;
@@ -33,7 +33,7 @@ class CommonSectionsFinder
      * @param $currentTime
      * @param $day
      */
-    public function __construct(Context $context,RideInstructionIntermediate $rideInstruction, $currentTime, $day)
+    public function __construct(PathFinderContext $context, RideInstructionIntermediate $rideInstruction, $currentTime, $day)
     {
         $this->rideInstruction = $rideInstruction;
         $this->currentTime = $currentTime;

@@ -9,7 +9,7 @@
 namespace App\Http\Controllers\OtpPathFinder\DataLoader;
 
 
-use App\Http\Controllers\OtpPathFinder\Context;
+use App\Http\Controllers\OtpPathFinder\PathFinderContext;
 use App\Http\Controllers\OtpPathFinder\Utils;
 use App\MetroTrip;
 use App\TrainTrip;
@@ -17,15 +17,15 @@ use App\TrainTrip;
 class PathsDataLoader
 {
     /**
-     * @var Context
+     * @var PathFinderContext
      */
     private $context;
 
     /**
      * PathsDataLoader constructor.
-     * @param Context $context
+     * @param PathFinderContext $context
      */
-    public function __construct(Context $context)
+    public function __construct(PathFinderContext $context)
     {
         $this->context = $context;
     }

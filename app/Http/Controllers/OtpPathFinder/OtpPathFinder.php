@@ -20,7 +20,7 @@ class OtpPathFinder
     private $numItineraries = 8;
     private $transferPenalty = 0;
     /**
-     * @var Context
+     * @var PathFinderContext
      */
     private $context;
     /**
@@ -30,7 +30,7 @@ class OtpPathFinder
     public function __construct($pathFinderAttributes)
     {
         $this->pathFinderAttributes = $pathFinderAttributes;
-        $this->context = new Context($this->pathFinderAttributes);
+        $this->context = new PathFinderContext($this->pathFinderAttributes);
     }
 
     public function findPaths()

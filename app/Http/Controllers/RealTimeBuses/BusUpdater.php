@@ -10,41 +10,77 @@ namespace App\Http\Controllers\RealTimeBuses;
 
 
 use App\Bus;
+use App\Http\Controllers\Context;
+use App\Http\Controllers\OtpPathFinder\Utils;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Support\Facades\DB;
 
 class BusUpdater
 {
 
+    /**
+     * @var BusUpdaterContext
+     */
+    private $context;
 
     /**
      * BusUpdater constructor.
      */
     public function __construct()
     {
+        $this->context = new BusUpdaterContext();
     }
 
     public function updateLocations ()
     {
         try{
+            $beforeAll = Utils::getTimeInMilis();
+            $before = Utils::getTimeInMilis();
             $response = $this->makeUpdateRequest();
+            $after = Utils::getTimeInMilis();
+            $this->context->addToDebug("getting_positions",$after-$before);
+            $before = Utils::getTimeInMilis();
             $buses = $this->getBusesFromResponse($response);
-            $this->storeBuses($buses);
-        } catch (GuzzleException $e) {
+            $after = Utils::getTimeInMilis();
+            $this->context->addToDebug("parsing",$after-$before);
+            $before = Utils::getTimeInMilis();
+            $this->updateBuses($buses);
+            $after = Utils::getTimeInMilis();
+            $this->context->addToDebug("updating",$after-$before);
+            $afterAll = Utils::getTimeInMilis();
+            $this->context->addToDebug("total_time",$afterAll-$beforeAll);
+            return ["msg" => "update successful","debug" => $this->context->getDebug()];
+        } catch (\Exception $e) {
             throw $e;
         }
     }
 
-    private function storeBuses ($buses)
+    private function updateBuses ($buses)
     {
-        foreach ($buses as $bus)
+        if (count($buses)>0)
+            DB::transaction(function () use($buses)
+            {
+                DB::table("buses")->truncate();
+                Bus::insert($buses);
+                //DB::table("buses")->insert($buses);
+            });
+        else
         {
-            Bus::updateOrCreate(
-                ["id" =>$bus["id"]],
-                $bus
-            );
+            throw new \Exception("not authorized");
         }
+
+        /*if (count($buses)>0)
+        {
+            foreach ($buses as $bus)
+            {
+                Bus::updateOrCreate(
+                    ["id" =>$bus["id"]],
+                    $bus
+                );
+            }
+        }*/
     }
 
     private function makeUpdateRequest ()
@@ -69,9 +105,9 @@ class BusUpdater
             foreach ($arr as $bus)
             {
 
-                if (isset($bus->Cap))
+                if (isset($bus->cap))
                 {
-                    $course = $bus->Cap;
+                    $course = $bus->cap;
                 }
                 else
                 {

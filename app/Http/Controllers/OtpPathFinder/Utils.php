@@ -139,7 +139,7 @@ class Utils
         return $coordinates;
     }
 
-    public static function getPolylineFromRideInstruction(Context $context,$line,$trip,$stations)
+    public static function getPolylineFromRideInstruction(PathFinderContext $context, $line, $trip, $stations)
     {
 
         $stationIds = array();

@@ -14,11 +14,14 @@ class BusController extends Controller
     {
         $busUpdater = new BusUpdater();
         try {
-            $busUpdater->updateLocations();
-        } catch (GuzzleException $e) {
-            return response()->json(['msg' => 'error connecting to real time server'],500);
+            $resp = $busUpdater->updateLocations();
+        } catch (\Exception $e) {
+            if ($e instanceof GuzzleException)
+                return response()->json(['msg' => 'error connecting to real time server'],500);
+            else
+                return response()->json(['msg' => 'update not authorized by real time server'],500);
         }
-        return response()->json(['msg' => 'update successful']);
+        return response()->json($resp);
     }
 
     public function index ()

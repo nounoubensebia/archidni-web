@@ -12,18 +12,18 @@ namespace App\Http\Controllers\OtpPathFinder;
 class OtpIntermediatePathFormatter
 {
     /**
-     * @var Context
+     * @var PathFinderContext
      */
     private $context;
     private $PathFinderAttributes;
 
     /**
      * OtpIntermediatePathFormatter constructor.
-     * @param Context $context
+     * @param PathFinderContext $context
      * @param $PathFinderAttributes
      * @param $json
      */
-    public function __construct(Context $context, $PathFinderAttributes)
+    public function __construct(PathFinderContext $context, $PathFinderAttributes)
     {
         $this->context = $context;
         $this->PathFinderAttributes = $PathFinderAttributes;

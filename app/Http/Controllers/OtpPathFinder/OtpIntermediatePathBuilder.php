@@ -23,7 +23,7 @@ use App\TrainTrip;
 class OtpIntermediatePathBuilder
 {
     /**
-     * @var Context
+     * @var PathFinderContext
      */
     private $context;
     private $directWalking;
@@ -44,7 +44,7 @@ class OtpIntermediatePathBuilder
      * @param $itinerary
      * @param PathFinderAttributes $pathFinderAttributes
      */
-    public function __construct(Context $context, $directWalking, $itinerary, PathFinderAttributes $pathFinderAttributes)
+    public function __construct(PathFinderContext $context, $directWalking, $itinerary, PathFinderAttributes $pathFinderAttributes)
     {
         $this->context = $context;
         $this->directWalking = $directWalking;

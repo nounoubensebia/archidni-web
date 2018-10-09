@@ -16,15 +16,15 @@ use App\Http\Controllers\PathFinderApi\CommonSectionsFinder;
 class OtpPathCommonSectionsFinder
 {
     /**
-     * @var Context
+     * @var PathFinderContext
      */
     private $context;
 
     /**
      * OtpPathCommonSectionsFinder constructor.
-     * @param Context $context
+     * @param PathFinderContext $context
      */
-    public function __construct(Context $context)
+    public function __construct(PathFinderContext $context)
     {
         $this->context = $context;
     }
