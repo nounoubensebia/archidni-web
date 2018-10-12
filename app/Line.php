@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class Line extends Model
 {
     //
+
+    public $timestamps = false;
+
+    protected $fillable = ["name","transport_mode_id","number","operator_id"];
+
     public function operator()
     {
         return $this->belongsTo('App\Operator');

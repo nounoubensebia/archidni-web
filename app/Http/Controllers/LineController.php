@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\CompanyNotification;
 use App\GeoUtils;
+use App\Http\Controllers\DataUpdater\BusLinesUpdater;
 use App\Http\Resources\LineResource;
 use App\Line;
 
@@ -71,5 +72,13 @@ class LineController extends Controller
             return response()->json($schedules);
         else
             return response()->json($line->trainTrips);
+    }
+
+    public function updateBusLines (Request $request)
+    {
+        $busLineUpdater = new BusLinesUpdater();
+        $results = $busLineUpdater->updateBusLines($request->getContent());
+        $msg = ["msg" => "update successful","results" => $results];
+        return response()->json($msg,200);
     }
 }

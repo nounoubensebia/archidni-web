@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Station extends Model
 {
+    public $timestamps = false;
+
+    protected $fillable = ['aotua_id','latitude','longitude','transport_mode_id','name'];
+
     //
     public function transportMode()
     {

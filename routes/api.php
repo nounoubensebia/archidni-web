@@ -156,5 +156,13 @@ Route::group(['prefix' => 'v1'], function () {
         'uses' => 'BusController@index'
     ]);
 
+    Route::group(['prefix' => 'update'],
+        function ()
+        {
+            Route::post('/bus-lines',[
+                'uses' => 'LineController@updateBusLines'
+            ]);
+        });
+
 });
 

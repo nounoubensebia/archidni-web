@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class MetroTrip extends Model
 {
+
+    protected $fillable = ['days','line_id','direction'];
+
     //
     public function timePeriods()
     {

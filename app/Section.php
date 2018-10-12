@@ -6,6 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Section extends Model
 {
+
+    protected $fillable = ['origin_id','destination_id','polyline','durationPolyline'];
+
+    public $timestamps = false;
+
     //
     public function lines()
     {
