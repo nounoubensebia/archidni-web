@@ -11,6 +11,9 @@ namespace App\Http\Controllers\DataUpdater;
 
 
 
+use App\Http\Controllers\OtpPathFinder\Coordinate;
+use App\Http\Controllers\OtpPathFinder\Utils;
+use App\Http\Controllers\PathFinderApi\Polyline;
 use App\Line;
 use App\MetroTrip;
 use App\Section;
@@ -47,7 +50,25 @@ class BusLinesUpdater
                 if (count($allerStations)!=count($allerStationsJson)||count($retourStations)
                 !=count($retourStationsJson))
                 {
-                    array_push($badLines,["database line" =>$line,"json line"=> $lineJson]);
+
+                    try{
+                        $stations_aller = $this->getAotuaStationsFromNewData($allerStationsJson);
+                        print_r($stations_aller);
+                        $stations_retour = $this->getAotuaStationsFromNewData($retourStationsJson);
+                        array_push($newProblematicLines,[
+                            'number' => $lineJson->number,
+                            'old_line'=>$line,
+                            'stations_aller'=>$stations_aller,
+                            'stations_retour'=>$stations_retour,
+                            'type' => 'problematic'
+                        ]);
+                        echo "no excep"."\n";
+                    }
+                    catch (StationNotFoundInDatabaseException $e)
+                    {
+                        echo "excep line ".$lineJson->number."\n";
+                        array_push($badLines,["database line" =>$line,"json line"=> $lineJson]);
+                    }
                 }
                 else
                 {
@@ -58,13 +79,16 @@ class BusLinesUpdater
                         "stations_aller" => $this->getAotuaStationsWithCoordinates($allerStationsJson,
                             $allerStations,$line->sections()->wherePivot('mode','=','0')->get()),
                         "stations_retour" => $this->getAotuaStationsWithCoordinates($retourStationsJson,
-                            $retourStations,$line->sections()->wherePivot('mode','=','1')->get())
+                            $retourStations,$line->sections()->wherePivot('mode','=','1')->get()),
+                        'type'=>"good"
                     ]);
                 }
 
            }
         }
 
+
+        $newGoodLines = array_merge($newProblematicLines,$newGoodLines);
 
         //adding good lines if they don't already exist
 
@@ -75,15 +99,15 @@ class BusLinesUpdater
                 $prevStation = null;
                 $prevStationJson = null;
                 $line = new Line(['number' => $newLine['number'],
-                    'name'=> "ligne ".$newLine['number'],
+                    'name'=> "ligne ".$newLine['number']." ".$newLine['type'],
                     "transport_mode_id"=>3,"operator_id" => 4]);
                 $line->save();
                 $this->addNewStations($line,$newLine['stations_aller'],true);
                 $this->addNewStations($line,$newLine['stations_retour'],false);
-                $this->createTripsForNewLines($line);
+                $this->createTripsForNewLine($line);
             }
         }
-        
+
 
         //updating lines
 
@@ -111,7 +135,9 @@ class BusLinesUpdater
 
 
 
-    private function createTripsForNewLines ($newLine)
+
+
+    private function createTripsForNewLine ($newLine)
     {
 
         $metroTripAller = new MetroTrip(['days'=>127,'line_id'=>$newLine->id,'direction'=>0]);
@@ -183,6 +209,65 @@ class BusLinesUpdater
         }
     }
 
+
+
+    private function getAotuaStationsFromNewData($jsonStations)
+    {
+        $stations = [];
+        $prevStation = null;
+        $i=0;
+        foreach ($jsonStations as $jsonStation)
+        {
+            if(Station::where('aotua_id',"=",$jsonStation->id)->get()->count()>0)
+            {
+                echo "found"."\n";
+                $databaseStation = Station::where('aotua_id',$jsonStation->id)->get()->first();
+                $station = [];
+                $station['aotua_id'] = $jsonStation->id;
+                $station['name'] = $jsonStation->name;
+                $station['latitude'] = $databaseStation->latitude;
+                $station['longitude'] = $databaseStation->longitude;
+
+                if ($i+1<count($jsonStations))
+                {
+                    $nextStation = $jsonStations[$i+1];
+                    if(Station::where('aotua_id',"=",$nextStation->id)->get()->count()>0)
+                    {
+                        $nextStation = Station::where('aotua_id',"=",$nextStation->id)->get()->first();
+                        $section = Section::where('origin_id','=',$databaseStation->id)->where('destination_id','='
+                            ,$nextStation->id);
+                        if ($section->get()->count()>0)
+                        {
+                            $section = $section->get()->first();
+                        }
+                        else
+                        {
+                            $section = new Section(['origin_id'=>$databaseStation->id,'destination_id'=>$databaseStation->id,
+                                'polyline'=>Polyline::encodeCoord([
+                                    new Coordinate($databaseStation->latitude,$databaseStation->longitude),
+                                    new Coordinate($nextStation->latitude,$nextStation->longitude)
+                                ]),'durationPolyline' => 1.232323]);
+                        }
+                        $station['polyline'] = $section->polyline;
+                        $station['durationPolyline'] = $section->durationPolyline;
+                    }
+                    else
+                    {
+                        echo "not found ".$nextStation->id."\n";
+                        throw new StationNotFoundInDatabaseException("station not found");
+                    }
+                }
+                array_push($stations,$station);
+            }
+            else
+            {
+                echo "not found ".$jsonStation->id."\n";
+                throw new StationNotFoundInDatabaseException("station not found");
+            }
+            $i++;
+        }
+        return $stations;
+    }
 
 
     private function getAotuaStationsWithCoordinates ($jsonStations,$databaseStations,$sections)
