@@ -9,8 +9,11 @@
 namespace App\Http\Controllers\OtpPathFinder;
 
 
+use App\GeoUtils;
 use App\Http\Controllers\PathFinderApi\Polyline;
 use App\MetroTrip;
+use App\Place;
+use App\Station;
 use App\TrainTrip;
 
 class Utils
@@ -308,6 +311,36 @@ class Utils
                 }
                 break;
         }
+    }
+
+    public static function getNearbyPlaces (Coordinate $coordinate)
+    {
+        $stations = Station::all();
+        $places = Place::with("parking","hospital")->get();
+        $nearbyPlaces = [];
+        $nearbyPlaces['stations'] = [];
+        $nearbyPlaces['places'] = [];
+        foreach ($stations as $station)
+        {
+            $distance = GeoUtils::distance($station->latitude,$station->longitude,$coordinate->latitude,
+                $coordinate->longitude);
+            if ($distance<0.5&&!($station->latitude==$coordinate->getLatitude()&&
+                $station->longitude==$coordinate->getLongitude()))
+            {
+                array_push($nearbyPlaces['stations'],$station);
+            }
+        }
+        foreach ($places as $place)
+        {
+            $distance = GeoUtils::distance($place->latitude,$place->longitude,$coordinate->latitude,
+                $coordinate->longitude);
+            if ($distance<0.5&&!($place->latitude==$coordinate->getLatitude()&&
+                    $place->longitude==$coordinate->getLongitude()))
+            {
+                array_push($nearbyPlaces['places'],$place);
+            }
+        }
+        return $nearbyPlaces;
     }
 
 }

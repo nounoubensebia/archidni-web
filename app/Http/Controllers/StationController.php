@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\GeoUtils;
+use App\Http\Controllers\OtpPathFinder\Coordinate;
 use App\Http\Controllers\OtpPathFinder\Utils;
 use App\Http\Resources\LineResource;
 use App\Http\Resources\StationResource;
@@ -64,17 +65,20 @@ class StationController extends Controller
 
     public function getNearbyPlaces ($id)
     {
-        $searchStation = Station::find($id);
+        $station = Station::find($id);
+        /*$searchStation = Station::find($id);
         $stations = Station::all();
         $nearbyStations = [];
         foreach ($stations as $station)
         {
-            $distance = GeoUtils::distance($station->latitude,$station->longitude,$searchStation->latitude,$searchStation->longitude);
+            $distance = GeoUtils::distance($station->latitude,$station->longitude,$searchStation->latitude,
+                $searchStation->longitude);
             if ($distance<0.5&&$station->id!=$id)
             {
                 array_push($nearbyStations,$station);
             }
         }
-        return $nearbyStations;
+        return $nearbyStations;*/
+        return Utils::getNearbyPlaces(new Coordinate($station->latitude,$station->longitude));
     }
 }

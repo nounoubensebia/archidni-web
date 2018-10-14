@@ -6,6 +6,7 @@ use App\Http\Controllers\OtpPathFinder\Utils;
 use App\Http\Resources\LineResource;
 use App\Line;
 use App\Parking;
+use App\Place;
 use Illuminate\Http\Request;
 
 class LinesAndPlacesController extends Controller
@@ -24,7 +25,7 @@ class LinesAndPlacesController extends Controller
         $lines = Line::with('sections')->get();
         $data = array();
         $data['lines'] = LineResource::collection($lines);
-        $data['parkings'] = Parking::all();
+        $data['places'] = Place::with(["parking","hospital"])->get();
         $after = Utils::getTimeInMilis();
         $data['debug']['time'] = ($after-$before)."";
         return $data;

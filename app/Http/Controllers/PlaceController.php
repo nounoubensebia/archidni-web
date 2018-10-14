@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\OtpPathFinder\Coordinate;
+use App\Http\Controllers\OtpPathFinder\Utils;
 use App\Place;
 use Illuminate\Http\Request;
 
@@ -54,5 +56,10 @@ class PlaceController extends Controller
 
     }
 
+    public function getNearbyPlaces ($id)
+    {
+        $place = Place::find($id);
+        return Utils::getNearbyPlaces(new Coordinate($place->latitude,$place->longitude));
+    }
 
 }
