@@ -17,7 +17,7 @@ class CreateTrainTripStationTable extends Migration
             $table->increments('id');
             $table->integer('train_trip_id')->unsigned();;
             $table->integer('station_id')->unsigned();;
-            $table->integer('minutes');
+            $table->float('minutes');
             $table->foreign('train_trip_id')->references('id')->on('train_trips')->onDelete('cascade');
             $table->foreign('station_id')->references('id')->on('stations');
             $table->engine = 'InnoDB';

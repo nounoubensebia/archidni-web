@@ -146,6 +146,7 @@ Route::group(['prefix' => 'v1'], function () {
         Route::resource('', 'PlaceController');
         Route::resource('/parkings','ParkingController');
         Route::resource('/hospitals','HospitalController');
+        Route::get('{id}/nearby-places','PlaceController@getNearbyPlaces');
     });
 
     Route::get('/buses/update',

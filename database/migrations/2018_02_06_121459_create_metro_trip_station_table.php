@@ -17,7 +17,7 @@ class CreateMetroTripStationTable extends Migration
             $table->increments('id');
             $table->integer('metro_trip_id')->unsigned();;
             $table->integer('station_id')->unsigned();;
-            $table->integer('minutes');
+            $table->float('minutes');
             $table->foreign('metro_trip_id')->references('id')->on('metro_trips')->onDelete('cascade');
             $table->foreign('station_id')->references('id')->on('stations');
             $table->engine = 'InnoDB';
