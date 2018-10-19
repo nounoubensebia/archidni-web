@@ -54,6 +54,6 @@ class Line extends Model
 
     public function schedules()
     {
-        return $this->hasMany('App\schedule');
+        return $this->hasMany('App\Schedule');
     }
 }
