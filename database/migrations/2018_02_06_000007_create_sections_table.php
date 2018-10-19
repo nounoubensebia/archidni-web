@@ -19,6 +19,9 @@ class CreateSectionsTable extends Migration
             $table->integer('destination_id')->unsigned();;
             $table->foreign('origin_id')->references('id')->on('stations')->onDelete('cascade');
             $table->foreign('destination_id')->references('id')->on('stations')->onDelete('cascade');
+            $table->float('duration')->nullable();
+            $table->text('polyline');
+            $table->float('durationPolyline');
             $table->engine = 'InnoDB';
             $table->charset = 'utf8';
             $table->collation = 'utf8_unicode_ci';
