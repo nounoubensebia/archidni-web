@@ -44,6 +44,16 @@ class Utils
     public static function getRideDuration ($start,$end,$trip)
     {
         $stations = self::getStationsIn($start,$end,$trip);
+        if (!isset($stations[0]))
+        {
+            //TODO remove
+            //echo "trip ".$trip->id."start ".$start." "."end ".$end;
+            //exit;
+            $inter = $end;
+            $start = $end;
+            $start = $inter;
+            $stations = self::getStationsIn($start,$end,$trip);
+        }
         $startTime = $stations[0]->pivot->minutes;
         $endTime = $stations[count($stations)-1]->pivot->minutes;
         return $endTime-$startTime;
