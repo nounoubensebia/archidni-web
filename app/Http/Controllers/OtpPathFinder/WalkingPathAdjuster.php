@@ -25,7 +25,7 @@ class WalkingPathAdjuster
      */
     private $walkingCache;
 
-    private static $adjustementRate = 3;
+    private static $adjustementRate = 5;
 
     /**
      * WalkingPathAdjuster constructor.
