@@ -129,7 +129,6 @@ class UserController extends Controller
         try {
             $tokens = $this->getTokens($user->email, $request->input("new_password"));
         } catch (FailedInternalRequestException $e) {
-            //return $e->getResponse();
             //return response()->json(['email' => $user->email,"password" => $request->input("new_password")]);
             return response()->json(["msg" => "internal server error"],500);
         }
