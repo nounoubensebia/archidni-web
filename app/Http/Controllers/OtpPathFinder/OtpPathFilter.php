@@ -87,7 +87,7 @@ class OtpPathFilter
 
         foreach ($pathsMap as &$pathEntry)
         {
-            if ($pathEntry['path']->getPathDuration()>=$minDuration*3)
+            if ($pathEntry['path']->getPathDuration()>=$minDuration*3 || $pathEntry['path']->getPathDuration()>300)
             {
                 $pathEntry['admissible'] = false;
             }

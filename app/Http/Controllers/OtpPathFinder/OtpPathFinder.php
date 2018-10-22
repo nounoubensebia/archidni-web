@@ -17,7 +17,7 @@ class OtpPathFinder
 
     private $pathFinderAttributes;
     private static $URL = "http://localhost:8801/otp/routers/default/plan?";
-    private $numItineraries = 15;
+    private $numItineraries = 8;
     private $transferPenalty = 0;
     /**
      * @var PathFinderContext
