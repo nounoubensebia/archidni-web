@@ -185,9 +185,9 @@ class OtpPathFinder
         $itineraries = $otpServerClient->getItineraries(true,false,false,$this->numItineraries,
             $this->transferPenalty);
         /*$itineraries = array_merge($itineraries,$otpServerClient->getItineraries(true,false,
-            true,3,$this->transferPenalty));
+            true,3,$this->transferPenalty));*/
         $itineraries = array_merge($itineraries,$otpServerClient->getItineraries(true,true,
-            false,3,$this->transferPenalty));*/
+            false,3,$this->transferPenalty));
         $itineraries = array_merge($itineraries,$otpServerClient->getItineraries(false,true,
             true,1,$this->transferPenalty));
         return $itineraries;
@@ -199,9 +199,9 @@ class OtpPathFinder
         $itineraries = $otpServerClient->getItineraries(false,false,false
             ,$this->numItineraries,$this->transferPenalty);
         /*$itineraries = array_merge($itineraries,$otpServerClient->getItineraries(false,false,
-            true,3,$this->transferPenalty));
+            true,3,$this->transferPenalty));*/
         $itineraries = array_merge($itineraries,$otpServerClient->getItineraries(false,true,
-            false,3,$this->transferPenalty));*/
+            false,3,$this->transferPenalty));
         $itineraries = array_merge($itineraries,$otpServerClient->getItineraries(false,true,
             true,1,$this->transferPenalty));
         return $itineraries;
