@@ -28,6 +28,8 @@ class TokenHandler
 {
 
 
+    private $minVersion = 1;
+
     /**
      * The authentication factory instance.
      *
@@ -54,6 +56,14 @@ class TokenHandler
     {
 
         $headers = $request->headers->all();
+        if (isset($headers['app-version']))
+        {
+            if ($this->minVersion > $headers['app-version'][0])
+            {
+                return response()->json(['message' => 'incorrect app version'],410);
+            }
+        }
+
         if (isset($headers['authorization']))
         {
             try {
