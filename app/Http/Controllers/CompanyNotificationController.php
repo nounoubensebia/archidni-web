@@ -73,7 +73,7 @@ class CompanyNotificationController extends Controller
         $lines = Line::find($lines);
         if ($companyNotification->save()) {
             $companyNotification->lines()->attach($lines);
-            //NotificationsUtils::send_notification(json_encode($companyNotification->load('lines')));
+            NotificationsUtils::send_notification(json_encode($companyNotification->load('lines')));
             $resonse = [
                 'msg' => 'notification created',
                 'notification' => $companyNotification->load('lines')
