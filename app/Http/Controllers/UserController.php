@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Laravel\Passport\Bridge\AccessToken;
 use Laravel\Passport\Bridge\AccessTokenRepository;
 use Laravel\Passport\Bridge\Client;
@@ -94,7 +95,7 @@ class UserController extends Controller
      * @return array
      * @throws FailedInternalRequestException
      */
-    private function getTokens ($email,$pass)
+    public function getTokens ($email,$pass)
     {
         $service = new InternalRequest(app());
             $resp = $service->request('POST', '/oauth/token', [
@@ -119,6 +120,12 @@ class UserController extends Controller
         {
             return response()->json(["message" => "Unauthenticated"],401);
         }
+
+        if (!Hash::check($request->input('old_password'),$user->password))
+        {
+            return response()->json(["message" => "old password incorrect"],408);
+        }
+
         $user->password = bcrypt($request->input("new_password"));
         $user->save();
         $userTokens = $user->tokens;
@@ -134,5 +141,21 @@ class UserController extends Controller
         }
         return response()->json(["message" => "Password Changed","tokens" => $tokens]);
     }
+
+    public function updateInfo ($id,Request $request)
+    {
+        $user = Auth::user();
+        if ($user->id != $id)
+        {
+            return response()->json(["message" => "Unauthenticated"],401);
+        }
+        $firestName = $request->input("first_name");
+        $lastName = $request->input("last_name");
+        $user->first_name = $firestName;
+        $user->last_name = $lastName;
+        $user->save();
+        return response()->json(["message" => "User info changed successfully"],200);
+    }
+
 
 }

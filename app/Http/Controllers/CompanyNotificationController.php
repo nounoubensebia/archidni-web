@@ -24,6 +24,13 @@ class CompanyNotificationController extends Controller
         return response()->json($companyNotifications);
     }
 
+    public function indexAdmin(Request $request)
+    {
+        $companyNotifications = CompanyNotification::with('lines','transportMode');
+        $companyNotifications = $companyNotifications->get();
+        return response()->json($companyNotifications);
+    }
+
     /**
      * Show the form for creating a new resource.
      *
@@ -66,7 +73,7 @@ class CompanyNotificationController extends Controller
         $lines = Line::find($lines);
         if ($companyNotification->save()) {
             $companyNotification->lines()->attach($lines);
-            NotificationsUtils::send_notification(json_encode($companyNotification->load('lines')));
+            //NotificationsUtils::send_notification(json_encode($companyNotification->load('lines')));
             $resonse = [
                 'msg' => 'notification created',
                 'notification' => $companyNotification->load('lines')

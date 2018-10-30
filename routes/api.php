@@ -108,9 +108,11 @@ Route::group(['prefix' => 'v1'], function () {
         Route::post('login', [
             'uses' => 'UserController@login'
         ]);
-        Route::post('{id}/update-password',[
+        Route::put('{id}/update-password',[
            'uses' => 'UserController@updatePassword'
         ])->middleware('token.handler:api');
+        Route::put('{id}/update',
+            ['uses' => 'UserController@updateInfo'])->middleware('token.handler:api');
     });
 
     Route::group(['prefix' => 'user-reports'],function ()
@@ -137,7 +139,11 @@ Route::group(['prefix' => 'v1'], function () {
     Route::post('/create-train-trips',
         ['uses' => 'TripController@createTrainTrips']);
 
+    Route::get('/CompanyNotifications/admin',
+        ['uses' => 'CompanyNotificationController@indexAdmin']);
+
     Route::resource('CompanyNotifications', 'CompanyNotificationController');
+
 
 
 
@@ -164,6 +170,20 @@ Route::group(['prefix' => 'v1'], function () {
                 'uses' => 'LineController@updateBusLines'
             ]);
         });
-
+    Route::group(['prefix' => 'temp-bus'],
+        function ()
+        {
+            Route::get('/lines',
+                ['uses'=>'TempBusController@getLines']);
+            Route::post('/lines',
+                ['uses' => 'TempBusController@storeLinesFromWissJson']);
+        }
+        );
+    Route::group(['prefix' => 'admin'],
+        function ()
+        {
+           Route::post('/login',
+               ['uses' => "AdminController@login"]);
+        });
 });
 
