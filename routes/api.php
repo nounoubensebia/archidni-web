@@ -142,8 +142,10 @@ Route::group(['prefix' => 'v1'], function () {
     Route::get('/CompanyNotifications/admin',
         ['uses' => 'CompanyNotificationController@indexAdmin']);
 
-    Route::resource('CompanyNotifications', 'CompanyNotificationController');
+    Route::post('/CompanyNotifications/add',
+        ['uses' =>'CompanyNotificationController@store']);
 
+    Route::resource('CompanyNotifications', 'CompanyNotificationController');
 
 
 
