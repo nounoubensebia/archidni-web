@@ -177,7 +177,7 @@ Route::group(['prefix' => 'v1'], function () {
         {
             Route::get('/lines',
                 ['uses'=>'TempBusController@getLines']);
-            Route::post('/lines',
+            Route::post('/store-lines',
                 ['uses' => 'TempBusController@storeLinesFromWissJson']);
         }
         );
@@ -187,5 +187,10 @@ Route::group(['prefix' => 'v1'], function () {
            Route::post('/login',
                ['uses' => "AdminController@login"]);
         });
+    Route::group(['prefix' => 'update-bus-lines'], function ()
+        {
+            Route::get('/convert',['uses' => 'BusLinesUpdaterController@convertGeolocToTemp']);
+        }
+    );
 });
 

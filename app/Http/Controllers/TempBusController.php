@@ -28,29 +28,50 @@ class TempBusController extends Controller
 
     public function storeLinesFromWissJson(Request $request)
     {
+        /*DB::table("temp_bus_station_locations")->truncate();
+        DB::table("temp_bus_line_bus_station")->truncate();
+        DB::table("temp_bus_lines")->truncate();
+        DB::table("temp_bus_stations")->truncate();*/
         DB::disableQueryLog();
         DB::connection()->disableQueryLog();
         $json = $request->getContent();
-        $lines = json_decode($json);
+        $root = json_decode($json);
+        $lines = $root[0];
+        $faultyLines = $this->getFaultyLines($root[1]);
+        $faultyLines = array_merge($faultyLines,$this->getFaultyLines($root[2]));
         $stations = $this->getStationsFromLines($lines);
         //$stations = array_slice($stations, 100, 200);;
         $this->storeStations($stations);
         foreach ($lines as $line)
         {
             $number = $line->number;
-            $linea = new TempBusLine(["number" => $number]);
-            $linea->save();
-            foreach ($line->stops_aller as $stop)
+            if (!in_array($number,$faultyLines))
             {
-                $station = TempBusStation::where("aotua_id",$stop->id)->first();
-                $linea->tempBusStations()->attach($station,['order' => $stop->order]);
-            }
-            foreach ($line->stops_retour as $stop)
-            {
-                $station = TempBusStation::where("aotua_id",$stop->id)->first();
-                $linea->tempBusStations()->attach($station,['order' => -1*$stop->order]);
+                $linea = new TempBusLine(["number" => $number]);
+                $linea->save();
+                foreach ($line->stops_aller as $stop)
+                {
+                    $station = TempBusStation::where("aotua_id",$stop->id)->first();
+                    $linea->tempBusStations()->attach($station,['position' => $stop->order,'type'=>0]);
+                }
+                foreach ($line->stops_retour as $stop)
+                {
+                    $station = TempBusStation::where("aotua_id",$stop->id)->first();
+                    $linea->tempBusStations()->attach($station,['position' => $stop->order,'type'=>1]);
+                }
             }
         }
+    }
+
+    private function getFaultyLines ($faultyLinesArray)
+    {
+        $f = [];
+        foreach ($faultyLinesArray as $fl)
+        {
+            if (!in_array($fl->number,$f))
+                array_push($f,$fl->number);
+        }
+        return $f;
     }
 
     private function getStationsFromLines ($lines)
