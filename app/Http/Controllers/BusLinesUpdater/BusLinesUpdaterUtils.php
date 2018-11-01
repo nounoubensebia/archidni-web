@@ -22,6 +22,34 @@ class BusLinesUpdaterUtils
         return self::getStationsByType($geolocLine,1);
     }
 
+    public static function getAllerProductionStations ($line)
+    {
+        return self::getProductionStationsByType($line,0);
+    }
+
+    public static function getRetourProductionStations ($line)
+    {
+        return self::getProductionStationsByType($line,1);
+    }
+
+    private static function getProductionStationsByType ($line,$type)
+    {
+        $sections = $line->sections;
+        $stations = [];
+        $i = 0;
+        foreach ($sections as $section)
+        {
+            if ($section->pivot->mode == $type)
+            {
+                if ($i==0)
+                    array_push($stations,$section->origin);
+                array_push($stations,$section->destination);
+                $i++;
+            }
+        }
+        return $stations;
+    }
+
     private static function getStationsByType($line,$type)
     {
         $stations = $line->stations;
@@ -50,6 +78,15 @@ class BusLinesUpdaterUtils
             }
         }
         return $locationToTake;
+    }
+
+    public static function getTempStationLocation ($tempStation)
+    {
+        $locations = $tempStation->locations;
+        if (isset($locations)&&$locations->count()>0)
+            return $locations->first();
+        else
+            return null;
     }
 
 }

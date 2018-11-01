@@ -334,8 +334,9 @@ class Utils
         {
             $distance = GeoUtils::distance($station->latitude,$station->longitude,$coordinate->latitude,
                 $coordinate->longitude);
-            if ($distance<0.5&&!($station->latitude==$coordinate->getLatitude()&&
-                $station->longitude==$coordinate->getLongitude()))
+            /*if ($distance<0.5&&!($station->latitude==$coordinate->getLatitude()&&
+                $station->longitude==$coordinate->getLongitude()))*/
+            if ($distance<0.5)
             {
                 array_push($nearbyPlaces['stations'],$station);
             }
@@ -344,8 +345,9 @@ class Utils
         {
             $distance = GeoUtils::distance($place->latitude,$place->longitude,$coordinate->latitude,
                 $coordinate->longitude);
-            if ($distance<0.5&&!($place->latitude==$coordinate->getLatitude()&&
-                    $place->longitude==$coordinate->getLongitude()))
+            /*if ($distance<0.5&&!($place->latitude==$coordinate->getLatitude()&&
+                    $place->longitude==$coordinate->getLongitude()))*/
+            if ($distance<0.5)
             {
                 array_push($nearbyPlaces['places'],$place);
             }
