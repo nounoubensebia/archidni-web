@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\DataUpdater\BusLinesUpdater;
 use App\Station;
 use App\TempBusLine;
 use App\TempBusStation;
@@ -13,12 +14,15 @@ class TempBusController extends Controller
     //
     public function getLines ()
     {
-        $lines = TempBusLine::with('tempBusStations','tempBusStations.locations')->get()->toArray();
+        /*$lines = TempBusLine::with('tempBusStations','tempBusStations.locations')->get()->toArray();
         foreach ($lines as &$line)
         {
             $line['state'] = $this->getLineState($line);
         }
-        return $lines;
+        return $lines;*/
+        $busUpdater = new BusLinesUpdater();
+        $resp = $busUpdater->archidniAllerToGeoLocAller();
+        return $resp;
     }
 
 

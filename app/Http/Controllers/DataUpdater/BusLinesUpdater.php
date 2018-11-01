@@ -11,6 +11,7 @@ namespace App\Http\Controllers\DataUpdater;
 
 
 
+use App\GeolocLine;
 use App\Http\Controllers\OtpPathFinder\Coordinate;
 use App\Http\Controllers\OtpPathFinder\Utils;
 use App\Http\Controllers\PathFinderApi\Polyline;
@@ -24,6 +25,15 @@ use Illuminate\Support\Facades\DB;
 
 class BusLinesUpdater
 {
+
+    public function archidniAllerToGeoLocAller ()
+    {
+        $archidniLines = Line::all();
+        $geolocLInes = GeolocLine::with('stations','stations.locations')->get();
+        return $geolocLInes;
+    }
+
+
     public function updateBusLines ($json)
     {
         $linesJson = json_decode($json);
