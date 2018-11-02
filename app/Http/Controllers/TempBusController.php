@@ -40,6 +40,7 @@ class TempBusController extends Controller
         $faultyLines = $this->getFaultyLines($root[1]);
         $faultyLines = array_merge($faultyLines,$this->getFaultyLines($root[2]));
         $stations = $this->getStationsFromLines($lines);
+        $reversed = $root[3];
         //$stations = array_slice($stations, 100, 200);;
         $this->storeStations($stations);
         foreach ($lines as $line)
@@ -51,17 +52,29 @@ class TempBusController extends Controller
                 $linea->save();
                 foreach ($line->stops_aller as $stop)
                 {
+                    $type = 0;
+                    if (in_array($line->number,$reversed))
+                    {
+                        $type = 1;
+                    }
                     $station = TempBusStation::where("aotua_id",$stop->id)->first();
-                    $linea->tempBusStations()->attach($station,['position' => $stop->order,'type'=>0]);
+                    $linea->stations()->attach($station,['position' => $stop->order,'type'=>$type]);
                 }
                 foreach ($line->stops_retour as $stop)
                 {
+                    $type = 1;
+                    if (in_array($line->number,$reversed))
+                    {
+                        $type = 0;
+                    }
                     $station = TempBusStation::where("aotua_id",$stop->id)->first();
-                    $linea->tempBusStations()->attach($station,['position' => $stop->order,'type'=>1]);
+                    $linea->stations()->attach($station,['position' => $stop->order,'type'=>$type]);
                 }
             }
         }
     }
+
+
 
     private function getFaultyLines ($faultyLinesArray)
     {

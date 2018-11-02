@@ -17,14 +17,23 @@ use App\TempBusLine;
 
 class TempToProductionConverter
 {
+
+    public function cleanDatabase ()
+    {
+        DB::delete('DELETE FROM `line_section` WHERE line_id IN (SELECT id FROM `lines` WHERE operator_id = 4)');
+        DB::delete('DELETE FROM sections WHERE origin_id IN (SELECT id FROM stations WHERE aotua_id IS NOT NULL)');
+        DB::delete('DELETE FROM `stations` WHERE aotua_id IS NOT NULL');
+        DB::delete('DELETE FROM `lines` WHERE operator_id = 4');
+    }
+
     public function convert()
     {
         echo "here";
         $converter = new GeolocToTempConverter();
         $tempLines = $converter->getCompleteLines()['complete lines'];
         print_r($tempLines);
-        //$this->storeStations($tempLines);
-        $this->storeLines($tempLines);
+        $this->storeStations($tempLines);
+        //$this->storeLines($tempLines);
         $this->storeSections($tempLines);
     }
 
