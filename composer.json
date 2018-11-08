@@ -15,6 +15,7 @@
         "matthewbdaly/laravel-internal-requests": "^0.0.1",
         "myclabs/deep-copy": "^1.8",
         "paragonie/random_compat": "2.*",
+        "phpoffice/phpspreadsheet": "^1.5",
         "tymon/jwt-auth": "^0.5.12"
     },
     "require-dev": {

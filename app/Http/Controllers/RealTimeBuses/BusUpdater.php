@@ -88,7 +88,7 @@ class BusUpdater
         $url = "http://196.46.250.250:85/ETUSA/ETUSATrameService.svc/ETUSARealtime";
         $client = new Client();
         try {
-            $req = $client->request('GET', $url, ["timeout" => 10]);
+            $req = $client->request('GET', $url, ["timeout" => 20]);
         } catch (GuzzleException $e) {
             throw $e;
         }
