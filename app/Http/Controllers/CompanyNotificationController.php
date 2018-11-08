@@ -73,7 +73,10 @@ class CompanyNotificationController extends Controller
         $lines = Line::find($lines);
         if ($companyNotification->save()) {
             $companyNotification->lines()->attach($lines);
-            NotificationsUtils::send_notification(json_encode($companyNotification->load('lines')));
+            $title = ($companyNotification->type==0) ? "Information voyageur" : "Alerte perturbations";
+            $body = $companyNotification->description;
+            $icon = $this->getTransportModeIcon($transportMode);
+            NotificationsUtils::send_notification(json_encode($companyNotification->load('lines')),$title,$body,$icon);
             $resonse = [
                 'msg' => 'notification created',
                 'notification' => $companyNotification->load('lines')
@@ -84,6 +87,23 @@ class CompanyNotificationController extends Controller
                 'msg' => 'an error has happened'
             ];
             return response()->json($resonse, 404);
+        }
+    }
+
+    private function getTransportModeIcon ($transportModeId)
+    {
+        switch ($transportModeId)
+        {
+            case 1 : return "ic_transport_mean_0_enabled";
+            break;
+            case 2 : return "ic_transport_mean_1_enabled";
+                break;
+            case 3 : return "ic_transport_mean_2_enabled";
+                break;
+            case 4 : return "ic_transport_mean_3_enabled";
+                break;
+            case 5 : return "ic_transport_mean_4_enabled";
+                break;
         }
     }
 

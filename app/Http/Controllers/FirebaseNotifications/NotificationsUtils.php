@@ -12,19 +12,20 @@ namespace App\Http\Controllers\FirebaseNotifications;
 class NotificationsUtils
 {
     //private static $FCM_KEY = "AAAAiQaXMyM:APA91bEHkh_Sc354KGQo33hfxRFiJiz_3Ty30jQQGae07TSXUQ4DnM9VdnF1CpntoII6nmj_XlAD3_mdG4P0nkfx6ZqsatuUyri5So4uGGCvcEo-1HBsIcdWS-RjiSCX-NCSn9PVsjZE";
-    public static function send_notification ($message)
+    public static function send_notification ($message,$title,$body,$icon)
     {
 
         $data = array("data"=>$message);
         $FCM_KEY = "AAAAVdHfRmw:APA91bGRUOyvsPiLfPRn_lTHFp9qY9fNhmZV2vnE2kGZB2HYq8PGgzduLcTz8C3H1TviaBTzTBvM7dZv3vq8RbBN9vERcpJQ22Cxvz0xgJNXOmgw8j3-d02-DPP3pZ7AGHwNYBtFtzmMljNE1YMEdLt6tAuL2aj8NQ";
-
+        
         $url = 'https://fcm.googleapis.com/fcm/send';
         $fields = array(
             'to' => '/topics/all-devices-v2',
             'data' => $data,
             'notification' => [
-                'title' => 'test',
-                'body' => 'test'
+                'title' => $title,
+                'body' => $body,
+                'icon' => $icon
     ]
         );
 
