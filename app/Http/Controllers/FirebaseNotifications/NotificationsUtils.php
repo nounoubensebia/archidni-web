@@ -21,7 +21,11 @@ class NotificationsUtils
         $url = 'https://fcm.googleapis.com/fcm/send';
         $fields = array(
             'to' => '/topics/all-devices-v2',
-            'data' => $data
+            'data' => $data,
+            'notification' => [
+                'title' => 'test',
+                'body' => 'test'
+    ]
         );
 
         $headers = array(
