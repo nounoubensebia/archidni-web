@@ -189,10 +189,12 @@ Route::group(['prefix' => 'v1'], function () {
         });
     Route::group(['prefix' => 'update-bus-lines'], function ()
         {
+            Route::get('/clean-database',['uses' => 'BusLinesUpdaterController@cleanDatabase']);
             Route::get('/convert-geoloc-temp',['uses' => 'BusLinesUpdaterController@convertGeolocToTemp']);
             Route::get('/convert-production-temp',['uses' => 'BusLinesUpdaterController@convertProductionToTemp']);
             Route::get('/convert-temp-production',['uses' => 'BusLinesUpdaterController@convertTempToProduction']);
             Route::get('/diag',['uses' => 'BusLinesUpdaterController@diag']);
+            Route::get('/generate-excel-files',['uses' => 'BusLinesUpdaterController@generateExcel']);
         }
     );
 });

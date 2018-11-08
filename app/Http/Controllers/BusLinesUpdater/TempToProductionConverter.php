@@ -14,6 +14,7 @@ use App\Line;
 use App\Section;
 use App\Station;
 use App\TempBusLine;
+use Illuminate\Support\Facades\DB;
 
 class TempToProductionConverter
 {
@@ -28,11 +29,10 @@ class TempToProductionConverter
 
     public function convert()
     {
-        echo "here";
         $converter = new GeolocToTempConverter();
         $tempLines = $converter->getCompleteLines()['complete lines'];
-        print_r($tempLines);
-        $this->storeStations($tempLines);
+        //print_r($tempLines);
+        //$this->storeStations($tempLines);
         //$this->storeLines($tempLines);
         $this->storeSections($tempLines);
     }

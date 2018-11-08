@@ -2,12 +2,27 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\BusLinesUpdater\ExcelFilesGenerator;
 use App\Http\Controllers\BusLinesUpdater\GeolocToTempConverter;
 use App\Http\Controllers\BusLinesUpdater\TempToProductionConverter;
 use Illuminate\Http\Request;
 
 class BusLinesUpdaterController extends Controller
 {
+
+    public function cleanDatabase ()
+    {
+        $converter = new TempToProductionConverter();
+        $converter->cleanDatabase();
+    }
+
+    public function generateExcel ()
+    {
+        $generator = new ExcelFilesGenerator();
+        $generator->generateGeolocExcel();
+        $generator->generateTempExcel();
+    }
+
     //
     public function convertGeolocToTemp ()
     {

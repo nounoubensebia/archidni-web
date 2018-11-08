@@ -9,6 +9,9 @@
 namespace App\Http\Controllers\BusLinesUpdater;
 
 
+use App\GeolocLine;
+use App\TempBusLine;
+
 class BusLinesUpdaterUtils
 {
 
@@ -87,6 +90,28 @@ class BusLinesUpdaterUtils
             return $locations->first();
         else
             return null;
+    }
+
+    public static function tempLineExists ($number)
+    {
+        $lines = TempBusLine::all();
+        foreach ($lines as $line)
+        {
+            if ($line->number==$number)
+                return true;
+        }
+        return false;
+    }
+
+    public static function geoLocLineExists ($number)
+    {
+        $lines = GeolocLine::all();
+        foreach ($lines as $line)
+        {
+            if ($line->number==$number)
+                return true;
+        }
+        return false;
     }
 
 }
