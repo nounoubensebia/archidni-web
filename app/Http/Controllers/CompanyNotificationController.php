@@ -19,7 +19,7 @@ class CompanyNotificationController extends Controller
     {
         //
         $companyNotifications = CompanyNotification::with('lines','transportMode')->
-        whereRaw('end_datetime > CURRENT_TIMESTAMP()')->orWhereRaw('end_datetime IS NULL');
+        whereRaw('end_datetime > CURRENT_TIMESTAMP()')->orWhereRaw('end_datetime IS NULL')->orderByDesc("created_at");
         $companyNotifications = $companyNotifications->get();
         return response()->json($companyNotifications);
     }
