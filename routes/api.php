@@ -113,6 +113,9 @@ Route::group(['prefix' => 'v1'], function () {
         Route::post('login', [
             'uses' => 'UserController@login'
         ]);
+        Route::get('disconnect',[
+            'uses' => 'UserController@disconnect'
+           ])->middleware('token.handler:api');
         Route::put('{id}/update-password',[
            'uses' => 'UserController@updatePassword'
         ])->middleware('token.handler:api');

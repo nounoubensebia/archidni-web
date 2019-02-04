@@ -69,6 +69,20 @@ class UserController extends Controller
         return response()->json($response,401);
     }
 
+
+    public function disconnect(Request $request)
+    {
+        $user = Auth::user();
+        $user->connected = 0;
+        $user->save();
+        $userTokens = $user->tokens;
+        foreach ($userTokens as $userToken)
+        {
+            $userToken->revoke();
+        }
+        return response()->json(['msg' =>'disconnected'],200);
+    }
+
     public function login (Request $request)
     {
         $email = $request->input('email');
@@ -77,11 +91,18 @@ class UserController extends Controller
         $credentials = $request->only('email','password');
         if (Auth::once($credentials)) {
             $user = Auth::user();
+            if ($user->connected == 1)
+            {
+                return response()->json([],403);
+            }
             try {
                 $tokens = $this->getTokens($email,$pass);
+
             } catch (FailedInternalRequestException $e) {
                 return response()->json(['message' => 'internal server error'],500);
             }
+            $user->connected = 1;
+            $user->save();
             return response()->json(['user' => $user,'tokens' =>$tokens],200);
         }
         else
