@@ -43,7 +43,7 @@ class UserController extends Controller
     {
         $user = new User(['email'=>$request->input('email'),
             'password' => bcrypt($request->input('password')),'first_name' => $request->input('first_name'),
-            'last_name' => $request->input('last_name')]);
+            'last_name' => $request->input('last_name'),'connected' => 1]);
         $found = User::query()->where('email',$request->input('email'))->get();
         if(count($found)==0)
         {
