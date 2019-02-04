@@ -99,6 +99,11 @@ Route::group(['prefix' => 'v1'], function () {
         ]);
     });
 
+    Route::get('bus_lines_excel',
+        ['uses' => 'ExcelFeedCreatorController@createBusExcel']);
+
+    Route::get('bus_lines_excel_aff',
+        ['uses' => 'ExcelFeedCreatorController@createAfretExcel']);
 
     Route::group(['prefix' => 'user'], function () {
 

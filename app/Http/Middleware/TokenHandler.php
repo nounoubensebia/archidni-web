@@ -28,7 +28,7 @@ class TokenHandler
 {
 
 
-    private $minVersion = 1;
+    private $minVersion = 0;
 
     /**
      * The authentication factory instance.
