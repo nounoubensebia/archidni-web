@@ -52,7 +52,7 @@ Route::get('/deploy-gtfs',["uses" => "GtfsController@deployFeed"]);
 
 Route::get('/find-common-sections',['uses' => 'CommonSectionController@findCommonSections']);
 
-Route::get('/test-email',['uses' => 'MailController@test']);
+Route::get('/test-email',['uses' => 'MailController@testEmail']);
 
 Route::group(['prefix' => 'v1'], function () {
     Route::get('/linesAndPlaces', ['uses' => 'LinesAndPlacesController@getAllPlacesAndLines'])
