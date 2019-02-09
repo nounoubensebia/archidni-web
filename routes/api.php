@@ -52,6 +52,8 @@ Route::get('/deploy-gtfs',["uses" => "GtfsController@deployFeed"]);
 
 Route::get('/find-common-sections',['uses' => 'CommonSectionController@findCommonSections']);
 
+Route::get('/test-email',['uses' => 'MailController@test']);
+
 Route::group(['prefix' => 'v1'], function () {
     Route::get('/linesAndPlaces', ['uses' => 'LinesAndPlacesController@getAllPlacesAndLines'])
         ->name('all_lines_and_places')
