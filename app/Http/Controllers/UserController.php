@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Emails\MailSender;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Database\Connection;
@@ -43,7 +44,8 @@ class UserController extends Controller
     {
         $user = new User(['email'=>$request->input('email'),
             'password' => bcrypt($request->input('password')),'first_name' => $request->input('first_name'),
-            'last_name' => $request->input('last_name'),'connected' => 1]);
+            'last_name' => $request->input('last_name'),'connected' => 1,'verification_code'=> null,
+            'verification_code_created'=>null,'email_verified' => 0]);
         $found = User::query()->where('email',$request->input('email'))->get();
         if(count($found)==0)
         {
@@ -55,6 +57,11 @@ class UserController extends Controller
                     'user' => $user,
                     'tokens' => $tokens
                 ];
+                $mailSender = new MailSender();
+                $verifCode = $mailSender->sendVerificationCode($user);
+                $user->verification_code = $verifCode;
+                $user->verification_code_created = Carbon::now()->toDateTimeString();
+                $user->save();
                 return response()->json($response,201);
             } catch (FailedInternalRequestException $e) {
                 return response()->json(["msg" => "internal server error"],500);

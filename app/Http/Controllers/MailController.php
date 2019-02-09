@@ -19,4 +19,7 @@ class MailController extends Controller
         });
         echo "Mail sent";
     }
+
+
+
 }
