@@ -109,7 +109,9 @@ class UserController extends Controller
             return response()->json(['msg' => 'Email already verified'],400);
         }
         $mailSender = new MailSender();
-        $mailSender->sendVerificationCode($user);
+        $verifCode = $mailSender->sendVerificationCode($user);
+        $user->verification_code = $verifCode;
+        $user->save();
         return response()->json(['msg' => 'Code sent']);
     }
 
