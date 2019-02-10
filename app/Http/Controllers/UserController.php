@@ -51,11 +51,11 @@ class UserController extends Controller
         {
             $user->save();
             try {
-                $tokens = $this->getTokens($request->input('email'), $request->input('password'));
+                //$tokens = $this->getTokens($request->input('email'), $request->input('password'));
                 $response = [
-                    'msg' => 'user_created',
-                    'user' => $user,
-                    'tokens' => $tokens
+                    'msg' => 'user_created'
+                    //'user' => $user,
+                    //'tokens' => $tokens
                 ];
                 $mailSender = new MailSender();
                 $verifCode = $mailSender->sendVerificationCode($user);
@@ -76,22 +76,41 @@ class UserController extends Controller
         return response()->json($response,401);
     }
 
-    public function verifyUser ($id,Request $request)
+    public function verifyUser (Request $request)
     {
-        $user = User::find($id);
+        $email = $request->input('email');
+        $password = $request->input('password');
+        $user = User::where('email',$email)->first();
+
         $real_verif_code = $user->verification_code;
         $test_verif_code = $request->input('verif_code');
         if (strcmp($real_verif_code,$test_verif_code) == 0)
         {
             $user->email_verified = 1;
             $user->save();
-            return response()->json(['msg' => 'code verified'],201);
+            $tokens = $this->getTokens($request->input('email'),
+                $request->input('password'));
+            return response()->json(['msg' => 'code verified','user' => $user,'tokens' => $tokens],
+                201);
         }
         else
         {
             return response()->json(['msg' => 'error'],400);
         }
 
+    }
+
+    public function resendEmailCode (Request $request)
+    {
+        $email = $request->input('email');
+        $user = User::where('email',$email)->first();
+        if ($user->email_verified == 1)
+        {
+            return response()->json(['msg' => 'Email already verified'],400);
+        }
+        $mailSender = new MailSender();
+        $mailSender->sendVerificationCode($user);
+        return response()->json(['msg' => 'Code sent']);
     }
 
     public function disconnect(Request $request)
@@ -115,6 +134,13 @@ class UserController extends Controller
         $credentials = $request->only('email','password');
         if (Auth::once($credentials)) {
             $user = Auth::user();
+            if (isset($user->verification_code))
+            {
+                if ($user->email_verified==0)
+                {
+                    return response()->json(['msg' =>'Email not verified'],402);
+                }
+            }
             if ($user->connected == 1)
             {
                 return response()->json([],403);

@@ -123,8 +123,10 @@ Route::group(['prefix' => 'v1'], function () {
         ])->middleware('token.handler:api');
         Route::put('{id}/update',
             ['uses' => 'UserController@updateInfo'])->middleware('token.handler:api');
-        Route::post('{id}/verify_code',
+        Route::post('/verify-code',
             ['uses' => 'UserController@verifyUser']);
+        Route::post('/resend-code',
+            ['uses' => 'UserController@resendEmailCode']);
     });
 
     Route::group(['prefix' => 'user-reports'],function ()

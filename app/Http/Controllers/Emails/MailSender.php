@@ -15,7 +15,7 @@ class MailSender
 {
     public function sendVerificationCode ($user)
     {
-        $random = Str::random(10);
+        $random = Str::random(5);
         $to_email = $user->email;
         $subject = 'Code';
         $message = 'Veuillez utiliser le code suivant : '.$random;

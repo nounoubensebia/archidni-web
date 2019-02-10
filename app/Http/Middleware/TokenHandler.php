@@ -68,6 +68,15 @@ class TokenHandler
         {
             try {
                 $this->authenticate($guards);
+                $user = $this->auth->authenticate();
+                if (isset($user->verification_code))
+                {
+                    if ($user->email_verified == 0)
+                    {
+                        return response()->json(['message' => 'Email not verified'],402);
+                    }
+                }
+                //return $user;
             } catch (AuthenticationException $authenticationException)
             {
                 return response()->json(['message' => 'Unauthenticated'],401);
