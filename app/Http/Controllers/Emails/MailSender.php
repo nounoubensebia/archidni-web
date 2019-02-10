@@ -9,11 +9,13 @@
 namespace App\Http\Controllers\Emails;
 
 
+use Illuminate\Support\Str;
+
 class MailSender
 {
     public function sendVerificationCode ($user)
     {
-        $random = rand(6);
+        $random = Str::random(10);
         $to_email = $user->email;
         $subject = 'Code de vérification';
         $message = 'Veuillez utiliser le code suivant : '.$random;
