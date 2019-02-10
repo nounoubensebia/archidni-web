@@ -17,10 +17,10 @@ class MailSender
     {
         $random = Str::random(10);
         $to_email = $user->email;
-        $subject = 'Code de vérification';
+        $subject = 'Code';
         $message = 'Veuillez utiliser le code suivant : '.$random;
-        $headers = 'test@archidni.smartsolutions.network';
-        mail($to_email,$subject,$message,$headers);
+        //$headers = 'test@archidni.smartsolutions.network';
+        mail($to_email,$subject,$message);
         return $random;
     }
 }

@@ -76,6 +76,23 @@ class UserController extends Controller
         return response()->json($response,401);
     }
 
+    public function verifyUser ($id,Request $request)
+    {
+        $user = User::find($id);
+        $real_verif_code = $user->verification_code;
+        $test_verif_code = $request->input('verif_code');
+        if (strcmp($real_verif_code,$test_verif_code) == 0)
+        {
+            $user->email_verified = 1;
+            $user->save();
+            return response()->json(['msg' => 'code verified'],201);
+        }
+        else
+        {
+            return response()->json(['msg' => 'error'],400);
+        }
+
+    }
 
     public function disconnect(Request $request)
     {
