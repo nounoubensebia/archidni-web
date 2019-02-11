@@ -44,7 +44,7 @@ class UserController extends Controller
     {
         $user = new User(['email'=>$request->input('email'),
             'password' => bcrypt($request->input('password')),'first_name' => $request->input('first_name'),
-            'last_name' => $request->input('last_name'),'connected' => 1,'verification_code'=> null,
+            'last_name' => $request->input('last_name'),'connected' => 0,'verification_code'=> null,
             'verification_code_created'=>null,'email_verified' => 0,'is_admin' => 0]);
         $found = User::query()->where('email',$request->input('email'))->get();
         if(count($found)==0)
@@ -153,7 +153,7 @@ class UserController extends Controller
             } catch (FailedInternalRequestException $e) {
                 return response()->json(['message' => 'internal server error'],500);
             }
-            $user->connected = 1;
+            $user->connected = 0;
             $user->save();
             return response()->json(['user' => $user,'tokens' =>$tokens],200);
         }
