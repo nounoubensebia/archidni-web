@@ -110,10 +110,10 @@ Route::group(['prefix' => 'v1'], function () {
     Route::group(['prefix' => 'user'], function () {
 
         Route::post('signup', [
-            'uses' => 'UserController@signup'
+            'uses' => 'UserController@signupWithoutCode'
         ]);
         Route::post('login', [
-            'uses' => 'UserController@login'
+            'uses' => 'UserController@loginWithoutCode'
         ]);
         Route::get('disconnect',[
             'uses' => 'UserController@disconnect'

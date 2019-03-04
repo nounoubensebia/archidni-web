@@ -76,6 +76,40 @@ class UserController extends Controller
         return response()->json($response,401);
     }
 
+    public function signupWithoutCode (Request $request)
+    {
+        $user = new User(['email'=>$request->input('email'),
+            'password' => bcrypt($request->input('password')),'first_name' => $request->input('first_name'),
+            'last_name' => $request->input('last_name'),'connected' => 0,'verification_code'=> null,
+            'verification_code_created'=>null,'email_verified' => 0,'is_admin' => 0]);
+        $found = User::query()->where('email',$request->input('email'))->get();
+        if(count($found)==0)
+        {
+            $user->save();
+            try {
+                $tokens = $this->getTokens($request->input('email'), $request->input('password'));
+                $response = [
+                    'msg' => 'user_created',
+                    'user' => $user,
+                    'tokens' => $tokens
+                ];
+                $user->verification_code = "NONE";
+                $user->verification_code_created = Carbon::now()->toDateTimeString();
+                $user->save();
+                return response()->json($response,201);
+            } catch (FailedInternalRequestException $e) {
+                return response()->json(["msg" => "internal server error"],500);
+            }
+        }
+        else
+        {
+            $response = [
+                'msg' => 'user exists'
+            ];
+        }
+        return response()->json($response,401);
+    }
+
     public function verifyUser (Request $request)
     {
         $email = $request->input('email');
@@ -126,6 +160,35 @@ class UserController extends Controller
             $userToken->revoke();
         }
         return response()->json(['msg' =>'disconnected'],200);
+    }
+
+
+    public function loginWithoutCode (Request $request)
+    {
+        $email = $request->input('email');
+        $pass = $request->input('password');
+
+        $credentials = $request->only('email','password');
+        if (Auth::once($credentials)) {
+            $user = Auth::user();
+            if ($user->connected == 1)
+            {
+                return response()->json([],403);
+            }
+            try {
+                $tokens = $this->getTokens($email,$pass);
+
+            } catch (FailedInternalRequestException $e) {
+                return response()->json(['message' => 'internal server error'],500);
+            }
+            $user->connected = 0;
+            $user->save();
+            return response()->json(['user' => $user,'tokens' =>$tokens],200);
+        }
+        else
+        {
+            return response()->json(['msg' =>'Invalid Credentials'],401);
+        }
     }
 
     public function login (Request $request)
